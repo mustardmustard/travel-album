@@ -430,7 +430,7 @@ const THEME = {
   },
   home:{ word:"XCJ", sub:"Travel  2025/2026", line:"Jingdezhen·Hunan·Wulin·Henan·Sanya·Jiangxi" },   // 首页点阵大字、副标题、地点行
   font:{ family:"Archivo", weight:900, stretch:"expanded", upper:true },   // 点阵字用的字体，和 :root --display 的第一个一致；upper 和 --case 一致
-  scale:[0,2,4,7,9], base:62,                  // 音阶（大调五声，明亮平和）和基准音高（MIDI 音符号）
+  scale:[0,3,5,7,10], base:62,                 // 音阶（羽调式五声：宫商角徵羽落在羽音，中国风的底色）和基准音高（MIDI 音符号）
   presence:1,                                  // 章节环境声的音量：.5 若有若无 / 1 默认 / 1.5 有存在感
   soundOn:true,                               // 进站默认开启；需要用户手势的浏览器会在首次触摸/按键时接通
   motion:{                                     // 动效性格：利落的城市感。数值越小越慢、越软
@@ -1575,95 +1575,208 @@ Object.assign(V, {
     s.buffer = SND.crackle; s.loop = true; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+.08); g.gain.linearRampToValueAtTime(0, t+dur);
     s.connect(g).connect(dest); s.start(t, Math.random()*2); s.stop(t+dur+.05);
   },
+  /* —— 中国乐器：古筝、琵琶、笛、箫、二胡、编钟、木鱼、鼓、锣、扬琴。全部现场合成，不用采样 —— */
+  zheng(f, t, dest, v=.1, bright=1){            // 古筝：亮起音 + 两根微走音的弦 + 按音下滑，尾巴带钢弦泛音
+    const ac = A(), g = ac.createGain(); g.connect(dest); env(g, t, .003, v, 2.4);
+    [0, 5].forEach((dt, k)=>{
+      const o = ac.createOscillator(), og = ac.createGain();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(f*(1 + .011*bright), t);
+      o.frequency.exponentialRampToValueAtTime(f, t+.08);
+      o.detune.value = dt; og.gain.value = k ? .4 : 1;
+      o.connect(og).connect(g); o.start(t); o.stop(t+2.6);
+    });
+    const o2 = ac.createOscillator(), g2 = ac.createGain();     // 二倍频泛音：筝的"钢丝味"
+    o2.type = "sine"; o2.frequency.value = f*2.01;
+    g2.gain.setValueAtTime(v*.3, t); g2.gain.exponentialRampToValueAtTime(.0001, t+.8);
+    o2.connect(g2).connect(g); o2.start(t); o2.stop(t+.9);
+  },
+  pipa(f, t, dest, v=.1, n=1){                  // 琵琶：金属味的短拨弦；n>1 连成一串轮指
+    const ac = A();
+    for (let k=0; k<n; k++){
+      const s = t + k*.055, g = ac.createGain(); env(g, s, .002, v*(k ? .55 : 1), .85);
+      [[1,1],[2,.45],[3,.26],[4.7,.12]].forEach(([m,a])=>{
+        const o = ac.createOscillator(), og = ac.createGain();
+        o.type = "triangle"; o.frequency.value = f*m; og.gain.value = a;
+        o.connect(og).connect(g); o.start(s); o.stop(s+.95);
+      });
+      g.connect(dest);
+    }
+  },
+  dizi(f, t, dest, v=.05, dur=.7){              // 笛子：正弦加气声，揉弦，起音带一点滑入
+    const ac = A(), g = ac.createGain(), fl = ac.createBiquadFilter(), ng = ac.createGain();
+    const o = ac.createOscillator(), o2 = ac.createOscillator(), g2 = ac.createGain(), vib = ac.createOscillator(), vg = ac.createGain();
+    const s = ac.createBufferSource(), nf = ac.createBiquadFilter();
+    fl.type = "lowpass"; fl.frequency.value = Math.min(f*5, 5200);
+    o.type = "sine"; o.frequency.setValueAtTime(f*.965, t); o.frequency.linearRampToValueAtTime(f, t+.07);
+    o2.type = "triangle"; o2.frequency.value = f*2; g2.gain.value = .22;
+    vib.frequency.value = 5.4; vg.gain.value = f*.007;
+    vib.connect(vg); vg.connect(o.frequency); vg.connect(o2.frequency);
+    s.buffer = SND.noise; s.loop = true; nf.type = "bandpass"; nf.frequency.value = f*2.4; nf.Q.value = 1.6; ng.gain.value = v*.45;
+    env(g, t, .05, v, dur);
+    o.connect(fl); o2.connect(g2).connect(fl); fl.connect(g).connect(dest); s.connect(nf).connect(ng).connect(g);
+    o.start(t); o2.start(t); vib.start(t); s.start(t, Math.random());
+    o.stop(t+dur+.2); o2.stop(t+dur+.2); vib.stop(t+dur+.2); s.stop(t+dur+.2);
+  },
+  xiao(f, t, dest, v=.05, dur=1.6){             // 箫：比笛更暗更慢，气声更重
+    const ac = A(), g = ac.createGain(); env(g, t, .16, v, dur);
+    const o = ac.createOscillator(), vib = ac.createOscillator(), vg = ac.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    vib.frequency.value = 4.2; vg.gain.value = f*.006; vib.connect(vg).connect(o.frequency);
+    const s = ac.createBufferSource(), nf = ac.createBiquadFilter(), ng = ac.createGain();
+    s.buffer = SND.noise; s.loop = true; nf.type = "bandpass"; nf.frequency.value = f*1.8; nf.Q.value = 2; ng.gain.value = v*.5;
+    o.connect(g); s.connect(nf).connect(ng).connect(g); g.connect(dest);
+    o.start(t); vib.start(t); s.start(t, Math.random());
+    o.stop(t+dur+.3); vib.stop(t+dur+.3); s.stop(t+dur+.3);
+  },
+  erhu(f, t, dest, v=.05, dur=1.4){             // 二胡：锯齿波过窄低通，慢起弓 + 深揉弦 + 滑入
+    const ac = A(), g = ac.createGain(), fl = ac.createBiquadFilter(), vib = ac.createOscillator(), vg = ac.createGain();
+    fl.type = "lowpass"; fl.Q.value = 2.2;
+    fl.frequency.setValueAtTime(f*4, t); fl.frequency.linearRampToValueAtTime(f*1.9, t+dur);
+    const o = ac.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(f*.985, t); o.frequency.linearRampToValueAtTime(f, t+.13);
+    vib.frequency.value = 6.2; vg.gain.value = f*.009; vib.connect(vg).connect(o.frequency);
+    env(g, t, .12, v, dur);
+    o.connect(fl).connect(g).connect(dest);
+    o.start(t); vib.start(t); o.stop(t+dur+.2); vib.stop(t+dur+.2);
+  },
+  bianzhong(f, t, dest, v=.08){                 // 编钟：非整数倍泛音，长长的余响
+    const ac = A(), g = ac.createGain(); env(g, t, .005, v, 3.8);
+    [[1,1],[2.76,.3],[5.4,.12]].forEach(([m,a])=>{
+      const o = ac.createOscillator(), og = ac.createGain();
+      o.type = "sine"; o.frequency.value = f*m; og.gain.value = a;
+      o.connect(og).connect(g); o.start(t); o.stop(t+4);
+    });
+    g.connect(dest);
+  },
+  muyu(f, t, dest, v=.12){                      // 木鱼：极短的木质敲击
+    const ac = A(), o = ac.createOscillator(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = "triangle"; o.frequency.setValueAtTime(f*2.4, t); o.frequency.exponentialRampToValueAtTime(f*1.7, t+.05);
+    fl.type = "bandpass"; fl.frequency.value = f*2.6; fl.Q.value = 3.5;
+    env(g, t, .001, v, .13); o.connect(fl).connect(g).connect(dest); o.start(t); o.stop(t+.2);
+  },
+  drum(t, dest, v=.12, f=118){                  // 鼓：低频下滑加一层鼓皮噪声
+    const ac = A(), o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f*.45, t+.24);
+    env(g, t, .004, v, .55); o.connect(g).connect(dest); o.start(t); o.stop(t+.65);
+    const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), ng = ac.createGain();
+    s.buffer = SND.noise; fl.type = "lowpass"; fl.frequency.value = 950;
+    ng.gain.setValueAtTime(v*.4, t); ng.gain.exponentialRampToValueAtTime(.0001, t+.13);
+    s.connect(fl).connect(ng).connect(dest); s.start(t, Math.random()); s.stop(t+.16);
+  },
+  gong(t, dest, v=.1, dur=2.6){                 // 锣：低音群加噪声，音高缓慢下坠
+    const ac = A(), g = ac.createGain(); env(g, t, .02, v, dur);
+    [86, 129, 172, 231].forEach((f, k)=>{
+      const o = ac.createOscillator(), og = ac.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(f*1.03, t); o.frequency.exponentialRampToValueAtTime(f*.985, t+dur);
+      og.gain.value = [1,.55,.32,.16][k]; o.connect(og).connect(g); o.start(t); o.stop(t+dur+.1);
+    });
+    const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), ng = ac.createGain();
+    s.buffer = SND.noise; fl.type = "bandpass"; fl.frequency.value = 1600; fl.Q.value = .8;
+    ng.gain.setValueAtTime(v*.55, t); ng.gain.exponentialRampToValueAtTime(.0001, t+dur*.8);
+    s.connect(fl).connect(ng).connect(dest); s.start(t); s.stop(t+dur);
+  },
+  yangqin(f, t, dest, v=.08){                   // 扬琴：明亮的击弦，泛音比古筝整齐
+    const ac = A(), g = ac.createGain(); env(g, t, .002, v, 1.1);
+    [[1,1],[2,.4],[3,.2],[5,.09]].forEach(([m,a])=>{
+      const o = ac.createOscillator(), og = ac.createGain();
+      o.type = "sine"; o.frequency.value = f*m; og.gain.value = a;
+      o.connect(og).connect(g); o.start(t); o.stop(t+1.2);
+    });
+    g.connect(dest);
+  },
 });
 const arp = (t, degs, gap, fn) => degs.forEach((d,k)=>fn(d, t + k*gap));
 
 /* ===== 声音：风格区 ===== 每章一套乐器和环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
    hz(音级, 八度, 基准) 按 THEME.scale 取音；V.* 是上面的合成乐器
-   本站题材：景德镇 / 湖南 / 武林 / 河南 / 三亚 / 江西，仍是零音频文件的现场合成 */
+   本站题材：景德镇 / 湖南 / 武林 / 河南 / 三亚 / 江西。中国风：古筝、琵琶、笛、箫、二胡、编钟、鼓、锣、木鱼、扬琴，仍是零音频文件的现场合成 */
 // 首页：照片环每走一格弹 melody 里的下一个音（step）；风格台切换时响一声（chime）
 const RING_SND = {
   melody:[0,2,4,7,9,7,4,2,0,2,4,7],
-  step:(f,t,d,v)=>V.pluck(f, t, d, v*.8),
-  chime:(f,t,d,v)=>V.wood(f, t, d, v*.6),
+  step:(f,t,d,v)=>V.zheng(f, t, d, v*.85, .8),
+  chime:(f,t,d,v)=>V.bianzhong(f, t, d, v*.55),
 };
 // 大图里每章一套声音：open 聚拢 / step 显影每一级 / done 成像 / look 放大镜 / swap 切换 / close 关闭
 const LB_SND = [
-  { // 景德镇：瓷与旧木，木琴和低柔的钟
-    open:t=>{ V.wind(t, SND.fx, .05, 1.2, 260, 1100, .7, "lowpass"); V.bell(hz(0,-1), t+.1, SND.fx, .06, true); },
-    step:(t,j)=>V.wood(hz(j,0), t, SND.fx, .075),
-    done:t=>arp(t, [0,2,4,7], .07, (d,s)=>V.bell(hz(d,0), s, SND.fx, .045, true)),
-    look:(t,d,v)=>V.wood(hz(d,0), t, SND.fx, .05*v),
-    swap:t=>V.wood(hz(4,0), t, SND.fx, .07),
-    close:t=>arp(t, [7,4,2,0], .11, (d,s)=>V.wood(hz(d,0), s, SND.fx, .055)),
+  { // 景德镇：瓷窑。木鱼与编钟，干净偏冷的瓷音
+    open:t=>{ V.wind(t, SND.fx, .05, 1.2, 240, 950, .7, "lowpass"); V.bianzhong(hz(0,-1), t+.1, SND.fx, .05); },
+    step:(t,j)=>{ V.muyu(hz(j,0), t, SND.fx, .1); V.zheng(hz(j,0), t+.04, SND.fx, .045, .7); },
+    done:t=>arp(t, [0,2,4,7], .1, (d,s)=>V.bianzhong(hz(d,0), s, SND.fx, .04)),
+    look:(t,d,v)=>V.muyu(hz(d,0), t, SND.fx, .11*v),
+    swap:t=>V.bianzhong(hz(4,0), t, SND.fx, .05),
+    close:t=>arp(t, [7,4,2,0], .13, (d,s)=>V.bianzhong(hz(d,0), s, SND.fx, .04)),
   },
-  { // 湖南：餐桌，轻快拨弦带一点烟火底噪
-    open:t=>{ V.vinyl(t, SND.fx, .35, .7); arp(t, [0,2,4], .06, (d,s)=>V.pluck(hz(d,1), s, SND.fx, .1, true)); },
-    step:(t,j)=>V.pluck(hz(j,1), t, SND.fx, .11, true),
-    done:t=>arp(t, [0,2,4,7,9], .06, (d,s)=>V.pluck(hz(d,1), s, SND.fx, .12, true)),
-    look:(t,d,v)=>V.pluck(hz(d,1), t, SND.fx, .07*v, true),
-    swap:t=>V.wood(hz(7,0), t, SND.fx, .08),
-    close:t=>arp(t, [9,7,4,2,0], .07, (d,s)=>V.pluck(hz(d,1), s, SND.fx, .09, true)),
+  { // 湖南：热闹的餐桌。鼓点与轮指琵琶
+    open:t=>{ V.drum(t, SND.fx, .1, 130); arp(t+.07, [0,2,4], .07, (d,s)=>V.pipa(hz(d,1), s, SND.fx, .09)); },
+    step:(t,j)=>V.pipa(hz(j,1), t, SND.fx, .11),
+    done:t=>arp(t, [0,2,4,7,9], .08, (d,s)=>V.pipa(hz(d,1), s, SND.fx, .1, 2)),
+    look:(t,d,v)=>V.pipa(hz(d,1), t, SND.fx, .07*v),
+    swap:t=>V.drum(t, SND.fx, .09, 150),
+    close:t=>arp(t, [9,7,4,2,0], .07, (d,s)=>V.pipa(hz(d,1), s, SND.fx, .08)),
   },
-  { // 武林：山风与低音拨弦
-    open:t=>V.wind(t, SND.fx, .09, 1.5, 320, 1800, .7),
-    step:(t,j)=>V.pluck(hz(j,-1), t, SND.fx, .13),
-    done:t=>{ V.wind(t, SND.fx, .05, 1, 420, 1400, .7, "lowpass"); arp(t, [0,2,4], .1, (d,s)=>V.bell(hz(d,0), s, SND.fx, .035, true)); },
-    look:(t,d,v)=>V.pluck(hz(d,0), t, SND.fx, .06*v),
-    swap:t=>V.swoosh(t, SND.fx, .09, .5),
-    close:t=>arp(t, [4,2,0], .13, (d,s)=>V.pluck(hz(d,-1), s, SND.fx, .11)),
+  { // 武林：山风里的箫，落一记鼓
+    open:t=>{ V.wind(t, SND.fx, .09, 1.6, 300, 1700, .7); V.xiao(hz(0,-1), t+.05, SND.fx, .05, 1.4); },
+    step:(t,j)=>V.zheng(hz(j,-1), t, SND.fx, .12),
+    done:t=>{ V.wind(t, SND.fx, .05, 1, 400, 1300, .7, "lowpass"); V.drum(t+.1, SND.fx, .1, 88); arp(t+.2, [0,2,4], .12, (d,s)=>V.zheng(hz(d,0), s, SND.fx, .05)); },
+    look:(t,d,v)=>V.zheng(hz(d,0), t, SND.fx, .05*v, .6),
+    swap:t=>{ V.swoosh(t, SND.fx, .09, .5); V.drum(t+.03, SND.fx, .07, 100); },
+    close:t=>V.gong(t, SND.fx, .08, 2.2),
   },
-  { // 河南：灯与逆光，暖电钢和柔铃
-    open:t=>[0,2,4].forEach((d,k)=>V.keys(hz(d,0), t+k*.05, SND.fx, .05, 1.7)),
-    step:(t,j)=>V.keys(hz(j,0), t, SND.fx, .045, .6),
-    done:t=>{ V.keys(hz(0,-1), t, SND.fx, .06, 2.2); V.bell(hz(7,1), t+.12, SND.fx, .04, true); },
-    look:(t,d,v)=>V.synth(hz(d,1), t, SND.fx, .025*v, .12, true),
-    swap:t=>V.bell(hz(4,1), t, SND.fx, .04, true),
-    close:t=>arp(t, [4,2,0], .12, (d,s)=>V.keys(hz(d,0), s, SND.fx, .045, 1.2)),
+  { // 河南：灯与逆光。扬琴与编钟，暖而正
+    open:t=>arp(t, [0,2,4], .06, (d,s)=>V.yangqin(hz(d,0), s, SND.fx, .045)),
+    step:(t,j)=>V.yangqin(hz(j,0), t, SND.fx, .05),
+    done:t=>{ V.yangqin(hz(0,-1), t, SND.fx, .055); V.bianzhong(hz(4,1), t+.14, SND.fx, .035); },
+    look:(t,d,v)=>V.yangqin(hz(d,1), t, SND.fx, .03*v),
+    swap:t=>V.bianzhong(hz(4,1), t, SND.fx, .04),
+    close:t=>arp(t, [4,2,0], .1, (d,s)=>V.yangqin(hz(d,0), s, SND.fx, .045)),
   },
-  { // 三亚：朋友合影，明亮的大调五声拨弦
-    open:t=>arp(t, [0,2,4,7,9], .05, (d,s)=>V.pluck(hz(d,1), s, SND.fx, .1, true)),
-    step:(t,j)=>V.wood(hz(j,1), t, SND.fx, .085),
-    done:t=>{ arp(t, [0,2,4,7,9], .055, (d,s)=>V.pluck(hz(d,1), s, SND.fx, .12, true)); V.wood(hz(0,0), t+.3, SND.fx, .06); },
-    look:(t,d,v)=>V.pluck(hz(d,1), t, SND.fx, .075*v, true),
-    swap:t=>V.pluck(hz(9,1), t, SND.fx, .11, true),
-    close:t=>arp(t, [9,7,4,2,0], .06, (d,s)=>V.wood(hz(d,1), s, SND.fx, .07)),
+  { // 三亚：朋友合影。明快的笛与扬琴
+    open:t=>arp(t, [0,2,4,7,9], .06, (d,s)=>V.dizi(hz(d,1), s, SND.fx, .05, .45)),
+    step:(t,j)=>V.yangqin(hz(j,1), t, SND.fx, .075),
+    done:t=>{ arp(t, [0,2,4,7,9], .06, (d,s)=>V.yangqin(hz(d,1), s, SND.fx, .08)); V.dizi(hz(0,1), t, SND.fx, .05, .9); },
+    look:(t,d,v)=>V.yangqin(hz(d,1), t, SND.fx, .05*v),
+    swap:t=>V.dizi(hz(9,1), t, SND.fx, .075, .4),
+    close:t=>arp(t, [9,7,4,2,0], .06, (d,s)=>V.yangqin(hz(d,1), s, SND.fx, .06)),
   },
-  { // 江西：家人与书，黑胶底噪里的 lo-fi 电钢
-    open:t=>{ V.vinyl(t, SND.fx, .45, 1.1); V.keys(hz(0,-1), t+.12, SND.fx, .05, 2); },
-    step:(t,j)=>V.keys(hz(j,-1), t, SND.fx, .04, .7),
-    done:t=>[0,2,4].forEach((d,k)=>V.keys(hz(d,-1), t+k*.04, SND.fx, .05, 2.2)),
-    look:(t,d,v)=>V.keys(hz(d,0), t, SND.fx, .03*v, .8),
-    swap:t=>V.pluck(hz(2,0), t, SND.fx, .09, true),
-    close:t=>arp(t, [4,2,0,-2], .12, (d,s)=>V.keys(hz(d,-1), s, SND.fx, .04, 1.4)),
+  { // 江西：家人与书。二胡的慢弓，古筝在底下托着
+    open:t=>{ V.erhu(hz(0,-1), t, SND.fx, .05, 1.5); V.zheng(hz(2,0), t+.15, SND.fx, .04, .6); },
+    step:(t,j)=>V.zheng(hz(j,-1), t, SND.fx, .07, .6),
+    done:t=>{ V.erhu(hz(0,0), t, SND.fx, .05, 1.4); [0,2,4].forEach((d,k)=>V.zheng(hz(d,-1), t+.1+k*.07, SND.fx, .04, .6)); },
+    look:(t,d,v)=>V.zheng(hz(d,0), t, SND.fx, .04*v, .6),
+    swap:t=>V.zheng(hz(2,0), t, SND.fx, .08, .6),
+    close:t=>arp(t, [4,2,0,-2], .13, (d,s)=>V.erhu(hz(d,-1), s, SND.fx, .04, 1.1)),
   },
 ];
 
-// 悬停音色：景德镇木琴、湖南拨弦、武林低音拨弦、河南暖电钢、三亚柔钟、江西电钢
+// 悬停音色：景德镇木鱼、湖南琵琶、武林古筝、河南扬琴、三亚笛、江西二胡
 const VOICE = [
-  (f,t,d)=>V.wood(f, t, d, .1),
-  (f,t,d)=>V.pluck(f, t, d, .2, true),
-  (f,t,d)=>V.pluck(f, t, d, .16),
-  (f,t,d)=>V.keys(f, t, d, .06, 1.2),
-  (f,t,d)=>V.bell(f, t, d, .045, true),
-  (f,t,d)=>V.keys(f, t, d, .05, .9),
+  (f,t,d)=>V.muyu(f, t, d, .11),
+  (f,t,d)=>V.pipa(f, t, d, .2),
+  (f,t,d)=>V.zheng(f, t, d, .13, .7),
+  (f,t,d)=>V.yangqin(f, t, d, .07),
+  (f,t,d)=>V.dizi(f, t, d, .055, .5),
+  (f,t,d)=>V.erhu(f, t, d, .05, .6),
 ];
 // 每章的环境声：返回要停掉的持续声源，和一个按时间排下一个音的 tick
 const SCENES = [
-  b=>{ const w=loopNoise(b, SND.noise, "lowpass", 420, .5, .045), d=drone(b, hz(0,-2), "sine", .035);   // 景德镇：低通风里的木鱼与钟
+  b=>{ const w=loopNoise(b, SND.noise, "lowpass", 400, .5, .045), d=drone(b, hz(0,-2), "sine", .03);   // 景德镇：窑火低鸣里的木鱼与编钟
        return { nodes:[w.s, lfo(w.g.gain,.05,.02), d],
-         tick:t=>{ V.wood(hz(pick([0,2,4]),0), t, b, .07); if(Math.random()<.4) V.bell(hz(2,-1), t+.12, b, .035, true); return t+rnd(2.4,4.8); } }; },
-  b=>{ const cr=loopNoise(b, SND.crackle, "bandpass", 1800, .6, .28);                                 // 湖南：热闹餐桌的短促拨弦
-       return { nodes:[cr.s], tick:t=>{ arp(t, [0,2,4,7], .09, (d,s)=>V.pluck(hz(d), s, b, .09, true)); return t+rnd(1.4,2.6); } }; },
-  b=>{ const w=loopNoise(b, SND.noise, "bandpass", 620, .7, .075);                                   // 武林：山风与稀疏低音
-       return { nodes:[w.s, lfo(w.fl.frequency,.045,240), lfo(w.g.gain,.09,.035)],
-         tick:t=>{ V.pluck(hz(pick([0,2,4,7]),-1), t, b, .14); if(Math.random()<.25) V.bell(hz(4,0), t+.2, b, .03, true); return t+rnd(2.2,4.4); } }; },
-  b=>{ const pad=[0,2,4].map(d=>drone(b, hz(d,-1), "sine", .016));                                  // 河南：暖铺底与电钢
-       return { nodes:pad, tick:t=>{ V.keys(hz(pick([0,2,4,5]),0), t, b, .055, 1.6); if(Math.random()<.3) V.bell(hz(7,1), t+.16, b, .025, true); return t+rnd(2.6,4.6); } }; },
-  b=>{ let i=0; const seq=[0,2,4,7,9,7,4,2];                                                        // 三亚：明亮的循环琶音
-       return { nodes:[], tick:t=>{ V.pluck(hz(seq[i%8],1), t, b, .11, true); if(i%8===0) V.wood(hz(0,0), t, b, .05); i++; return t+rnd(.38,.62); } }; },
-  b=>{ const cr=loopNoise(b, SND.crackle, "lowpass", 4200, .5, .4), prog=[[0,2,4],[-2,1,3],[3,5,7],[1,4,6]]; let i=0;   // 江西：黑胶与慢和弦
-       return { nodes:[cr.s], tick:t=>{ prog[i%4].forEach((d,k)=>V.keys(hz(d,-1), t+k*.04, b, .045, 2.2)); i++; return t+60/72*2; } }; },
+         tick:t=>{ V.muyu(hz(pick([0,2,4]),0), t, b, .07); if(Math.random()<.45) V.bianzhong(hz(pick([0,2]),-1), t+.15, b, .035); return t+rnd(2.4,4.6); } }; },
+  b=>{ const n=loopNoise(b, SND.noise, "bandpass", 1100, .7, .05);                                     // 湖南：街市底噪里的琵琶短句与鼓
+       return { nodes:[n.s, lfo(n.g.gain,.07,.02)],
+         tick:t=>{ arp(t, pick([[0,2,4,7],[4,2,0,2]]), .1, (d,s)=>V.pipa(hz(d,1), s, b, .075)); if(Math.random()<.3) V.drum(t, b, .06, 120); return t+rnd(1.8,3.2); } }; },
+  b=>{ const w=loopNoise(b, SND.noise, "bandpass", 560, .7, .075);                                     // 武林：山风、箫、偶尔一记鼓
+       return { nodes:[w.s, lfo(w.fl.frequency,.045,220), lfo(w.g.gain,.09,.03)],
+         tick:t=>{ if(Math.random()<.55) V.xiao(hz(pick([0,2,4]),-1), t, b, .045, 2.4); else V.drum(t, b, .08, 92); return t+rnd(2.6,5); } }; },
+  b=>{ const pad=[0,2].map(d=>drone(b, hz(d,-1), "sine", .016));                                       // 河南：五度铺底，扬琴与编钟
+       return { nodes:pad,
+         tick:t=>{ V.yangqin(hz(pick([0,2,4,7]),0), t, b, .05); if(Math.random()<.3) V.bianzhong(hz(4,0), t+.2, b, .028); return t+rnd(2.6,4.6); } }; },
+  b=>{ const w=loopNoise(b, SND.noise, "lowpass", 700, .6, .05); let i=0; const seq=[0,2,4,7,9,7,4,2];  // 三亚：浪声上的笛子循环
+       return { nodes:[w.s, lfo(w.g.gain,.06,.025)],
+         tick:t=>{ V.dizi(hz(seq[i%8],1), t, b, .045, .5); if(i%8===0) V.yangqin(hz(0,0), t, b, .04); i++; return t+rnd(.45,.72); } }; },
+  b=>{ const n=loopNoise(b, SND.noise, "lowpass", 2800, .5, .022), prog=[[0,2,4],[-2,1,3],[3,5,7],[1,4,6]]; let i=0;   // 江西：古筝的慢和弦，二胡在上面拉
+       return { nodes:[n.s], tick:t=>{ prog[i%4].forEach((d,k)=>V.zheng(hz(d,-1), t+k*.06, b, .045, .6)); if(i%2===0) V.erhu(hz(prog[i%4][0],0), t+.3, b, .04, 1.8); i++; return t+60/64*2; } }; },
 ];
 /* ===== 声音：风格区结束 ===== */
 
@@ -1730,7 +1843,7 @@ function activateSound(){
   SND.out.gain.cancelScheduledValues(ac.currentTime); SND.out.gain.setTargetAtTime(.9, ac.currentTime, .15);
   SND.cur = -2; sndScene();
   if (LB.open){ LB.ducked = false; sndDuck(true); }
-  V.bell(hz(4,1), ac.currentTime + .05, SND.fx, .06);
+  V.bianzhong(hz(4,1), ac.currentTime + .05, SND.fx, .05);
   syncSoundUI();
 }
 function resumeSound(){
