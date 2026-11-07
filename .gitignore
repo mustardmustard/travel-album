@@ -1,0 +1,12 @@
+.DS_Store
+.claude/
+
+# 本地备份：原 JAPAN 相册照片、各批新图原稿、改版前的 index.html / tints.js 备份、验证截图
+备份文件/
+
+# 工作区内部数据（工作日志、记忆、临时校验文件）
+.workbuddy/
+
+# 校验 / 调试产生的临时文件
+_check_*.js
+*.log
