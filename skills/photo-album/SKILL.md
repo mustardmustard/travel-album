@@ -27,7 +27,7 @@ description: >-
 |---|---|
 | `references/principles.md` | 开始前，必读 |
 | `references/style-dna.md` | 第 2–3 步，必读。照片 → DNA 的映射表，以及确认问题 |
-| `references/examples.md` | 第 2 步。本站的 DNA，加 3 份截然不同的示例 |
+| `references/examples.md` | 第 2 步。模板原始站的 DNA，加 3 份截然不同的示例 |
 | `references/components.md` | 第 4 步。每个部件的契约、旋钮和可替换形式 |
 | `references/sound.md` | 第 4 步。乐器、音阶、每章声音配方、音量预算 |
 | `scripts/prepare_photos.py` | 第 1 步。生成 `photos/sq`、`photos/full`，并自动调用 `bake_tints.py` |
@@ -40,7 +40,7 @@ description: >-
 ### 第 0 步：确认输入
 
 - 照片文件夹：8–40 张都可以。不到 24 张时，照片环会循环补满四条边；不到 8 张的话，首页建议换成照片堆（见 `components.md` 第 1 节）。超过 40 张，首页会很挤，可以挑选一下。
-- 新站放在哪个文件夹。**不要在本仓库里覆盖 JAPAN 站。**
+- 新站放在哪个文件夹。**不要在本仓库里覆盖现有站点。**
 - 照片版权归用户。如果混有别人的作品（比如用其他风格 skill 生成的图），记下作者和许可，后面写进 `credit` 和 `license`。
 
 ### 第 1 步：整理和测量照片
@@ -93,7 +93,7 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
    grep -niE "japan|日本|旅の|tokyo|osaka|kobe|kyoto|高塔|霓虹|朱红|都节|东京塔|国际橙" index.html
    ```
 
-   风格区注释里描述 JAPAN 的话，比如"宽体无衬线，像车站和招牌"，也要改成新站自己的理由。
+   风格区注释里描述原模板站的话，比如"宽体无衬线，像站牌和招牌"，也要改成新站自己的理由。
 6. 写一份新站自己的 `README.md`：怎么在本地运行、怎么换照片、署名与版权。结构可以参考本仓库的 README。
 
 ### 第 5 步：验收
@@ -117,7 +117,7 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 - [ ] 随便指一个颜色，都能说出来自哪张照片（原理 1）
 - [ ] 把照片换成灰块后，页面很空（原理 2）
 - [ ] 闭上眼也能听出是哪一章（原理 4）
-- [ ] 跟 JAPAN 站并排放，一眼就能看出不是同一个站
+- [ ] 跟原模板站（JAPAN 示例）并排放，一眼就能看出不是同一个站
 
 最后截图给用户看，并请用户自己听一遍声音。测量只能保证声音不爆、不哑，好不好听要人耳判断。
 
