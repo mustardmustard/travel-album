@@ -1028,8 +1028,10 @@ function sampleDots(intro){
   const dpr = Math.min(devicePixelRatio||1, 2);
   // 点阵大字现在位于上层展示区顶部：宽度跟着标题区，高度按视口取，做成居中的大标题
   const box = $("#heroTitle").getBoundingClientRect();
-  const cw = Math.max(240, Math.min(box.width || innerWidth*.9, 1000));
-  const chH = Math.max(90, Math.min(innerHeight*.16, 150));
+  // 尺寸上限调大一档：宽度上限 1320px（原 1000）、高度取视口 20% / 最多 190px（原 16% / 150px），
+  // 「ZENG Y^2」在桌面端从 134px 的字号提到约 172px；窄屏本来就是宽度受限，不受影响。
+  const cw = Math.max(240, Math.min(box.width || innerWidth*.9, 1320));
+  const chH = Math.max(90, Math.min(innerHeight*.20, 190));
   // 以首页大字定画布：宽度撑到标题区的 88%，高度不超过 chH
   const g = document.createElement("canvas").getContext("2d"); setFont(g, 100);
   const m = g.measureText(HOME.word).width, size = Math.min(100*cw*.88/m, chH/.86);
