@@ -120,33 +120,52 @@ a{color:inherit;text-decoration:none}
 /* 水面倒影：不再用 -webkit-box-reflect（那是画在原元素上的静态效果，没法单独倾斜、起波纹，
    Firefox 也看不到）。改成一份镜像 DOM：同样的瓷砖、同样的轮动，只是翻转 + 渐隐，
    由主循环按滚轮速度写 transform / --wave。照片环本身一张照片都不动。 */
+.water-defs{position:absolute;overflow:hidden;pointer-events:none}
 .ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
   transform:scaleY(-1);
-  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.62),transparent 52%);
-          mask-image:linear-gradient(to top,rgba(0,0,0,.62),transparent 52%);
-  opacity:var(--refl-opacity,.6);filter:blur(.6px) saturate(.92);
+  /* 渐隐拉满整层：旧版 52% 就把水面抹白了，波纹根本没地方显示 */
+  -webkit-mask-image:linear-gradient(to top,
+    rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
+          mask-image:linear-gradient(to top,
+    rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
+  opacity:var(--refl-opacity,.84);
+  /* SVG 位移滤镜让倒影里的照片本身被水纹扭曲；伪元素的水线/涟漪也会一起被扭，更自然 */
+  filter:url(#waterRippleFilter) blur(.3px) saturate(.96);
   will-change:transform}
-/* 顶部照片带的倒影落在中间文字区上方，压得更淡更短，不盖住 byline / 提示 */
+/* 顶部照片带的倒影落在中间文字区上方：仍压得短一些，别盖住 byline / 提示 */
 .ring-section .reflect.top{
-  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.4),transparent 40%);
-          mask-image:linear-gradient(to top,rgba(0,0,0,.4),transparent 40%);
-  --refl-opacity:.4}
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
+          mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
+  --refl-opacity:.55}
 .ring-section .reflect .tile{pointer-events:none}
-/* 水波：一层缓慢漂移的高光横纹 + 一层水面边缘光；--wave 越大（滚得越快）越明显 */
-.ring-section .reflect::after{content:"";position:absolute;inset:0;pointer-events:none;
+/* 涟漪：同心椭圆环，尺寸收小、间距收窄，保证几条环真的落在可见的水面里；
+   只用普通 alpha 叠加（mix-blend-mode:screen 在浅色倒影上会把高光吃掉，旧版就栽在这）。 */
+.ring-section .reflect::before{content:"";position:absolute;inset:-24% -8%;z-index:1;pointer-events:none;
+  background:repeating-radial-gradient(ellipse 32% 12% at 50% 0%,
+    rgba(255,255,255,0) 0 12px,
+    rgba(255,255,255,.52) 14px 17px,
+    rgba(10,186,181,.20) 18px 21px,
+    rgba(255,255,255,0) 22px 36px);
+  opacity:calc(.44 + var(--wave,.15) * .42);
+  animation:waterRings 5.4s ease-in-out infinite alternate}
+@keyframes waterRings{
+  from{transform:scale(.82) translateY(-5%)}
+  to  {transform:scale(1.5) translateY(5%)}
+}
+/* 水线：明暗交替的横向波纹 + 紧贴照片带的那道亮水面线（to top 的第 0 层，翻转后正好在水面顶） */
+.ring-section .reflect::after{content:"";position:absolute;inset:-12% -6%;z-index:2;pointer-events:none;
   background:
+    linear-gradient(to top,rgba(255,255,255,.9) 0 2px,rgba(10,186,181,.3) 2px 5px,transparent 7px),
     repeating-linear-gradient(to bottom,
-      rgba(255,255,255,0) 0 7px,
-      rgba(255,255,255,.22) 8px 9px,
-      rgba(10,186,181,.10) 10px 12px,
-      rgba(255,255,255,0) 13px 20px),
-    radial-gradient(130% 55% at 50% 0%,rgba(255,255,255,.20),transparent 72%);
-  background-size:100% 100%,160% 100%;mix-blend-mode:screen;
-  opacity:calc(.22 + var(--wave,.15) * .6);
-  animation:waterRipple 7s ease-in-out infinite alternate}
-@keyframes waterRipple{
-  from{background-position:0 0,0 0;transform:translateX(-1.2%) scaleY(1)}
-  to  {background-position:0 18px,26px 0;transform:translateX(1.2%) scaleY(1.1)}
+      rgba(255,255,255,0) 0 10px,
+      rgba(255,255,255,.55) 11px 14px,
+      rgba(0,0,0,.22) 15px 18px,
+      rgba(255,255,255,0) 19px 30px);
+  opacity:calc(.5 + var(--wave,.15) * .45);
+  animation:waterLines 3.4s ease-in-out infinite alternate}
+@keyframes waterLines{
+  from{transform:translate(-2%,-4%) scaleY(1);background-position:0 0,0 0}
+  to  {transform:translate(2%,4%) scaleY(1.16);background-position:0 0,0 30px}
 }
 
 /* ---------- home: photo ring ---------- */
@@ -412,12 +431,27 @@ a{color:inherit;text-decoration:none}
   /* 减弱动效：手风琴直接切换、光晕静止、水面不摇 */
   .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
   .hero-card.is-open::after{animation:none;opacity:.4}
-  .ring-section .reflect{transform:scaleY(-1)!important}
-  .ring-section .reflect::after{animation:none}
+  .ring-section .reflect{transform:scaleY(-1)!important;filter:blur(.5px) saturate(.95)}
+  .ring-section .reflect::before,.ring-section .reflect::after{animation:none;opacity:.4}
 }
 </style>
 </head>
 <body>
+
+<!-- 水面倒影的位移滤镜：让镜像照片本身像水面一样起伏，而不是只在上面叠一层静态高光。
+     所在 svg 不能用 display:none（部分浏览器会因此跳过滤镜），所以只把尺寸收成 0。 -->
+<svg class="water-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="waterRippleFilter" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.075" numOctaves="2" seed="5" result="noise">
+        <animate attributeName="baseFrequency" dur="9s" repeatCount="indefinite"
+                 values="0.012 0.075;0.018 0.100;0.012 0.075"/>
+      </feTurbulence>
+      <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="13"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
 <header class="hdr">
   <a class="logo x" id="logo" href="#/" aria-label="回到相册首页"></a>
@@ -811,7 +845,7 @@ function renderRing(t = performance.now()){
   const c = ring.c, off = ring.u*c;
   // 倒影里的每一格比原图多一点点横向荡漾：相邻格错开相位，连起来就是一道缓慢走过的水纹。
   // 只改镜像层，原照片环的位移一格都不动。
-  const waveAmp = reduce ? 0 : REFL.wave*7;
+  const waveAmp = reduce ? 0 : REFL.wave*18;
   for (const s of ring.strips){
     s.tiles.forEach((el,j)=>{
       let p = mod(j*c + s.dir*off, s.len);
@@ -819,7 +853,7 @@ function renderRing(t = performance.now()){
       el.style.transform = s.axis==="x" ? `translate3d(${p}px,0,0)` : `translate3d(0,${p}px,0)`;
       const m = s.refTiles?.[j];
       if (m){
-        const wob = waveAmp ? Math.sin(t*.0019 + j*.82 + (s.name==="bottom"?1.7:0))*waveAmp : 0;
+        const wob = waveAmp ? Math.sin(t*.0026 + j*.82 + (s.name==="bottom"?1.7:0))*waveAmp : 0;
         const q = (p+wob).toFixed(2);
         m.style.transform = s.axis==="x" ? `translate3d(${q}px,0,0)` : `translate3d(0,${q}px,0)`;
       }
@@ -2138,6 +2172,7 @@ async function go(){
 addEventListener("hashchange", go);
 
 /* ---------------- 水面倒影：滚轮冲量 → 倾角 / 波纹 ---------------- */
+const waterDisp = $("#waterDisp");          // SVG 位移滤镜：滚轮速度 → 水波扭曲幅度
 function reflectTick(t){
   if (reduce) return;
   REFL.target *= .955;                                   // 停止滚动后约 1 秒慢慢回正
@@ -2146,6 +2181,9 @@ function reflectTick(t){
   REFL.wave   += ((.14 + REFL.energy*.86) - REFL.wave)*.06;
   const tilt = (REFL.tilt + Math.sin(t*.00055)*.55).toFixed(2);   // 静止时也有极轻的水面起伏
   const wave = REFL.wave.toFixed(3);
+  // 静止保留 13px 的基础扭曲，滚得越快水面越汹涌；只在数值变化时写 SVG，避免每帧无谓重算
+  const scale = (13 + REFL.wave*26).toFixed(1);
+  if (waterDisp.getAttribute("scale") !== scale) waterDisp.setAttribute("scale", scale);
   for (const el of ring.reflects){
     el.style.transform = `scaleY(-1) skewX(${tilt}deg)`;
     el.style.setProperty("--wave", wave);
