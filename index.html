@@ -123,23 +123,24 @@ a{color:inherit;text-decoration:none}
 .water-defs{position:absolute;overflow:hidden;pointer-events:none}
 .ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
   transform:scaleY(-1) skewX(var(--refl-tilt,0deg));
+  /* 上下两栏共用同一条渐隐曲线，DOM 高度都是 --refl-h，所以可见倒影等高 */
   -webkit-mask-image:linear-gradient(to top,
-    rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
+    rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%);
           mask-image:linear-gradient(to top,
-    rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
+    rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%);
   opacity:var(--refl-opacity,.7);
   /* 深灰水面底色：瓷砖之间的亚像素缝被位移放大时会露出深色而不是白纸，也顺带压暗倒影 */
   background:rgba(26,34,36,.55);
   /* brightness 把整片倒影压成深水面；波纹层也在里面，会一起变淡 */
   filter:url(#waterRippleFilter) brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
   will-change:transform}
-/* 顶部照片带的倒影落在中间文字区上方：仍压得短一些，别盖住 byline / 提示 */
-.ring-section .reflect.top{
-  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
-          mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
-  --refl-opacity:.44}
-/* 镜像格比原图多 2px，让相邻格互相盖住，位移滤镜就不会把缝隙拉成白色锯齿 */
-.ring-section .reflect .tile{pointer-events:none;width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
+/* 上栏倒影压在中间文字区上方，只调淡、不改高度 */
+.ring-section .reflect.top{--refl-opacity:.4}
+/* 倒影盒比照片格矮：镜像格上移，保证紧贴水面的仍是照片底边，而不是照片顶部。
+   同时比原图多 2px 让相邻格互相盖住，位移滤镜就不会把缝隙拉成白色锯齿。 */
+.ring-section .reflect .tile{pointer-events:none;
+  top:calc(var(--refl-h,90px) - var(--c) - 2px);
+  width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
 /* 涟漪痕迹：只留很淡的一层，晃动交给主循环的相位变量，不再用固定时长的 CSS 动画 */
 .ring-section .reflect::before{content:"";position:absolute;inset:-24% -8%;z-index:1;pointer-events:none;
   background:repeating-radial-gradient(ellipse 32% 12% at 50% 0%,
@@ -780,21 +781,25 @@ function layoutRing(){
   // 横屏固定 4 行，列数按屏幕比例取（16:9 约 7 列，更宽的屏 8–9 列），让照片环尽量铺满
   const padX = landscape ? W*.04 : 16, padY = 24;
   const rows = landscape ? 4 : 7;
-  const cols = landscape ? Math.max(6, Math.min(9, Math.round((W-padX*2)/((H-padY*2)/rows)))) : 5;
-  const c0 = Math.floor(Math.min((W-padX*2)/cols, (H-padY*2)/rows));   // 基准格子：外框仍按它算，照片环占同样的屏幕范围
+  // 倒影高度：上下两栏完全一致，并先从一屏高度里扣出来再算照片环。
+  // 旧版下栏倒影用的是整格照片高度，既比上栏长、又把页面撑出一截滚动条，永远没法一屏看全。
+  const reflH = Math.round(Math.min(96, Math.max(48, H*(landscape ? .14 : .085))));
+  const budget = H - reflH;                       // 留给「两行照片 + 中间文字」的高度
+  const cols = landscape ? Math.max(6, Math.min(9, Math.round((W-padX*2)/((budget-padY*2)/rows)))) : 5;
+  const c0 = Math.floor(Math.min((W-padX*2)/cols, (budget-padY*2)/rows));
   const fw = c0*cols, fh = c0*rows;
-  // 风格旋钮：中间白色底板缩到原来的 .8。格子必须保持正方形，所以取「较受限那一轴」求出的带厚，
-  // 让该轴正好到 .8、另一轴同步收窄；上下两条带各占 1 格厚的规则不变，照片变大后依旧铺满、不留空缺。
-  // 窄屏（竖屏）中间区本来就只有两百来像素，再缩会把 byline / 提示文字挤到照片上、点阵字也过小，
-  // 所以竖屏沿用原尺寸；想让竖屏也一起缩，把下面竖屏的 1 改成 .9 之类即可。
-  const CENTER_SCALE = landscape ? .8 : 1;
+  // 风格旋钮：中间白色底板横向缩到 .8、纵向再收一点（.7），把两行照片和文字拉得更紧凑。
+  // 格子必须保持正方形，所以取「较受限那一轴」求出的带厚；竖屏沿用原尺寸，免得文字挤到照片上。
+  const SCALE_X = landscape ? .8 : 1, SCALE_Y = landscape ? .7 : 1;
   const hole0W = fw - 2*c0, hole0H = fh - 2*c0;
-  const cx = (fw - hole0W*CENTER_SCALE)/2, cy = (fh - hole0H*CENTER_SCALE)/2;
+  const cx = (fw - hole0W*SCALE_X)/2, cy = (fh - hole0H*SCALE_Y)/2;
   const c = Math.max(c0, Math.floor(Math.min(cx, cy)));
   const holeW = fw - 2*c, holeH = fh - 2*c;
-  Object.assign(ring,{ c, cols:Math.ceil(fw/c), rows:Math.ceil(fh/c), holeW, holeH });
-  Object.assign(frame.style,{ width:fw+"px", height:fh+"px", left:((W-fw)/2)+"px", top:((H-fh)/2)+"px" });
+  Object.assign(ring,{ c, cols:Math.ceil(fw/c), rows:Math.ceil(fh/c), holeW, holeH, reflH });
+  // frame 在「照片环 + 底部倒影」这个整体里垂直居中，倒影末端不会越过一屏
+  Object.assign(frame.style,{ width:fw+"px", height:fh+"px", left:((W-fw)/2)+"px", top:((budget-fh)/2)+"px" });
   frame.style.setProperty("--c", c+"px");
+  frame.style.setProperty("--refl-h", reflH+"px");
   Object.assign(center.style,{ left:c+"px", top:c+"px", width:holeW+"px", height:holeH+"px" });
 
   // 只保留上下两条横向照片带（左右两条竖向带按需求去掉）：上边往左、下边往右，仍来回流动
@@ -820,7 +825,7 @@ function layoutRing(){
     const ref = document.createElement("div");
     ref.className = "reflect " + d.name;
     ref.setAttribute("aria-hidden","true");
-    Object.assign(ref.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:d.h+"px" });
+    Object.assign(ref.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:reflH+"px" });
     const refTiles = tiles.map(src=>{
       const m = document.createElement("div");
       m.className = src.className.replace(/\bpreview\b/g,"").trim() + " reflect-tile";
