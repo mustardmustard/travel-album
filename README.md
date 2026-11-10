@@ -2,7 +2,7 @@
 
 一个单文件的互动相册网站：照片沿着方框边缘逆时针流动，中间是会躲开鼠标的点阵大字，点进去是横向滑动的章节页。
 
-> 当前 `photos/` 为 25 张生活照片，按景德镇 / 湖南 / 武林 / 河南 / 三亚 / 江西分为六章；首页点阵大字为 `XCJ`，左上角为 `TRAVEL THE WORLD`，副标题 `TRAVEL 2025/2026`，地点行 `Jingdezhen·Hunan·Wulin·Henan·Sanya·Jiangxi`，署名 `XCJ`，六章钢琴触键按题材重编。标题为 `The World — XCJ 的旅行相册`；强调色已由模板最初的国际橙 `#F0481A` 改为蒂芙尼蓝 `#0ABAB5`；黑色文字砖为 `Travel Log / The World`（该砖带 `.x` 类，按全站 `--case:uppercase` 显示为大写）。各批原始照片见 `备份文件/`。
+> 当前 `photos/` 为 25 张生活照片，按景德镇 / 湖南 / 武林 / 河南 / 三亚 / 江西分为六章；首页点阵大字为 `ZENG Y^2`，左上角为 `TRAVEL THE WORLD`，副标题 `TRAVEL 2025/2026`，地点行 `Jingdezhen·Hunan·Wulin·Henan·Sanya·Jiangxi`，署名 `XCJ`，六章钢琴触键按题材重编。标题为 `The World — XCJ 的旅行相册`；强调色已由模板最初的国际橙 `#F0481A` 改为蒂芙尼蓝 `#0ABAB5`；黑色文字砖为 `Travel Log / The World`（该砖带 `.x` 类，按全站 `--case:uppercase` 显示为大写）。各批原始照片见 `备份文件/`。
 
 ## 互动
 
