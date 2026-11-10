@@ -39,7 +39,7 @@ a{color:inherit;text-decoration:none}
   border-bottom:1px solid var(--line);background:var(--bg);z-index:20}
 .logo{display:flex;align-items:center;gap:6px;padding:0 24px;font-weight:800;font-size:19px;letter-spacing:.01em}
 .logo .box{display:inline-grid;place-items:center;height:20px;padding:0 4px;border:2.5px solid var(--accent);
-  color:var(--accent);font-size:12px;font-weight:800;line-height:1}
+  color:var(--accent);font-size:12px;font-weight:800;line-height:1;white-space:nowrap;flex:none}
 .nav{margin-left:auto;display:flex}
 .nav a{display:flex;align-items:center;padding:0 28px;border-left:1px solid var(--line);font-size:12px;font-weight:500;
   transition:color .25s}
@@ -58,6 +58,34 @@ a{color:inherit;text-decoration:none}
 .view{position:fixed;inset:var(--hdr) 0 0 0}
 .view[hidden]{display:none}
 
+/* ---------- home: 上层展示区（Tiffany 式编排：居中大标题 / 细导航 / 一排带间距的方图） ---------- */
+#home{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y}
+.hero{display:flex;flex-direction:column;align-items:center;
+  padding:22px clamp(20px,5vw,80px) 42px;background:var(--bg);border-bottom:1px solid var(--line)}
+.hero-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  font-size:10px;letter-spacing:.16em;color:var(--muted);white-space:nowrap}
+.hero-top a{transition:color .25s}
+.hero-top a:hover{color:var(--accent)}
+.hero-top .ht-mid{letter-spacing:.1em}
+.hero-title{width:100%;display:flex;justify-content:center;margin:clamp(18px,3vh,34px) 0 6px}
+.hero-title canvas{display:block;pointer-events:auto;touch-action:none}
+.hero-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;
+  font-size:9px;font-weight:500;letter-spacing:.18em;color:var(--muted)}
+.hero-nav a{transition:color .25s}
+.hero-nav a:hover{color:var(--accent)}
+.hero-nav i{font-style:normal;opacity:.45}
+.hero-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,2.6vw,32px);
+  width:min(760px,100%);margin-top:clamp(26px,4vh,42px)}
+.hero-card{min-width:0}
+.hero-card .ph{display:block;aspect-ratio:1;background:var(--ph);overflow:hidden}
+.hero-card img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.001);
+  transition:transform .8s var(--ease)}
+@media (hover:hover){ .hero-card:hover img{transform:scale(1.06)} }
+.hero-card figcaption{margin-top:12px;text-align:center;font-size:10px;font-weight:600;
+  letter-spacing:.16em;color:var(--ink)}
+/* 下层照片环：容器自己接管触摸，滑动仍只转环、不滚页面（原交互不变） */
+.ring-section{position:relative;width:100%;touch-action:none}
+
 /* ---------- home: photo ring ---------- */
 .frame{position:absolute;--c:120px}
 .strip{position:absolute;overflow:hidden}
@@ -75,7 +103,7 @@ a{color:inherit;text-decoration:none}
 }
 .tile.preview{outline:3px solid var(--accent);outline-offset:-3px}
 .tile.preview .ov{clip-path:inset(0);background:linear-gradient(transparent 40%,rgba(18,18,18,.75));color:var(--bg)}
-#home{touch-action:none}
+/* #home 的触摸策略在上方「上层展示区」里定义：展示层 pan-y 可滚，照片环层 none 保持原交互 */
 .ov em{font-style:normal;font-size:clamp(8px,calc(var(--c)*.072),11px);font-weight:600}
 .ov b{font-size:clamp(9px,calc(var(--c)*.085),13px);font-weight:700;line-height:1.25}
 .ov b span{display:block;font-family:var(--cjk);font-stretch:100%;font-weight:500;margin-top:2px}
@@ -285,6 +313,13 @@ a{color:inherit;text-decoration:none}
   .author-contact{margin-top:8px;padding-top:20px}
   .about .ch-head{height:76px}
   .about .ch-count{font-size:9px}
+  .hero{padding:16px 16px 30px}
+  .hero-top{font-size:9px;letter-spacing:.1em}
+  .hero-top .ht-mid{display:none}
+  .hero-title{margin:16px 0 4px}
+  .hero-nav{font-size:8px;gap:5px 10px;letter-spacing:.1em}
+  .hero-cards{grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px;width:100%}
+  .hero-card figcaption{font-size:9px;margin-top:9px;letter-spacing:.1em}
   .places{display:none}
   .sub,.hint{white-space:nowrap}
   .hint{font-size:10px;letter-spacing:.06em;gap:6px}
@@ -323,14 +358,23 @@ a{color:inherit;text-decoration:none}
   </nav>
 </header>
 
-<section class="view" id="home" aria-label="照片环">
-  <div class="frame" id="frame">
-    <div class="center" id="center">
-      <canvas id="dots"></canvas>
-      <p class="sub x"></p>
-      <p class="places x"></p>
-      <p class="hint x"><i></i><span id="touchGuide">Scroll to travel</span><i></i></p>
-      <a class="touch-enter" id="touchEnter" hidden href="#/"></a>
+<section class="view" id="home" aria-label="旅行相册首页">
+  <!-- 上层：Tiffany 式编排。点阵大字仍在这里躲鼠标、悬停照片时重组成章节名 -->
+  <div class="hero" id="hero">
+    <div class="hero-top x" id="heroTop"></div>
+    <div class="hero-title" id="heroTitle"><canvas id="dots"></canvas></div>
+    <nav class="hero-nav x" id="heroNav" aria-label="章节导航"></nav>
+    <div class="hero-cards" id="heroCards"></div>
+  </div>
+  <!-- 下层：原来的照片环，四条边逆时针流动、惯性、悬停、轻点预览全部保持 -->
+  <div class="ring-section" id="ringSection">
+    <div class="frame" id="frame">
+      <div class="center" id="center">
+        <p class="sub x"></p>
+        <p class="places x"></p>
+        <p class="hint x"><i></i><span id="touchGuide">Scroll to travel</span><i></i></p>
+        <a class="touch-enter" id="touchEnter" hidden href="#/"></a>
+      </div>
     </div>
   </div>
 </section>
@@ -629,6 +673,7 @@ function tileEl(t){
 
 function layoutRing(){
   const W = innerWidth, H = innerHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hdr"));
+  $("#ringSection").style.height = H + "px";   // 下层照片环仍占满一屏，frame 的居中计算照旧
   const landscape = W > 700 && W/H > .95;
   // 横屏固定 4 行，列数按屏幕比例取（16:9 约 7 列，更宽的屏 8–9 列），让照片环尽量铺满
   const padX = landscape ? W*.04 : 16, padY = 24;
@@ -690,9 +735,14 @@ function renderRing(){
 
 /* 输入：滚轮 / 触摸拖动 / 键盘 → 只改目标位置，每帧插值追上 */
 function nudge(d){ if (ring.preview) clearTouchPreview(); ring.tu += d; ring.lastInput = performance.now(); }
-$("#home").addEventListener("wheel", e=>{ e.preventDefault(); nudge((e.deltaY+e.deltaX)/240); }, { passive:false });
+// 上层展示区用滚轮正常翻页；进入下层照片环后，滚轮依旧推动照片环（惯性、音阶、自动漂移都不变）
+$("#home").addEventListener("wheel", e=>{
+  if (e.target.closest?.(".hero")) return;
+  nudge((e.deltaY+e.deltaX)/240);
+}, { passive:true });
 let homeTouch = null;
 $("#home").addEventListener("touchstart", e=>{
+  if (e.target.closest?.(".hero")){ homeTouch = null; return; }   // 展示层交给浏览器纵向滚动
   ring.input = "touch"; ring.hover = false; updateTouchGuide();
   if (e.touches.length!==1){ homeTouch = null; ring.suppressUntil = performance.now()+600; return; }
   const t = e.touches[0];
@@ -716,14 +766,31 @@ $("#home").addEventListener("click", e=>{
 });
 addEventListener("keydown", e=>{
   if (route.view!=="home") return;
-  if (e.key==="ArrowDown"||e.key==="ArrowRight") nudge(1);
-  if (e.key==="ArrowUp"||e.key==="ArrowLeft") nudge(-1);
+  // 方向键仍只推动照片环；上层展示区的翻页交给滚轮 / 触摸，不跟着跳
+  if (e.key==="ArrowDown"||e.key==="ArrowRight"){ e.preventDefault(); nudge(1); }
+  if (e.key==="ArrowUp"||e.key==="ArrowLeft"){ e.preventDefault(); nudge(-1); }
 });
 
 /* ---------------- 首页：点阵粒子字（悬停照片时重组成章节名，并染上那张照片的颜色） ---------------- */
 const cv = $("#dots"), ctx = cv.getContext("2d");
 const P = { dots:[], mx:-1e4, my:-1e4, R:THEME.motion.repel, step:6, r:2.4, w:0, h:0, size:0, shapes:[], key:0, src:null, tinted:false, timer:0, tints:new Map() };
 const HOME = THEME.home;
+// 上层展示区：顶部一行细信息、章节细导航、四张带间距的类目方图（点进去是对应章节）
+function buildHero(){
+  const up = s => THEME.font.upper ? String(s).toUpperCase() : s;
+  $("#heroTop").innerHTML =
+    `<span>${HOME.sub}</span>` +
+    `<span class="ht-mid">A travel journal by ${THEME.author.name}</span>` +
+    `<a href="mailto:${THEME.author.email}">Contact us</a>`;
+  $("#heroNav").innerHTML = CHAPTERS.map((c,i)=>`<a href="#/ch/${i+1}">${up(c.en)}</a>`).join('<i>·</i>');
+  $("#heroCards").innerHTML = CHAPTERS.slice(0,4).map((c,i)=>`
+    <figure class="hero-card">
+      <a href="#/ch/${i+1}/1" aria-label="进入${c.zh}章节">
+        <span class="ph"><img src="${photoURL("sq", c.photos[0].src)}" alt="" decoding="async"></span>
+      </a>
+      <figcaption class="x">${up(c.en)}</figcaption>
+    </figure>`).join("");
+}
 const cssRGB = name => { const h = getComputedStyle(document.documentElement).getPropertyValue(name).trim().slice(1); return [0,2,4].map(i=>parseInt(h.slice(i, i+2), 16)); };
 const ACCENT = cssRGB("--accent"), PAPER = cssRGB("--bg"), INK = cssRGB("--ink");
 const subEl = $("#center .sub"), lineEl = $("#center .places");
@@ -750,10 +817,13 @@ function wordPoints(word){
 
 function sampleDots(intro){
   const dpr = Math.min(devicePixelRatio||1, 2);
-  const cw = ring.holeW, chH = ring.holeH;
-  // 以首页大字定画布：宽度撑到中间区域的 82%，高度不超过中间区域的 42%
+  // 点阵大字现在位于上层展示区顶部：宽度跟着标题区，高度按视口取，做成居中的大标题
+  const box = $("#heroTitle").getBoundingClientRect();
+  const cw = Math.max(240, Math.min(box.width || innerWidth*.9, 1000));
+  const chH = Math.max(90, Math.min(innerHeight*.16, 150));
+  // 以首页大字定画布：宽度撑到标题区的 88%，高度不超过 chH
   const g = document.createElement("canvas").getContext("2d"); setFont(g, 100);
-  const m = g.measureText(HOME.word).width, size = Math.min(100*cw*.82/m, chH*.42/.86);
+  const m = g.measureText(HOME.word).width, size = Math.min(100*cw*.88/m, chH/.86);
   const w = Math.round(m*size/100), h = Math.round(size*.86), step = Math.max(4, Math.round(w/108));
   Object.assign(P,{ w, h, size, step, r:step*.4, R:Math.max(48, step*11) });
   P.tints.clear();
@@ -1903,6 +1973,7 @@ function show(r){
   $("#home").hidden = r.view!=="home";
   $("#chapter").hidden = r.view!=="chapter";
   $("#about").hidden = r.view!=="about";
+  if (r.view==="home") $("#home").scrollTop = 0;   // 回首页时从上层展示区重新开始
   document.querySelectorAll("[data-nav]").forEach(a=>a.setAttribute("aria-current", String(a.dataset.nav===(r.view==="chapter"?"ch":r.view))));
   if (r.view==="chapter") buildChapter(r.ci, r.focus);
   else if (r.view==="home" && P.key){ clearTimeout(P.timer); setShape(0, null, false); setCaption(-1); }   // 回首页时粒子字恢复成首页大字
@@ -1960,6 +2031,9 @@ function lbResize(){ lbLayout(); lpHide(); if (LB.phase==="shown") lbDrawDev(1);
   document.title = THEME.title;
   $("#logo").innerHTML = `${THEME.logo[0]}<span class="box">${THEME.logo[1]}</span>`;
   initAuthor();
+  buildHero();
+  // 上层展示区可滚动：点左上角 logo 回到顶部标题；照片环区域内的滑动仍只转环
+  $("#logo").addEventListener("click", ()=>{ if (route.view==="home") $("#home").scrollTo({top:0,behavior:"smooth"}); });
   updateTouchGuide(); syncSoundUI();
   setCaption(-1); cv.setAttribute("aria-label", HOME.word);
   layoutRing();
