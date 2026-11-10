@@ -165,7 +165,9 @@ a{color:inherit;text-decoration:none}
 .frame{position:absolute;--c:120px}
 .strip{position:absolute;overflow:hidden}
 .tile{position:absolute;left:0;top:0;width:var(--c);height:var(--c);overflow:hidden;will-change:transform;
-  display:block;background:var(--ph)}
+  display:block;background:var(--ph);
+  /* 照片格圆角与上层手风琴卡片一致（26px / 窄屏 20px），横栏与上层视觉统一 */
+  border-radius:26px}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.001);
   transition:transform .8s var(--ease)}
 .ov{position:absolute;inset:0;background:var(--accent);color:var(--on-accent);
@@ -395,6 +397,7 @@ a{color:inherit;text-decoration:none}
   .hero-nav{font-size:8px;gap:5px 10px;letter-spacing:.1em}
   .hero-cards{height:230px;--slim:44px;gap:8px;margin-top:22px;width:100%}
   .hero-card{border-radius:20px}
+  .tile{border-radius:20px}
   .hero-card .cap{padding:32px 14px 14px}
   .hero-card .cap b{font-size:13px}
   .hero-card .num{bottom:10px;font-size:10px}
