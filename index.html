@@ -143,11 +143,27 @@ a{color:inherit;text-decoration:none}
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
 /* 上栏倒影压在中间文字区上方，只调淡、不改高度 */
 .ring-section .reflect.top{--refl-opacity:.4}
-/* 倒影盒比照片格矮：镜像格上移，保证紧贴水面的仍是照片底边，而不是照片顶部。
-   同时比原图多 2px 让相邻格互相盖住，接缝处露出的就是一层白底而不是细缝。 */
-.ring-section .reflect .tile{pointer-events:none;
-  top:calc(var(--refl-h,90px) - var(--c) - 2px);
+/* 下栏倒影改挂照片上方：整个盒子被 scaleY(-1) 翻转后，元素顶边才是贴住水线的一侧，
+   所以底色、照片遮罩、帘子的渐隐方向和摆动支点都要翻到元素顶边 */
+.ring-section .reflect.bottom{background:linear-gradient(to bottom,
+  rgba(255,255,255,.92),rgba(255,255,255,.60) 38%,rgba(255,255,255,.28) 72%,rgba(255,255,255,0) 100%)}
+.ring-section .reflect.bottom .reflect-img{
+  -webkit-mask-image:linear-gradient(to bottom,
+    rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%);
+          mask-image:linear-gradient(to bottom,
+    rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%)}
+.ring-section .reflect.bottom .refl-curtain{
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.85),rgba(0,0,0,.30) 55%,rgba(0,0,0,.05));
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,.85),rgba(0,0,0,.30) 55%,rgba(0,0,0,.05));
+  transform-origin:50% 0}
+/* 倒影格一律直角（贴水线一侧与照片齐平，尾端也不出现圆角）；
+   比原图多 2px 让相邻格互相盖住，接缝处露出的就是一层白底而不是细缝。 */
+.ring-section .reflect .tile{pointer-events:none;border-radius:0;
   width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
+/* 上栏倒影挂在照片下方：镜像格上移，照片底边贴住水面；
+   下栏倒影按要求改挂照片上方：镜像格放回首格位置，照片顶边贴住水面。 */
+.ring-section .reflect.top .tile{top:calc(var(--refl-h,90px) - var(--c) - 2px)}
+.ring-section .reflect.bottom .tile{top:0}
 /* 水面涟漪层：静水时不画任何东西，canvas 完全透明，倒影就是一面压暗的镜子。
    只有鼠标划过倒影才在命中处画几圈横向拉长、很快消散的小椭圆涟漪。
    canvas 是 .reflect 的兄弟层，不吃照片镜像的遮罩与压暗，只跟着同一个倾角一起斜。
@@ -194,12 +210,17 @@ a{color:inherit;text-decoration:none}
 @keyframes refl-curtain-drift{from{transform:translateX(0)}to{transform:translateX(-240px)}}
 
 /* ---------- home: photo ring ---------- */
-.frame{position:absolute;--c:120px}
+.frame{position:absolute;--c:120px;--band-r:26px}
 .strip{position:absolute;overflow:hidden}
+/* 条带容器把最外端的两个角补成圆角（否则左右两端的照片会被裁成直角）：
+   上栏圆上缘两角、下栏圆下缘两角。照片格只在靠外的一侧保留圆角，贴水线的一侧直角，
+   让照片与倒影在水线处齐平衔接。 */
+.strip.top{border-radius:var(--band-r) var(--band-r) 0 0}
+.strip.bottom{border-radius:0 0 var(--band-r) var(--band-r)}
 .tile{position:absolute;left:0;top:0;width:var(--c);height:var(--c);overflow:hidden;will-change:transform;
-  display:block;background:var(--ph);
-  /* 照片格圆角与上层手风琴卡片一致（26px / 窄屏 20px），横栏与上层视觉统一 */
-  border-radius:26px}
+  display:block;background:var(--ph)}
+.strip.top .tile{border-radius:var(--band-r) var(--band-r) 0 0}
+.strip.bottom .tile{border-radius:0 0 var(--band-r) var(--band-r)}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.001);
   transition:transform .8s var(--ease)}
 .ov{position:absolute;inset:0;background:var(--accent);color:var(--on-accent);
@@ -429,7 +450,7 @@ a{color:inherit;text-decoration:none}
   .hero-nav{font-size:8px;gap:5px 10px;letter-spacing:.1em}
   .hero-cards{height:230px;--slim:44px;gap:8px;margin-top:22px;width:100%}
   .hero-card{border-radius:20px}
-  .tile{border-radius:20px}
+  .frame{--band-r:20px}
   .hero-card .cap{padding:32px 14px 14px}
   .hero-card .cap b{font-size:13px}
   .hero-card .num{bottom:10px;font-size:10px}
@@ -816,8 +837,9 @@ function layoutRing(){
   const c = Math.max(c0, Math.floor(Math.min(cx, cy)));
   const holeW = fw - 2*c, holeH = fh - 2*c;
   Object.assign(ring,{ c, cols:Math.ceil(fw/c), rows:Math.ceil(fh/c), holeW, holeH, reflH });
-  // frame 在「照片环 + 底部倒影」这个整体里垂直居中，倒影末端不会越过一屏
-  Object.assign(frame.style,{ width:fw+"px", height:fh+"px", left:((W-fw)/2)+"px", top:((budget-fh)/2)+"px" });
+  // frame 垂直居中：上栏倒影折进方框上缘内侧、下栏倒影折进下缘内侧后，
+  // 「照片环 + 两侧倒影」全部装在 frame 的高度里，正好一屏
+  Object.assign(frame.style,{ width:fw+"px", height:fh+"px", left:((W-fw)/2)+"px", top:((H-fh)/2)+"px" });
   frame.style.setProperty("--c", c+"px");
   frame.style.setProperty("--refl-h", reflH+"px");
   Object.assign(center.style,{ left:c+"px", top:c+"px", width:holeW+"px", height:holeH+"px" });
@@ -837,7 +859,7 @@ function layoutRing(){
   frame.querySelectorAll(".strip,.reflect,.water-canvas").forEach(s=>s.remove());
   ring.strips = []; ring.reflects = []; ring.waters = []; let k = 0;
   defs.forEach((d,i)=>{
-    const el = document.createElement("div"); el.className = "strip";
+    const el = document.createElement("div"); el.className = "strip " + d.name;
     Object.assign(el.style,{ left:d.x+"px", top:d.y+"px", width:d.w+"px", height:d.h+"px" });
     const tiles = Array.from({length:counts[i]},(_,j)=>tileEl(TILES[(k+j)%total]));
     tiles.forEach(e=>el.appendChild(e));
@@ -845,7 +867,9 @@ function layoutRing(){
     const ref = document.createElement("div");
     ref.className = "reflect " + d.name;
     ref.setAttribute("aria-hidden","true");
-    Object.assign(ref.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:reflH+"px" });
+    // 上栏倒影挂在照片下方；下栏倒影按要求改挂照片上方（水面 = 照片带的上边缘）
+    const refTop = d.name==="bottom" ? d.y - reflH : d.y + d.h;
+    Object.assign(ref.style,{ left:d.x+"px", top:refTop+"px", width:d.w+"px", height:reflH+"px" });
     const refTiles = tiles.map(src=>{
       const m = document.createElement("div");
       m.className = src.className.replace(/\bpreview\b/g,"").trim() + " reflect-tile";
@@ -874,7 +898,7 @@ function layoutRing(){
     wcv.setAttribute("aria-hidden","true");
     const DS = 3;
     wcv.width = Math.max(1,Math.ceil(d.w/DS)); wcv.height = Math.max(1,Math.ceil(reflH/DS));
-    Object.assign(wcv.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:reflH+"px" });
+    Object.assign(wcv.style,{ left:d.x+"px", top:refTop+"px", width:d.w+"px", height:reflH+"px" });
     const wctx = wcv.getContext("2d");
     k += counts[i];
     frame.insertBefore(el, center);
