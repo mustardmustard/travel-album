@@ -74,17 +74,36 @@ a{color:inherit;text-decoration:none}
 .hero-nav a{transition:color .25s}
 .hero-nav a:hover{color:var(--accent)}
 .hero-nav i{font-style:normal;opacity:.45}
-.hero-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,2.6vw,32px);
-  width:min(760px,100%);margin-top:clamp(26px,4vh,42px)}
-.hero-card{min-width:0}
-.hero-card .ph{display:block;aspect-ratio:1;background:var(--ph);overflow:hidden}
-.hero-card img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.001);
-  transition:transform .8s var(--ease)}
-@media (hover:hover){ .hero-card:hover img{transform:scale(1.06)} }
-.hero-card figcaption{margin-top:12px;text-align:center;font-size:10px;font-weight:600;
-  letter-spacing:.16em;color:var(--ink)}
+/* 手风琴类目卡：默认第一张展开；鼠标移到哪张哪张展开，其余自动收成细长竖条 */
+.hero-cards{display:flex;gap:clamp(10px,1.6vw,18px);width:min(880px,100%);
+  margin-top:clamp(26px,4vh,42px);height:clamp(230px,30vh,300px);--slim:64px}
+.hero-card{position:relative;display:block;flex:0 0 var(--slim);min-width:0;overflow:hidden;
+  border-radius:26px;background:var(--ph);
+  transition:flex .65s var(--ease),border-radius .65s var(--ease)}
+.hero-card.is-open{flex:1 1 auto}
+.hero-card .ph{position:absolute;inset:0;overflow:hidden}
+.hero-card img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+  transform:scale(1.001);transition:transform .8s var(--ease)}
+@media (hover:hover){ .hero-card:hover img{transform:scale(1.04)} }
+/* 收起时显示编号，展开时显示章节名（压在底部的渐变上，不挡照片主体） */
+.hero-card .num{position:absolute;left:0;right:0;bottom:14px;text-align:center;
+  font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;
+  text-shadow:0 1px 6px rgba(0,0,0,.65);transition:opacity .3s}
+.hero-card .cap{position:absolute;left:0;right:0;bottom:0;padding:44px 22px 20px;
+  color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));
+  opacity:0;transition:opacity .45s var(--ease);pointer-events:none}
+.hero-card .cap b{display:block;font-size:clamp(14px,1.6vw,22px);font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase}
+.hero-card .cap span{display:block;margin-top:4px;font-family:var(--cjk);font-size:11px;
+  letter-spacing:.08em;opacity:.85}
+.hero-card.is-open .num{opacity:0}
+.hero-card.is-open .cap{opacity:1}
 /* 下层照片环：容器自己接管触摸，滑动仍只转环、不滚页面（原交互不变） */
 .ring-section{position:relative;width:100%;touch-action:none}
+/* 上下两条横向照片带：下方一层由深到透明的水面倒影；照片环轮动时倒影会跟着动 */
+.ring-section .strip{
+  -webkit-box-reflect: below 2px linear-gradient(to top, rgba(0,0,0,.45), transparent 45%);
+}
 
 /* ---------- home: photo ring ---------- */
 .frame{position:absolute;--c:120px}
@@ -318,8 +337,11 @@ a{color:inherit;text-decoration:none}
   .hero-top .ht-mid{display:none}
   .hero-title{margin:16px 0 4px}
   .hero-nav{font-size:8px;gap:5px 10px;letter-spacing:.1em}
-  .hero-cards{grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px;width:100%}
-  .hero-card figcaption{font-size:9px;margin-top:9px;letter-spacing:.1em}
+  .hero-cards{height:230px;--slim:44px;gap:8px;margin-top:22px;width:100%}
+  .hero-card{border-radius:20px}
+  .hero-card .cap{padding:32px 14px 14px}
+  .hero-card .cap b{font-size:13px}
+  .hero-card .num{bottom:10px;font-size:10px}
   .places{display:none}
   .sub,.hint{white-space:nowrap}
   .hint{font-size:10px;letter-spacing:.06em;gap:6px}
@@ -682,7 +704,7 @@ function layoutRing(){
   const c0 = Math.floor(Math.min((W-padX*2)/cols, (H-padY*2)/rows));   // 基准格子：外框仍按它算，照片环占同样的屏幕范围
   const fw = c0*cols, fh = c0*rows;
   // 风格旋钮：中间白色底板缩到原来的 .8。格子必须保持正方形，所以取「较受限那一轴」求出的带厚，
-  // 让该轴正好到 .8、另一轴同步收窄；四条边各占 1 格厚的规则不变，照片变大后依旧铺满、不留空缺。
+  // 让该轴正好到 .8、另一轴同步收窄；上下两条带各占 1 格厚的规则不变，照片变大后依旧铺满、不留空缺。
   // 窄屏（竖屏）中间区本来就只有两百来像素，再缩会把 byline / 提示文字挤到照片上、点阵字也过小，
   // 所以竖屏沿用原尺寸；想让竖屏也一起缩，把下面竖屏的 1 改成 .9 之类即可。
   const CENTER_SCALE = landscape ? .8 : 1;
@@ -695,19 +717,17 @@ function layoutRing(){
   frame.style.setProperty("--c", c+"px");
   Object.assign(center.style,{ left:c+"px", top:c+"px", width:holeW+"px", height:holeH+"px" });
 
-  // 四条边：top 往左、left 往下、bottom 往右、right 往上 → 整体逆时针流动
-  const visX = Math.ceil(fw/c), visY = Math.ceil(holeH/c);
+  // 只保留上下两条横向照片带（左右两条竖向带按需求去掉）：上边往左、下边往右，仍来回流动
+  const visX = Math.ceil(fw/c);
   const defs = [
-    { name:"top",    x:0,      y:0,      w:fw,   h:c,      axis:"x", dir:-1, vis:visX },
-    { name:"right",  x:fw-c,   y:c,      w:c,    h:holeH,  axis:"y", dir:-1, vis:visY },
-    { name:"bottom", x:0,      y:fh-c,   w:fw,   h:c,      axis:"x", dir: 1, vis:visX },
-    { name:"left",   x:0,      y:c,      w:c,    h:holeH,  axis:"y", dir: 1, vis:visY },
+    { name:"top",    x:0, y:0,    w:fw, h:c, axis:"x", dir:-1, vis:visX },
+    { name:"bottom", x:0, y:fh-c, w:fw, h:c, axis:"x", dir: 1, vis:visX },
   ];
   // 按可见长度分配格子，每条边至少比可见多 1 格才能无缝循环
   const need = defs.map(d=>d.vis+1), total = TILES.length, extra = Math.max(0, total - need.reduce((a,b)=>a+b,0));
   const weight = defs.map(d=>d.vis), wsum = weight.reduce((a,b)=>a+b,0);
   const counts = need.map((n,i)=>n + Math.floor(extra*weight[i]/wsum));
-  let left = total - counts.reduce((a,b)=>a+b,0); for (let i=0; left>0; i=(i+1)%4, left--) counts[i]++;
+  let left = total - counts.reduce((a,b)=>a+b,0); for (let i=0; left>0; i=(i+1)%defs.length, left--) counts[i]++;
 
   frame.querySelectorAll(".strip").forEach(s=>s.remove());
   ring.strips = []; let k = 0;
@@ -784,12 +804,31 @@ function buildHero(){
     `<a href="mailto:${THEME.author.email}">Contact us</a>`;
   $("#heroNav").innerHTML = CHAPTERS.map((c,i)=>`<a href="#/ch/${i+1}">${up(c.en)}</a>`).join('<i>·</i>');
   $("#heroCards").innerHTML = CHAPTERS.slice(0,4).map((c,i)=>`
-    <figure class="hero-card">
-      <a href="#/ch/${i+1}/1" aria-label="进入${c.zh}章节">
-        <span class="ph"><img src="${photoURL("sq", c.photos[0].src)}" alt="" decoding="async"></span>
-      </a>
-      <figcaption class="x">${up(c.en)}</figcaption>
-    </figure>`).join("");
+    <a class="hero-card" href="#/ch/${i+1}/1" aria-label="进入${c.zh}章节">
+      <span class="ph"><img src="${photoURL("sq", c.photos[0].src)}" alt="" decoding="async"></span>
+      <span class="num">${pad2(i+1)}</span>
+      <span class="cap"><b>${up(c.en)}</b><span>${c.zh}</span></span>
+    </a>`).join("");
+  // 手风琴：鼠标进入哪张哪张展开，其余自动收成细条；离开整排回到第一张展开。
+  // 用明确的状态而不是纯 CSS :hover，避免容器进入瞬间第一张收起造成的布局跳动 / 鼠标错位。
+  const cards = $("#heroCards"), items = [...cards.querySelectorAll(".hero-card")];
+  let openIdx = -1, lockUntil = 0;
+  const setOpen = (i, lock=false) => {
+    if (i===openIdx) return;
+    openIdx = i;
+    items.forEach((el,k)=>el.classList.toggle("is-open", k===i));
+    // 展开动画期间其它卡片会从鼠标下方滑过，锁定这段时间避免展开项被连锁 pointerenter 带跑
+    if (lock) lockUntil = performance.now() + 700;
+  };
+  const free = e => e.pointerType!=="touch" && performance.now()>lockUntil;
+  items.forEach((el,i)=>{
+    el.addEventListener("pointerenter", e=>{ if (free(e)) setOpen(i, true); });
+    el.addEventListener("pointermove",  e=>{ if (free(e)) setOpen(i, true); });
+    el.addEventListener("focus", ()=>setOpen(i));                    // 键盘 Tab 也能展开
+  });
+  cards.addEventListener("pointerleave", e=>{ if (e.pointerType!=="touch") setOpen(0); });
+  cards.addEventListener("focusout", e=>{ if (!cards.contains(e.relatedTarget)) setOpen(0); });
+  setOpen(0);                                                          // 默认第一张展开
 }
 const cssRGB = name => { const h = getComputedStyle(document.documentElement).getPropertyValue(name).trim().slice(1); return [0,2,4].map(i=>parseInt(h.slice(i, i+2), 16)); };
 const ACCENT = cssRGB("--accent"), PAPER = cssRGB("--bg"), INK = cssRGB("--ink");
