@@ -119,24 +119,26 @@ a{color:inherit;text-decoration:none}
 .ring-section{position:relative;width:100%;touch-action:none}
 /* 水面倒影：不再用 -webkit-box-reflect（那是画在原元素上的静态效果，没法单独倾斜、起波纹，
    Firefox 也看不到）。改成一份镜像 DOM：同样的瓷砖、同样的轮动，只是翻转 + 渐隐；
-   再叠一层 canvas 水面，由主循环按滚轮速度写倾角、相位与水纹。照片环本身一张照片都不动。 */
-.water-defs{position:absolute;overflow:hidden;pointer-events:none}
+   再叠一层 canvas，由主循环按滚轮速度写倾角；静水时它完全透明，只有鼠标划过才画局部涟漪。
+   照片环本身一张照片都不动。 */
 .ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
   transform:scaleY(-1) skewX(var(--refl-tilt,0deg));
   opacity:var(--refl-opacity,.7);
-  /* 水面底色不参与渐隐：从水面铺到倒影末端，给波纹明暗提供对比度。
+  /* 水面底色不参与渐隐：从水面铺到倒影末端，给涟漪的明暗提供对比度。
      to top = 翻转后贴住照片带的水面；末端 alpha 自己归零，不会留下一条硬边。
-     它同时是「深色垫底」：位移滤镜放在内层，边缘被拉开时露出的是这层深色，不是白纸，
-     照片带底边就不会再出现一条被采样出来的白色亮线。 */
+     它同时是深色垫底：镜像格之间若有亚像素缝，露出的也是深色而不是白纸，
+     照片带底边就不会出现白色亮线。 */
   background:linear-gradient(to top,
     rgba(20,32,34,.80),rgba(20,32,34,.52) 38%,rgba(20,32,34,.26) 72%,rgba(20,32,34,0) 100%);
   will-change:transform}
-/* 只有「照片镜像」自己渐隐 + 压暗 + 位移。遮罩放在内层而不是 .reflect 上，水纹层不受影响；
-   brightness 也只作用在这一层，照片倒影调暗但水纹层保持可见。两栏共用同一条曲线和 --refl-h。 */
+/* 只有「照片镜像」自己渐隐 + 压暗。遮罩放在内层而不是 .reflect 上，涟漪层不受影响；
+   brightness 也只作用在这一层，照片倒影调暗但涟漪层保持可见。
+   水面是静的：不再挂 SVG 位移滤镜，镜像不会被自发噪声撕动，也不会在照片带底边采样出白线。
+   两栏共用同一条曲线和 --refl-h。 */
 .ring-section .reflect-img{position:absolute;inset:0;overflow:hidden;
-  /* 深灰水面底色：瓷砖之间的亚像素缝被位移放大时会露出深色而不是白纸 */
+  /* 深灰水面底色：瓷砖之间的亚像素缝露出深色而不是白纸 */
   background:rgba(26,34,36,.55);
-  filter:url(#waterRippleFilter) brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
+  filter:brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
   -webkit-mask-image:linear-gradient(to top,
     rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%);
           mask-image:linear-gradient(to top,
@@ -145,14 +147,13 @@ a{color:inherit;text-decoration:none}
 /* 上栏倒影压在中间文字区上方，只调淡、不改高度 */
 .ring-section .reflect.top{--refl-opacity:.4}
 /* 倒影盒比照片格矮：镜像格上移，保证紧贴水面的仍是照片底边，而不是照片顶部。
-   同时比原图多 2px 让相邻格互相盖住，位移滤镜就不会把缝隙拉成白色锯齿。 */
+   同时比原图多 2px 让相邻格互相盖住，就不会在深色水面底色上露出白色细缝。 */
 .ring-section .reflect .tile{pointer-events:none;
   top:calc(var(--refl-h,90px) - var(--c) - 2px);
   width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
-/* 水面波纹层：不再用等距横纹 / 同心圆环 / 1px 亮水面线这些一眼看穿的机械图案
-   （那条亮线在照片带底边还会被位移滤镜拉成一条带色边的白线）。改成 <canvas> 逐帧画
-   多方向行波叠加出的明暗高度场：波峰细高光、波谷柔阴影，互相交错干涉，接近真实水面。
-   canvas 是 .reflect 的兄弟层，不吃 SVG 位移滤镜，只跟着同一个倾角一起斜，因此水纹不被撕碎。
+/* 水面涟漪层：静水时不画任何东西，canvas 完全透明，倒影就是一面压暗的镜子。
+   只有鼠标划过倒影才在命中处画几圈横向拉长、很快消散的小椭圆涟漪。
+   canvas 是 .reflect 的兄弟层，不吃照片镜像的遮罩与压暗，只跟着同一个倾角一起斜。
    不设 z-index：按 DOM 顺序排在 .reflect 之上、.center 之下，中间文字永远盖得住它。 */
 .ring-section .water-canvas{position:absolute;display:block;pointer-events:none;
   transform:skewX(var(--refl-tilt,0deg));transform-origin:50% 50%;
@@ -423,32 +424,14 @@ a{color:inherit;text-decoration:none}
   /* 减弱动效：手风琴直接切换、光晕静止、水面不摇 */
   .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
   .hero-card.is-open::after{animation:none;opacity:.4}
-  /* 压暗/模糊只留在 .reflect-img 内层；外层关掉 SVG 位移滤镜即可，别叠加两次 brightness */
+  /* 倒影完全静止：不倾斜、不压暗两次，涟漪层直接隐藏 */
   .ring-section .reflect{transform:scaleY(-1)!important}
-  /* 减弱动效时内层也去掉 SVG 位移，只保留静态压暗 */
   .ring-section .reflect-img{filter:brightness(.52) contrast(1.08) saturate(.85) blur(.5px)}
-  /* 静置一层很淡的水纹，不摇、也不响应鼠标涟漪 */
-  .ring-section .water-canvas{transform:none!important;opacity:.28}
+  .ring-section .water-canvas{display:none}
 }
 </style>
 </head>
 <body>
-
-<!-- 水面倒影的位移滤镜：让镜像照片本身像水面一样起伏，而不是只在上面叠一层静态高光。
-     所在 svg 不能用 display:none（部分浏览器会因此跳过滤镜），所以只把尺寸收成 0。 -->
-<svg class="water-defs" width="0" height="0" aria-hidden="true" focusable="false">
-  <defs>
-    <!-- 倒影盒变矮后，8% 的垂直余量小于位移幅度会把边缘的水纹削掉；给足余量让波纹覆盖整片倒影 -->
-    <filter id="waterRippleFilter" x="-8%" y="-30%" width="116%" height="160%" color-interpolation-filters="sRGB">
-      <!-- 噪声不用固定时长的 SMIL 动画：主循环按统一相位改 baseFrequency 的 x/y 两个分量
-           和位移幅度，这样水纹的方向与「晃动频率」都能跟着照片滑动速度实时变。
-           位移幅度刻意压住，太大照片边缘会撕裂。 -->
-      <feTurbulence id="waterTurb" type="fractalNoise" baseFrequency="0.019 0.024" numOctaves="2" seed="5" result="noise"/>
-      <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="10"
-                         xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </defs>
-</svg>
 
 <header class="hdr">
   <a class="logo x" id="logo" href="#/" aria-label="回到相册首页"></a>
@@ -576,7 +559,7 @@ const THEME = {
   },
   home:{ word:"XCJ", sub:"Travel  2025/2026", line:"Jingdezhen·Hunan·Wulin·Henan·Sanya·Jiangxi" },   // 首页点阵大字、副标题、地点行
   font:{ family:"Archivo", weight:900, stretch:"expanded", upper:true },   // 点阵字用的字体，和 :root --display 的第一个一致；upper 和 --case 一致
-  scale:[0,3,5,7,10], base:62,                 // 五声音阶（正好是十孔口琴第二把位）和基准音高（MIDI 音符号）
+  scale:[0,3,5,7,10], base:62,                 // 羽调式五声音阶（适合空灵钢琴的开放式琶音）和基准音高（MIDI 音符号）
   presence:1,                                  // 章节环境声的音量：.5 若有若无 / 1 默认 / 1.5 有存在感
   soundOn:true,                               // 进站默认开启；需要用户手势的浏览器会在首次触摸/按键时接通
   motion:{                                     // 动效性格：利落的城市感。数值越小越慢、越软
@@ -712,9 +695,9 @@ const TILES = ringTiles();
 const frame = $("#frame"), center = $("#center");
 const ring = { u:0, tu:0, strips:[], reflects:[], waters:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
   input:matchMedia("(hover: none), (pointer: coarse)").matches ? "touch" : "mouse", preview:null, suppressUntil:0 };
-/* 水面倒影的状态：滚轮速度 → 倾角 / 波纹幅度 / 晃动频率。
-   phase 是所有水波共用的相位，推进速度随 wave 变，所以滑得越快晃得越急。 */
-const REFL = { tilt:0, target:0, energy:0, wave:.15, phase:0, t0:0, tick:0 };
+/* 水面倒影的状态：滚轮速度 → 整体倾角。水面本身静止，不再有相位与自发波幅，
+   只有鼠标划过时由 WATER / drawWater() 在 canvas 上画局部涟漪。 */
+const REFL = { tilt:0, target:0, tick:0 };
 const touchEnter = $("#touchEnter"), touchGuide = $("#touchGuide");
 function updateTouchGuide(){
   touchGuide.textContent = ring.input==="mouse" ? "Scroll to travel" : ring.preview ? "再点照片，或进入章节" : "轻点预览 · 滑动浏览";
@@ -834,14 +817,15 @@ function layoutRing(){
       m.innerHTML = src.innerHTML;
       return m;
     });
-    // 照片镜像单独包一层：渐隐遮罩只作用在这一层，水纹层不受影响，
-    // 因此水纹能从水面一直铺到倒影末端，而不是跟着照片一起被抹掉。
+    // 照片镜像单独包一层：渐隐遮罩只作用在这一层，涟漪层不受影响，
+    // 因此鼠标涟漪能从水面一直铺到倒影末端，而不是跟着照片一起被抹掉。
     const img = document.createElement("div");
     img.className = "reflect-img";
     refTiles.forEach(e=>img.appendChild(e));
     ref.appendChild(img);
-    // 水面层：低分辨率画布（1/3），浏览器放大时天然平滑，正好是水波的柔和质感。
-    // 放在 .reflect 之外，不吃 SVG 位移滤镜；插在 center 之前，中间文字仍画在它上面。
+    // 水面层：低分辨率画布（1/3），浏览器放大时天然平滑。静水时完全透明，
+    // 只在鼠标划过时画局部涟漪。放在 .reflect 之外，不吃照片镜像的遮罩/压暗；
+    // 插在 center 之前，中间文字仍画在它上面。
     const wcv = document.createElement("canvas");
     wcv.className = "water-canvas " + d.name;
     wcv.setAttribute("aria-hidden","true");
@@ -855,17 +839,14 @@ function layoutRing(){
     frame.insertBefore(wcv, center);
     ring.reflects.push(ref);
     ring.waters.push({ cv:wcv, ctx:wctx, w:wcv.width, h:wcv.height, ds:DS,
-      img:wctx.createImageData(wcv.width,wcv.height), ripples:[], staticDone:false,
-      colS:null, colC:null, rowS:null, rowC:null });
+      ripples:[], dirty:false });
     ring.strips.push({ ...d, tiles, refTiles, len:tiles.length*c });
   });
   renderRing();
 }
 function renderRing(t = performance.now()){
   const c = ring.c, off = ring.u*c;
-  // 倒影里的每一格比原图多一点点横向荡漾：相邻格错开相位，连起来就是一道缓慢走过的水纹。
-  // 只改镜像层，原照片环的位移一格都不动。
-  const waveAmp = reduce ? 0 : REFL.wave*18;
+  // 镜像层与原照片环严格同步：静水不再给每一格加自发的相位摆动
   for (const s of ring.strips){
     s.tiles.forEach((el,j)=>{
       let p = mod(j*c + s.dir*off, s.len);
@@ -873,8 +854,7 @@ function renderRing(t = performance.now()){
       el.style.transform = s.axis==="x" ? `translate3d(${p}px,0,0)` : `translate3d(0,${p}px,0)`;
       const m = s.refTiles?.[j];
       if (m){
-        const wob = waveAmp ? Math.sin(t*.0026 + j*.82 + (s.name==="bottom"?1.7:0))*waveAmp : 0;
-        const q = (p+wob).toFixed(2);
+        const q = p.toFixed(2);
         m.style.transform = s.axis==="x" ? `translate3d(${q}px,0,0)` : `translate3d(0,${q}px,0)`;
       }
     });
@@ -888,9 +868,8 @@ $("#home").addEventListener("wheel", e=>{
   if (e.target.closest?.(".hero")) return;
   const d = (e.deltaY+e.deltaX)/240;
   nudge(d);
-  // 滚轮越快 → 倒影倾角越大、水波越强；倾斜方向跟着滚动方向。停下后由主循环慢慢衰减回水平。
+  // 滚轮越快 → 倒影倾角越大；倾斜方向跟着滚动方向。停下后由主循环慢慢衰减回水平。
   REFL.target = Math.max(-9, Math.min(9, d*5));
-  REFL.energy = Math.min(1, Math.abs(d)/1.2);
 }, { passive:true });
 let homeTouch = null;
 $("#home").addEventListener("touchstart", e=>{
@@ -1735,15 +1714,19 @@ function sndInit(){
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8;   // 总线限幅，防爆音
   SND.out = ac.createGain(); SND.out.gain.value = 0; SND.out.connect(comp).connect(ac.destination);
   // 混响：一段指数衰减的噪声当冲激响应
-  const len = ac.sampleRate*2.8, ir = ac.createBuffer(2, len, ac.sampleRate);
-  for (let c=0; c<2; c++){ const b = ir.getChannelData(c); for (let i=0; i<len; i++) b[i] = (Math.random()*2-1)*Math.pow(1-i/len, 3.2); }
+  // 长一点的混响：4.2s、缓衰减，前面留 32ms 预延迟并压暗高频，尾音才「空」而不糊
+  const len = ac.sampleRate*4.2, ir = ac.createBuffer(2, len, ac.sampleRate);
+  for (let c=0; c<2; c++){ const b = ir.getChannelData(c); for (let i=0; i<len; i++) b[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.1); }
   const verb = ac.createConvolver(); verb.buffer = ir; verb.connect(SND.out);
-  SND.wet = ac.createGain(); SND.wet.gain.value = .38; SND.wet.connect(verb);
+  const wetTone = ac.createBiquadFilter(); wetTone.type="lowpass"; wetTone.frequency.value=2400; wetTone.Q.value=.4;
+  const pre = ac.createDelay(.2); pre.delayTime.value=.032;
+  wetTone.connect(pre).connect(verb);
+  SND.wet = ac.createGain(); SND.wet.gain.value = .52; SND.wet.connect(wetTone);
   // fx 总线：悬停音、转场；lp 总线：章节环境声，横向滚动时改它的亮度
   SND.fx = ac.createGain(); SND.fx.connect(SND.out); SND.fx.connect(SND.wet);
-  const hl = ac.createBiquadFilter(); hl.type = "lowpass"; hl.frequency.value = 4200; hl.Q.value = .5;   // 悬停音再过一道柔和低通，去掉刺耳的高频
+  const hl = ac.createBiquadFilter(); hl.type = "lowpass"; hl.frequency.value = 3200; hl.Q.value = .5;   // 悬停音再过一道柔和低通，去掉刺耳的高频
   SND.hov = ac.createGain(); SND.hov.connect(hl).connect(SND.fx);
-  SND.lp = ac.createBiquadFilter(); SND.lp.type = "lowpass"; SND.lp.frequency.value = 3400; SND.lp.Q.value = .5;
+  SND.lp = ac.createBiquadFilter(); SND.lp.type = "lowpass"; SND.lp.frequency.value = 2900; SND.lp.Q.value = .5;
   SND.lp.connect(SND.out); SND.lp.connect(SND.wet);
   SND.noise = ac.createBuffer(1, ac.sampleRate*2, ac.sampleRate);
   SND.crackle = ac.createBuffer(1, ac.sampleRate*3, ac.sampleRate);
@@ -1808,17 +1791,8 @@ function loopNoise(dest, buf, type, freq, q, gain){
 }
 function lfo(param, rate, depth){ const ac = A(), o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = rate; g.gain.value = depth; o.connect(g).connect(param); o.start(); return o; }
 function drone(dest, f, type, gain){ const ac = A(), o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = gain; o.connect(g).connect(dest); o.start(); return o; }
-// 簧片的软饱和曲线：tanh 把锯齿波的尖角磨圆一点，泛音还在但不刺耳。整站只算一次。
-function reedCurve(){
-  if (!SND.reed){
-    const n=1024, c=new Float32Array(n), k=Math.tanh(1.7);
-    for (let i=0;i<n;i++){ const x=(i/(n-1))*2-1; c[i]=Math.tanh(x*1.7)/k; }
-    SND.reed=c;
-  }
-  return SND.reed;
-}
-
-// 环境效果（风 / 浪、霓虹起音、黑胶底噪）＋ 本站唯一的主乐器：口琴族
+// 环境效果（风 / 浪、霓虹起音、黑胶底噪）＋ 本站唯一的主乐器：轻柔空灵钢琴族。
+// 钢琴不靠采样：每个音由带非谐性的正弦泛音叠成，长混响与缓慢拍频把尾音铺开。
 Object.assign(V, {
   wind(t, dest, v=.08, dur=1, f0=300, f1=2400, q=1.2, type="bandpass"){
     const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
@@ -1839,175 +1813,186 @@ Object.assign(V, {
     s.buffer = SND.crackle; s.loop = true; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+.08); g.gain.linearRampToValueAtTime(0, t+dur);
     s.connect(g).connect(dest); s.start(t, Math.random()*2); s.stop(t+dur+.05);
   },
-  /* —— 口琴（harmonica）：自由簧片。两片略微走音的簧片（湿调）互相拍频，起音带一口气的 chiff，
-        长音后段渐入喉颤，中频共振峰给一点"鼻音"，收尾是收气而不是断电。全部现场合成，零音频文件 —— */
-  harmonica(f, t, dest, v=.08, dur=.7, o={}){
-    v = Math.max(.0005, v);                 // 放大镜饱和度为 0 时也不能让指数包络从 0 起跳
-    const ac=A(), bright=o.bright ?? 1, breath=o.breath ?? 1, va=o.vib ?? 1;
-    const atk=o.soft ? .055 : .022, rel=.14, end=t+dur+rel;
-    const g=ac.createGain(), tr=ac.createGain(); g.connect(tr).connect(dest);
-    // 呼吸起伏：约 ±8% 的缓慢音量摆动，就是口琴一鼓一瘪的"哇"感
-    tr.gain.value=1;
-    const tl=ac.createOscillator(), tg=ac.createGain();
-    tl.frequency.value=4.5+Math.random()*.6; tg.gain.value=.085;
-    tl.connect(tg).connect(tr.gain);
-    // 簧片非线性 + 共鸣塑造：低通去刺、peaking 抬 1~3kHz、高通去浑浊低频
-    const sh=ac.createWaveShaper(); sh.curve=reedCurve(); sh.oversample="2x";
-    const body=ac.createBiquadFilter(); body.type="lowpass";
-    body.frequency.value=Math.min(5600,Math.max(1600,f*6*bright)); body.Q.value=.7;
-    const form=ac.createBiquadFilter(); form.type="peaking";
-    form.frequency.value=Math.min(2800,Math.max(900,f*2.7)); form.Q.value=.9; form.gain.value=5.5;
-    const hp=ac.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=170;
-    sh.connect(body).connect(form).connect(hp).connect(g);
-    // 喉颤：短音几乎不颤，长音后半段才慢慢加进来
-    const vib=ac.createOscillator(), vg=ac.createGain();
-    vib.frequency.value=5.0+Math.random()*.7;
-    vg.gain.setValueAtTime(0,t);
-    vg.gain.linearRampToValueAtTime(f*.0045*va, t+Math.min(.3,dur*.45));
-    vib.connect(vg);
-    const bend=o.bend || 0;
-    [[-9,1,"sawtooth"],[11,.85,"sawtooth"],[0,.2,"triangle"]].forEach(([dt,a,type])=>{
-      const osc=ac.createOscillator(), og=ac.createGain(); osc.type=type;
-      osc.frequency.setValueAtTime(f*Math.pow(2,-bend/12), t);
-      if (bend) osc.frequency.exponentialRampToValueAtTime(f, t+Math.min(.16,dur*.35));
-      osc.detune.value=dt; og.gain.value=a; vg.connect(osc.frequency);
-      osc.connect(og).connect(sh); osc.start(t); osc.stop(end+.05);
+  /* —— 钢琴（piano）：槌击弦的柔和声学模型。全部现场合成，零音频文件。
+        六个略带非谐性的正弦泛音各自衰减（越高越快），起音一口极轻的槌触噪声；
+        基频由三根只差几音分的同音弦叠出缓慢拍频，低通模拟琴盖与房间，
+        再交给长混响把尾音铺成「空灵」。风格区的参数沿用：
+        bright→泛音亮度，breath→空气层，vib→同音弦走音幅度，
+        soft→弱音踏板（起音更慢、泛音更少），bend→落键时极轻的张力滑音。 */
+  piano(f, t, dest, v=.06, dur=1.2, o={}){
+    v = Math.max(.0005, v);                 // 亮度为 0 时指数包络也不能从 0 起跳
+    const ac=A(), bright=o.bright ?? 1, air=o.breath ?? 1, chorus=o.vib ?? 1, una=!!o.soft;
+    const atk = una ? .030 : .014, span = Math.max(.35, dur)*1.08;
+    const end = t + span + .55;            // 钢琴是自然衰减，尾音要留足
+    // 琴盖 / 房间的柔和低通：起音时略开，余韵里慢慢合上
+    const body=ac.createBiquadFilter(); body.type="lowpass"; body.Q.value=.4;
+    body.frequency.setValueAtTime(Math.min(5400,Math.max(1100,f*5.2*bright*(una?.78:1))),t);
+    body.frequency.exponentialRampToValueAtTime(Math.min(2600,Math.max(520,f*2.2)),t+span*.8);
+    const hp=ac.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=105;
+    body.connect(hp).connect(dest);
+    // 0.1Hz 的极慢滤波器呼吸：空气在动，而不是音量在颤
+    const sh=ac.createOscillator(), sg=ac.createGain();
+    sh.frequency.value=.09+Math.random()*.05; sg.gain.value=150;
+    sh.connect(sg).connect(body.frequency); sh.start(t); sh.stop(end);
+    // 弦的非谐性：f_k = k·f·√(1+B·k²)，B≈0.00035（真实钢琴中音区量级）
+    const B=.00035, glide=o.bend || 0;
+    [[1,1],[2,.36],[3,.17],[4,.085],[5,.042],[6,.022]].forEach(([k,amp])=>{
+      const pf=f*k*Math.sqrt(1+B*k*k);
+      const og=ac.createGain(), peak=v*amp*(una && k>2 ? .55 : 1)*Math.min(1.4,bright);
+      const dec=Math.max(.24,span/(1+k*.26));
+      og.gain.setValueAtTime(0,t);
+      og.gain.linearRampToValueAtTime(peak,t+atk);
+      og.gain.exponentialRampToValueAtTime(Math.max(.0002,peak*.34),t+atk+.14);
+      og.gain.exponentialRampToValueAtTime(.0001,t+atk+.14+dec);
+      og.connect(body);
+      // 同音三弦：只有基音叠三根，微微走音的拍频是钢琴「湿润」的来源
+      const voices=k===1?[-1.6,0,1.9]:[0];
+      voices.forEach((dt,vi)=>{
+        const osc=ac.createOscillator(), vg=ac.createGain(); osc.type="sine";
+        osc.frequency.setValueAtTime(pf*Math.pow(2,glide*k/1200),t);
+        if (glide) osc.frequency.exponentialRampToValueAtTime(pf,t+.09);
+        osc.detune.value=dt*chorus;
+        vg.gain.value=voices.length===3?(vi===1?.6:.24):1;
+        osc.connect(vg).connect(og); osc.start(t); osc.stop(t+atk+.14+dec+.05);
+      });
     });
-    // 主包络：簧片起振 → 略回落的持续平台 → 收气
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(v,t+atk);
-    g.gain.linearRampToValueAtTime(v*.88,Math.max(t+atk+.02,t+dur*.7));
-    g.gain.exponentialRampToValueAtTime(.0001,end);
-    // 气声：起音一口 chiff，之后留极轻的持续气流，收尾一起消失
-    if (breath>0){
-      const s=ac.createBufferSource(), nf=ac.createBiquadFilter(), ng=ac.createGain();
-      s.buffer=SND.noise; s.loop=true;
-      nf.type="bandpass"; nf.frequency.value=Math.min(6500,Math.max(1800,f*5)); nf.Q.value=.55;
-      const a2=Math.min(.014,dur*.18), chiff=Math.min(.16,dur*.5), floor=Math.max(.0002,v*.10*breath);
-      ng.gain.setValueAtTime(0,t);
-      ng.gain.linearRampToValueAtTime(v*.8*breath,t+a2);
-      ng.gain.exponentialRampToValueAtTime(floor,t+chiff);
-      ng.gain.setValueAtTime(floor,Math.max(t+chiff,t+dur-.05));
-      ng.gain.linearRampToValueAtTime(0,end);
-      s.connect(nf).connect(ng).connect(dest); s.start(t,Math.random()); s.stop(end+.05);
+    // 槌触：75ms 内消失的一口柔噪声，只让起音有「落键」的实体感
+    const hm=ac.createBufferSource(), hf=ac.createBiquadFilter(), hg=ac.createGain();
+    hm.buffer=SND.noise; hm.loop=true; hf.type="bandpass";
+    hf.frequency.value=Math.min(4200,Math.max(900,f*3.4)); hf.Q.value=.6;
+    hg.gain.setValueAtTime(0,t);
+    hg.gain.linearRampToValueAtTime(v*.26*(una?.6:1),t+.006);
+    hg.gain.exponentialRampToValueAtTime(.0001,t+.075);
+    hm.connect(hf).connect(hg).connect(dest); hm.start(t,Math.random()); hm.stop(t+.1);
+    // 空气层：几不可闻的房间气声，把余韵托在空间里
+    if (air>0){
+      const s=ac.createBufferSource(), af=ac.createBiquadFilter(), ag=ac.createGain();
+      s.buffer=SND.noise; s.loop=true; af.type="lowpass"; af.frequency.value=1450; af.Q.value=.35;
+      const a=v*.055*Math.min(1.8,air);
+      ag.gain.setValueAtTime(0,t);
+      ag.gain.linearRampToValueAtTime(a,t+.18);
+      ag.gain.linearRampToValueAtTime(a*.35,t+span*.6);
+      ag.gain.linearRampToValueAtTime(0,end);
+      s.connect(af).connect(ag).connect(dest); s.start(t,Math.random()); s.stop(end+.05);
     }
-    vib.start(t); vib.stop(end+.05); tl.start(t); tl.stop(end+.05);
   },
-  tongue(f, t, dest, v=.1){        // 吐音：舌尖断气的短音，替代打击乐的节奏点，仍是同一支口琴
-    V.harmonica(f, t, dest, v, .13, {bright:1.15, breath:1.35, vib:.2});
+  pianoTouch(f,t,dest,v=.08){     // 极轻的短触键：代替打击乐的节奏点，仍是同一台钢琴
+    V.piano(f,t,dest,v*.78,.30,{bright:1.1,breath:.55,vib:.6});
   },
-  harpChord(freqs, t, dest, v=.06, dur=1, o={}){   // 同时含住几个孔：口琴的和弦
+  pianoChord(freqs,t,dest,v=.05,dur=1.2,o={}){   // 几个音先后 12ms 落下，像手指不是绝对齐的
     const k=Math.sqrt(freqs.length);
-    freqs.forEach(f=>V.harmonica(f, t, dest, v/k, dur, {...o, breath:(o.breath ?? 1)*.5}));
+    freqs.forEach((f,i)=>V.piano(f,t+i*.012,dest,v/k,dur,{...o,breath:(o.breath ?? 1)*.5}));
   },
-  breath(t, dest, v=.05, dur=1, f0=600, f1=1800){  // 纯换气声，没有音高：吹与吸之间那口气
+  air(t,dest,v=.03,dur=1.2,f0=500,f1=1500){      // 没有音高的柔和气声：一扇窗、一阵过堂风
     const ac=A(), s=ac.createBufferSource(), fl=ac.createBiquadFilter(), g=ac.createGain();
-    s.buffer=SND.noise; s.loop=true; fl.type="bandpass"; fl.Q.value=.7;
+    s.buffer=SND.noise; s.loop=true; fl.type="bandpass"; fl.Q.value=.5;
     fl.frequency.setValueAtTime(f0,t);
     fl.frequency.exponentialRampToValueAtTime(f1,t+dur*.45);
     fl.frequency.exponentialRampToValueAtTime(f0*.8,t+dur);
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+dur*.3); g.gain.linearRampToValueAtTime(0,t+dur);
-    s.connect(fl).connect(g).connect(dest); s.start(t,Math.random()); s.stop(t+dur+.05);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(v,t+dur*.32);
+    g.gain.linearRampToValueAtTime(0,t+dur+.08);
+    s.connect(fl).connect(g).connect(dest); s.start(t,Math.random()); s.stop(t+dur+.1);
   },
 });
 const arp = (t, degs, gap, fn) => degs.forEach((d,k)=>fn(d, t + k*gap));
 
-/* ===== 声音：风格区 ===== 每章一套口琴的吹法与环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
-   hz(音级, 八度, 基准) 按 THEME.scale 取音；V.harmonica / V.tongue / V.harpChord / V.breath 是上面的口琴族
-   本站整册只有一件乐器：口琴。六章靠音区、气息、吐音与长音、和弦、速度区分，不再用任何打击乐或拨弦 */
-// 首页：照片环每走一格吹 melody 里的下一个音（step）；风格台切换时响一声（chime）
+/* ===== 声音：风格区 ===== 每章一套钢琴的触键与环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
+   hz(音级, 八度, 基准) 按 THEME.scale 取音；V.piano / V.pianoTouch / V.pianoChord / V.air 是上面的钢琴族
+   本站整册只有一件乐器：钢琴。六章靠音区、触键轻重、单音与琶音、和弦与留白速度区分，不再用任何打击乐或拨弦 */
+// 首页：照片环每走一格弹 melody 里的下一个音（step）；风格台切换时响一声（chime）
 const RING_SND = {
   melody:[0,2,4,7,9,7,4,2,0,2,4,7],
-  step:(f,t,d,v)=>V.harmonica(f, t, d, v*.85, .42, {bright:1.05, breath:1, vib:.7}),
-  chime:(f,t,d,v)=>V.harmonica(f, t, d, v*.6, 1.1, {bright:.85, breath:.9, vib:1.3, soft:true}),
+  step:(f,t,d,v)=>V.piano(f, t, d, v*.85, .42, {bright:1.05, breath:1, vib:.7}),
+  chime:(f,t,d,v)=>V.piano(f, t, d, v*.6, 1.1, {bright:.85, breath:.9, vib:1.3, soft:true}),
 };
 // 大图里每章一套声音：open 聚拢 / step 显影每一级 / done 成像 / look 放大镜 / swap 切换 / close 关闭
 const LB_SND = [
-  { // 景德镇：低音区长音，气声重、带一点压音
-    open:t=>{ V.breath(t, SND.fx, .05, 1.1, 320, 1100); V.harmonica(hz(0,-1), t+.08, SND.fx, .055, 1.5, {bright:.72, breath:1.4, vib:1.2, soft:true, bend:.5}); },
-    step:(t,j)=>V.harmonica(hz(j,-1), t, SND.fx, .05, .5, {bright:.8, breath:1.2, vib:.5}),
-    done:t=>arp(t, [0,2,4,7], .11, (d,s)=>V.harmonica(hz(d,-1), s, SND.fx, .045, .8, {bright:.8, breath:1.1})),
-    look:(t,d,v)=>V.tongue(hz(d,0), t, SND.fx, .07*v),
-    swap:t=>V.harmonica(hz(4,-1), t, SND.fx, .05, .7, {bright:.8, bend:.4}),
-    close:t=>arp(t, [7,4,2,0], .14, (d,s)=>V.harmonica(hz(d,-1), s, SND.fx, .04, .9, {bright:.75, breath:1.2})),
+  { // 景德镇：低音区长音，踏板留足余韵
+    open:t=>{ V.air(t, SND.fx, .05, 1.1, 320, 1100); V.piano(hz(0,-1), t+.08, SND.fx, .055, 1.5, {bright:.72, breath:1.4, vib:1.2, soft:true, bend:.5}); },
+    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .05, .5, {bright:.8, breath:1.2, vib:.5}),
+    done:t=>arp(t, [0,2,4,7], .11, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .045, .8, {bright:.8, breath:1.1})),
+    look:(t,d,v)=>V.pianoTouch(hz(d,0), t, SND.fx, .07*v),
+    swap:t=>V.piano(hz(4,-1), t, SND.fx, .05, .7, {bright:.8, bend:.4}),
+    close:t=>arp(t, [7,4,2,0], .14, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .04, .9, {bright:.75, breath:1.2})),
   },
-  { // 湖南：中音区短吐音，节奏密、起音亮
-    open:t=>arp(t, [0,2,4], .07, (d,s)=>V.tongue(hz(d,1), s, SND.fx, .08)),
-    step:(t,j)=>V.tongue(hz(j,1), t, SND.fx, .085),
-    done:t=>arp(t, [0,2,4,7,9], .075, (d,s)=>V.harmonica(hz(d,1), s, SND.fx, .07, .3, {bright:1.25, breath:1.2})),
-    look:(t,d,v)=>V.tongue(hz(d,1), t, SND.fx, .05*v),
-    swap:t=>V.harmonica(hz(4,1), t, SND.fx, .075, .35, {bright:1.2, bend:.6}),
-    close:t=>arp(t, [9,7,4,2,0], .07, (d,s)=>V.tongue(hz(d,1), s, SND.fx, .06)),
+  { // 湖南：中音区轻触键，音密、起音清透
+    open:t=>arp(t, [0,2,4], .07, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .08)),
+    step:(t,j)=>V.pianoTouch(hz(j,1), t, SND.fx, .085),
+    done:t=>arp(t, [0,2,4,7,9], .075, (d,s)=>V.piano(hz(d,1), s, SND.fx, .07, .3, {bright:1.25, breath:1.2})),
+    look:(t,d,v)=>V.pianoTouch(hz(d,1), t, SND.fx, .05*v),
+    swap:t=>V.piano(hz(4,1), t, SND.fx, .075, .35, {bright:1.2, bend:.6}),
+    close:t=>arp(t, [9,7,4,2,0], .07, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .06)),
   },
-  { // 武林：山风里的长音与深喉颤
-    open:t=>{ V.breath(t, SND.fx, .07, 1.6, 500, 1900); V.harmonica(hz(0,-1), t+.06, SND.fx, .05, 2.0, {bright:.85, breath:1.3, vib:1.8, soft:true}); },
-    step:(t,j)=>V.harmonica(hz(j,-1), t, SND.fx, .055, 1.1, {bright:.85, breath:1.2, vib:1.2}),
-    done:t=>{ V.breath(t, SND.fx, .045, 1.1, 650, 1500); arp(t+.15, [0,2,4], .14, (d,s)=>V.harmonica(hz(d,0), s, SND.fx, .045, 1.0, {vib:1.4})); },
-    look:(t,d,v)=>V.harmonica(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.2}),
-    swap:t=>{ V.breath(t, SND.fx, .06, .55, 900, 2200); V.harmonica(hz(2,0), t+.03, SND.fx, .05, .5, {bend:.5}); },
-    close:t=>V.harmonica(hz(0,-2), t, SND.fx, .055, 2.2, {bright:.7, breath:1.5, vib:1.8, soft:true, bend:.7}),
+  { // 武林：山风里的长音与缓慢拍频
+    open:t=>{ V.air(t, SND.fx, .07, 1.6, 500, 1900); V.piano(hz(0,-1), t+.06, SND.fx, .05, 2.0, {bright:.85, breath:1.3, vib:1.8, soft:true}); },
+    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .055, 1.1, {bright:.85, breath:1.2, vib:1.2}),
+    done:t=>{ V.air(t, SND.fx, .045, 1.1, 650, 1500); arp(t+.15, [0,2,4], .14, (d,s)=>V.piano(hz(d,0), s, SND.fx, .045, 1.0, {vib:1.4})); },
+    look:(t,d,v)=>V.piano(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.2}),
+    swap:t=>{ V.air(t, SND.fx, .06, .55, 900, 2200); V.piano(hz(2,0), t+.03, SND.fx, .05, .5, {bend:.5}); },
+    close:t=>V.piano(hz(0,-2), t, SND.fx, .055, 2.2, {bright:.7, breath:1.5, vib:1.8, soft:true, bend:.7}),
   },
-  { // 河南：一口气含住几个孔，暖而正的和弦
-    open:t=>V.harpChord([0,2,4].map(d=>hz(d,0)), t, SND.fx, .06, 1.0, {bright:.95, breath:.9}),
-    step:(t,j)=>V.harmonica(hz(j,0), t, SND.fx, .055, .6, {bright:.95}),
-    done:t=>V.harpChord([0,2,4,7].map(d=>hz(d,-1)), t, SND.fx, .055, 1.4, {bright:.9, soft:true}),
-    look:(t,d,v)=>V.harmonica(hz(d,1), t, SND.fx, .028*v, .4, {vib:.4}),
-    swap:t=>V.harmonica(hz(4,1), t, SND.fx, .045, .6, {bright:1.05}),
-    close:t=>arp(t, [4,2,0], .12, (d,s)=>V.harmonica(hz(d,0), s, SND.fx, .05, .8, {bright:.9})),
+  { // 河南：柔和铺开的开放式暖和弦
+    open:t=>V.pianoChord([0,2,4].map(d=>hz(d,0)), t, SND.fx, .06, 1.0, {bright:.95, breath:.9}),
+    step:(t,j)=>V.piano(hz(j,0), t, SND.fx, .055, .6, {bright:.95}),
+    done:t=>V.pianoChord([0,2,4,7].map(d=>hz(d,-1)), t, SND.fx, .055, 1.4, {bright:.9, soft:true}),
+    look:(t,d,v)=>V.piano(hz(d,1), t, SND.fx, .028*v, .4, {vib:.4}),
+    swap:t=>V.piano(hz(4,1), t, SND.fx, .045, .6, {bright:1.05}),
+    close:t=>arp(t, [4,2,0], .12, (d,s)=>V.piano(hz(d,0), s, SND.fx, .05, .8, {bright:.9})),
   },
   { // 三亚：高音区明快，快速的单音循环
-    open:t=>arp(t, [0,2,4,7,9], .055, (d,s)=>V.harmonica(hz(d,1), s, SND.fx, .05, .28, {bright:1.3, breath:1.1, vib:.4})),
-    step:(t,j)=>V.harmonica(hz(j,1), t, SND.fx, .07, .35, {bright:1.3}),
-    done:t=>{ arp(t, [0,2,4,7,9], .055, (d,s)=>V.tongue(hz(d,1), s, SND.fx, .065)); V.harmonica(hz(0,2), t+.1, SND.fx, .05, 1.0, {bright:1.25, vib:1.1}); },
-    look:(t,d,v)=>V.tongue(hz(d,1), t, SND.fx, .045*v),
-    swap:t=>V.harmonica(hz(9,1), t, SND.fx, .07, .4, {bright:1.3, bend:.8}),
-    close:t=>arp(t, [9,7,4,2,0], .06, (d,s)=>V.harmonica(hz(d,1), s, SND.fx, .055, .3, {bright:1.25})),
+    open:t=>arp(t, [0,2,4,7,9], .055, (d,s)=>V.piano(hz(d,1), s, SND.fx, .05, .28, {bright:1.3, breath:1.1, vib:.4})),
+    step:(t,j)=>V.piano(hz(j,1), t, SND.fx, .07, .35, {bright:1.3}),
+    done:t=>{ arp(t, [0,2,4,7,9], .055, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .065)); V.piano(hz(0,2), t+.1, SND.fx, .05, 1.0, {bright:1.25, vib:1.1}); },
+    look:(t,d,v)=>V.pianoTouch(hz(d,1), t, SND.fx, .045*v),
+    swap:t=>V.piano(hz(9,1), t, SND.fx, .07, .4, {bright:1.3, bend:.8}),
+    close:t=>arp(t, [9,7,4,2,0], .06, (d,s)=>V.piano(hz(d,1), s, SND.fx, .055, .3, {bright:1.25})),
   },
   { // 江西：低音慢和弦，长旋律在上面
-    open:t=>{ V.harmonica(hz(0,-1), t, SND.fx, .05, 1.8, {bright:.78, breath:1.3, vib:1.5, soft:true}); V.harpChord([0,2].map(d=>hz(d,-2)), t+.12, SND.fx, .035, 2.0, {bright:.7}); },
-    step:(t,j)=>V.harmonica(hz(j,-1), t, SND.fx, .06, .8, {bright:.8, breath:1.2}),
-    done:t=>{ V.harmonica(hz(0,0), t, SND.fx, .05, 1.6, {vib:1.6, soft:true}); [0,2,4].forEach((d,k)=>V.harmonica(hz(d,-1), t+.12+k*.08, SND.fx, .035, .9, {bright:.8})); },
-    look:(t,d,v)=>V.harmonica(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.1}),
-    swap:t=>V.harmonica(hz(2,0), t, SND.fx, .06, .6, {bright:.9, bend:.3}),
-    close:t=>arp(t, [4,2,0,-2], .15, (d,s)=>V.harmonica(hz(d,-1), s, SND.fx, .04, 1.2, {bright:.75, breath:1.3, vib:1.4})),
+    open:t=>{ V.piano(hz(0,-1), t, SND.fx, .05, 1.8, {bright:.78, breath:1.3, vib:1.5, soft:true}); V.pianoChord([0,2].map(d=>hz(d,-2)), t+.12, SND.fx, .035, 2.0, {bright:.7}); },
+    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .06, .8, {bright:.8, breath:1.2}),
+    done:t=>{ V.piano(hz(0,0), t, SND.fx, .05, 1.6, {vib:1.6, soft:true}); [0,2,4].forEach((d,k)=>V.piano(hz(d,-1), t+.12+k*.08, SND.fx, .035, .9, {bright:.8})); },
+    look:(t,d,v)=>V.piano(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.1}),
+    swap:t=>V.piano(hz(2,0), t, SND.fx, .06, .6, {bright:.9, bend:.3}),
+    close:t=>arp(t, [4,2,0,-2], .15, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .04, 1.2, {bright:.75, breath:1.3, vib:1.4})),
   },
 ];
 
-// 悬停音色：六章都是口琴，只是音区、气息、颤音与和弦不同
+// 悬停音色：六章都是钢琴，只是音区、触键、拍频与和弦不同
 const VOICE = [
-  (f,t,d)=>V.harmonica(f, t, d, .055, .45, {bright:.78, breath:1.3, vib:.6}),
-  (f,t,d)=>V.tongue(f, t, d, .085),
-  (f,t,d)=>V.harmonica(f, t, d, .06, 1.0, {bright:.85, breath:1.2, vib:1.3}),
-  (f,t,d)=>V.harpChord([f, f*1.5], t, d, .05, .55, {bright:.95}),
-  (f,t,d)=>V.harmonica(f, t, d, .055, .3, {bright:1.3, breath:1.1, vib:.4}),
-  (f,t,d)=>V.harmonica(f, t, d, .05, 1.2, {bright:.8, breath:1.3, vib:1.5, soft:true}),
+  (f,t,d)=>V.piano(f, t, d, .055, .45, {bright:.78, breath:1.3, vib:.6}),
+  (f,t,d)=>V.pianoTouch(f, t, d, .085),
+  (f,t,d)=>V.piano(f, t, d, .06, 1.0, {bright:.85, breath:1.2, vib:1.3}),
+  (f,t,d)=>V.pianoChord([f, f*1.5], t, d, .05, .55, {bright:.95}),
+  (f,t,d)=>V.piano(f, t, d, .055, .3, {bright:1.3, breath:1.1, vib:.4}),
+  (f,t,d)=>V.piano(f, t, d, .05, 1.2, {bright:.8, breath:1.3, vib:1.5, soft:true}),
 ];
 // 每章的环境声：返回要停掉的持续声源，和一个按时间排下一个音的 tick
-// 底层只留风/气/房间噪声，凡是有音高的声音都由口琴发出
+// 底层只留风/气/房间噪声，凡是有音高的声音都由钢琴发出
 const SCENES = [
   b=>{ const w=loopNoise(b, SND.noise, "lowpass", 420, .5, .04);                                  // 景德镇：低沉气流里的低音长音
        return { nodes:[w.s, lfo(w.g.gain,.05,.015)],
-         tick:t=>{ V.harmonica(hz(pick([0,2,4]),-1), t, b, .045, 1.7, {bright:.72, breath:1.35, vib:1.1, soft:true});
-                   if (Math.random()<.35) V.breath(t+.35, b, .028, .9, 300, 850); return t+rnd(2.6,4.8); } }; },
-  b=>{ const n=loopNoise(b, SND.noise, "bandpass", 1000, .7, .042);                               // 湖南：中音区短吐音的快句
+         tick:t=>{ V.piano(hz(pick([0,2,4]),-1), t, b, .045, 1.7, {bright:.72, breath:1.35, vib:1.1, soft:true});
+                   if (Math.random()<.35) V.air(t+.35, b, .028, .9, 300, 850); return t+rnd(2.6,4.8); } }; },
+  b=>{ const n=loopNoise(b, SND.noise, "bandpass", 1000, .7, .042);                               // 湖南：中音区轻触键的快句
        return { nodes:[n.s, lfo(n.g.gain,.08,.016)],
-         tick:t=>{ arp(t, pick([[0,2,4,7],[4,2,0,2]]), .085, (d,s)=>V.tongue(hz(d,1), s, b, .065));
-                   if (Math.random()<.3) V.harmonica(hz(pick([0,4]),0), t+.3, b, .035, .8, {bright:1.1, vib:.8}); return t+rnd(1.8,3.1); } }; },
-  b=>{ const w=loopNoise(b, SND.noise, "bandpass", 560, .7, .065);                               // 武林：山风里的长音与深喉颤
+         tick:t=>{ arp(t, pick([[0,2,4,7],[4,2,0,2]]), .085, (d,s)=>V.pianoTouch(hz(d,1), s, b, .065));
+                   if (Math.random()<.3) V.piano(hz(pick([0,4]),0), t+.3, b, .035, .8, {bright:1.1, vib:.8}); return t+rnd(1.8,3.1); } }; },
+  b=>{ const w=loopNoise(b, SND.noise, "bandpass", 560, .7, .065);                               // 武林：山风里的长音与缓慢拍频
        return { nodes:[w.s, lfo(w.fl.frequency,.045,220), lfo(w.g.gain,.09,.026)],
-         tick:t=>{ V.harmonica(hz(pick([0,2,4]),-1), t, b, .04, 2.4, {bright:.85, breath:1.3, vib:1.8, soft:true});
-                   if (Math.random()<.4) V.breath(t+.5, b, .03, 1.2, 500, 1700); return t+rnd(3.0,5.2); } }; },
-  b=>{ const a=loopNoise(b, SND.noise, "lowpass", 900, .5, .03);                                 // 河南：慢换的口琴和弦
+         tick:t=>{ V.piano(hz(pick([0,2,4]),-1), t, b, .04, 2.4, {bright:.85, breath:1.3, vib:1.8, soft:true});
+                   if (Math.random()<.4) V.air(t+.5, b, .03, 1.2, 500, 1700); return t+rnd(3.0,5.2); } }; },
+  b=>{ const a=loopNoise(b, SND.noise, "lowpass", 900, .5, .03);                                 // 河南：慢换的钢琴和弦
        return { nodes:[a.s],
-         tick:t=>{ V.harpChord([0,2,4].map(d=>hz(d,-1)), t, b, .042, 2.0, {bright:.9, soft:true});
-                   if (Math.random()<.35) V.harmonica(hz(7,0), t+.4, b, .032, 1.1, {bright:1, vib:1.2}); return t+rnd(3.0,4.8); } }; },
+         tick:t=>{ V.pianoChord([0,2,4].map(d=>hz(d,-1)), t, b, .042, 2.0, {bright:.9, soft:true});
+                   if (Math.random()<.35) V.piano(hz(7,0), t+.4, b, .032, 1.1, {bright:1, vib:1.2}); return t+rnd(3.0,4.8); } }; },
   b=>{ const w=loopNoise(b, SND.noise, "lowpass", 700, .6, .045); let i=0; const seq=[0,2,4,7,9,7,4,2];  // 三亚：高音区明快的循环
        return { nodes:[w.s, lfo(w.g.gain,.06,.02)],
-         tick:t=>{ V.harmonica(hz(seq[i%8],1), t, b, .04, .32, {bright:1.3, breath:1.1, vib:.4});
-                   if (i%8===0) V.harmonica(hz(0,0), t, b, .03, 1.2, {bright:1.1}); i++; return t+rnd(.45,.72); } }; },
+         tick:t=>{ V.piano(hz(seq[i%8],1), t, b, .04, .32, {bright:1.3, breath:1.1, vib:.4});
+                   if (i%8===0) V.piano(hz(0,0), t, b, .03, 1.2, {bright:1.1}); i++; return t+rnd(.45,.72); } }; },
   b=>{ const n=loopNoise(b, SND.noise, "lowpass", 2200, .5, .02), prog=[[0,2,4],[-2,1,3],[3,5,7],[1,4,6]]; let i=0;  // 江西：低音慢和弦，长旋律在上面
-       return { nodes:[n.s], tick:t=>{ V.harpChord(prog[i%4].map(d=>hz(d,-1)), t, b, .038, 2.2, {bright:.8, soft:true});
-                   V.harmonica(hz(prog[i%4][0],0), t+.35, b, .035, 1.8, {bright:.8, breath:1.25, vib:1.5, soft:true}); i++; return t+60/64*2; } }; },
+       return { nodes:[n.s], tick:t=>{ V.pianoChord(prog[i%4].map(d=>hz(d,-1)), t, b, .038, 2.2, {bright:.8, soft:true});
+                   V.piano(hz(prog[i%4][0],0), t+.35, b, .035, 1.8, {bright:.8, breath:1.25, vib:1.5, soft:true}); i++; return t+60/64*2; } }; },
 ];
 /* ===== 声音：风格区结束 ===== */
 
@@ -2057,7 +2042,7 @@ function sndStep(dir, speed){
 }
 function sndSwoosh(){ if (sndReady()) V.swoosh(A().currentTime, SND.fx); }
 function sndChime(i){ if (sndReady()) RING_SND.chime(hz(i*2 + 2, 1), A().currentTime, SND.fx, .1); }
-function sndTone(k){ if (!sndReady() || Math.abs(k - SND.tone) < .01) return; SND.tone = k; SND.lp.frequency.setTargetAtTime(900 + k*4200, A().currentTime, .15); }
+function sndTone(k){ if (!sndReady() || Math.abs(k - SND.tone) < .01) return; SND.tone = k; SND.lp.frequency.setTargetAtTime(800 + k*3000, A().currentTime, .15); }
 
 const sndBtn = $("#snd");
 sndBtn.addEventListener("click", ()=>setSound(!SND.on));
@@ -2074,7 +2059,7 @@ function activateSound(){
   SND.out.gain.cancelScheduledValues(ac.currentTime); SND.out.gain.setTargetAtTime(.9, ac.currentTime, .15);
   SND.cur = -2; sndScene();
   if (LB.open){ LB.ducked = false; sndDuck(true); }
-  V.harmonica(hz(4,1), ac.currentTime + .05, SND.fx, .05, 1.0, {bright:1.05, breath:1.1});
+  V.piano(hz(4,1), ac.currentTime + .05, SND.fx, .05, 1.0, {bright:1.05, breath:1.1});
   syncSoundUI();
 }
 function resumeSound(){
@@ -2168,127 +2153,54 @@ async function go(){
 }
 addEventListener("hashchange", go);
 
-/* ---------------- 水面：多方向行波 + 指针涟漪 ----------------
-   真实水面的明暗来自「高度场的坡度」：几组波长、方向、传播速度都不同的行波叠加，
-   迎光的坡亮、背光的坡暗，于是自然出现交错、分叉、随时间游走的波纹，
-   而不是等距横纹或同心圆环那种一眼看穿的机械图案（也不会在照片带底边留下白亮线）。
-   鼠标划过时往高度场里注入一圈沿半径扩散、逐渐衰减的阻尼波，就是局部的小涟漪。 */
-const WATER = {
-  // 波矢方向 deg；波峰线与波矢垂直，所以 70~110° 得到拉长的水平波纹，
-  // 再掺几组斜向/近竖向的弱波做交叉干涉，就不会变成整齐的横条纹或一圈圈同心圆。
-  waves:[
-    { len:152, deg: 88, a:1.00, sp:1.00, ph:0.0 },   // 主涌浪：近水平长波峰
-    { len: 98, deg: 66, a:0.60, sp:1.45, ph:1.7 },   // 右斜短波
-    { len:208, deg:114, a:0.72, sp:0.62, ph:3.1 },   // 左斜慢速长波
-    { len: 74, deg: 34, a:0.28, sp:1.90, ph:0.6 },   // 少量近竖向交叉波
-    { len:262, deg:-74, a:0.42, sp:0.43, ph:2.4 },   // 大尺度缓起伏
-  ],
-  lastX:-1e4, lastY:-1e4, lastT:0, tick:0
-};
-for (const w of WATER.waves){
-  const k = 2*Math.PI/w.len, a = w.deg*Math.PI/180;
-  w.kx = k*Math.cos(a); w.ky = k*Math.sin(a);
-}
-const WN = WATER.waves.length;
+/* ---------------- 水面：静水 + 指针涟漪 ----------------
+   去掉了所有自发的多方向行波、高度场脊线、交叉波与 SVG 噪声位移：没有人碰水面时
+   canvas 完全透明，倒影就是一面压暗的镜子。只有鼠标划过倒影，命中处才泛起几圈
+   横向拉长（1.7:1）的小椭圆涟漪：亮环在前、暗环紧随，中心一点极淡的隆起高光，
+   约 1 秒消散。涟漪散尽后立刻清空画布，静止时零绘制开销。 */
+const WATER = { lastX:-1e4, lastY:-1e4, lastT:0 };
 
 function drawWater(t){
   const layers = ring.waters;
-  if (!layers.length) return;
-  if (!reduce && (++WATER.tick & 1)) return;         // 水面 30fps 足够，给主循环留余量
-  const p = reduce ? 0 : REFL.phase, wv = reduce ? .15 : REFL.wave;
-  const gain = 11 + wv*6;                            // 滑得越快，明暗起伏越明显
-  const Lx = .32, Ly = .95;                          // 光从上方略偏左照下来
+  if (!layers.length || reduce) return;
   for (const L of layers){
-    if (reduce && L.staticDone) continue;
-    const { ctx, w, h, ds, img } = L, data = img.data, waves = WATER.waves;
-    if (!L.colS){
-      L.colS = new Float32Array(w*WN); L.colC = new Float32Array(w*WN);
-      L.rowS = new Float32Array(h*WN); L.rowC = new Float32Array(h*WN);
+    if (L.ripples.length) L.ripples = L.ripples.filter(r=>t-r.t0 < 1050);
+    if (!L.ripples.length){
+      if (L.dirty){ L.ctx.clearRect(0,0,L.w,L.h); L.dirty=false; }   // 最后一圈散尽后擦干净
+      continue;
     }
-    const colS=L.colS, colC=L.colC, rowS=L.rowS, rowC=L.rowC;
-    // 相位可分离：sin(kx·x + ky·y + ωt) 拆成列因子和行因子，逐像素不必再算三角函数
-    for (let i=0;i<w;i++){
-      const x=i*ds, o=i*WN;
-      for (let k=0;k<WN;k++){ const q=waves[k].kx*x; colS[o+k]=Math.sin(q); colC[o+k]=Math.cos(q); }
-    }
-    for (let j=0;j<h;j++){
-      const y=j*ds, o=j*WN;
-      for (let k=0;k<WN;k++){
-        const q=waves[k].ky*y + waves[k].sp*p*2.0 + waves[k].ph;
-        rowS[o+k]=Math.sin(q); rowC[o+k]=Math.cos(q);
-      }
-    }
-    if (!reduce) L.ripples = L.ripples.filter(r=>t-r.t0 < 1150);
-    const fadeY = 1/(h*ds);
-    for (let j=0;j<h;j++){
-      const y=j*ds, ro=j*WN, fade = 1 - y*fadeY*.58;
-      for (let i=0;i<w;i++){
-        const x=i*ds, co=i*WN;
-        let gx=0, gy=0, h=0;
-        for (let k=0;k<WN;k++){
-          const s=colS[co+k], c=colC[co+k], rs=rowS[ro+k], rc=rowC[ro+k];
-          const sinP = s*rc + c*rs;                  // sin(相位) → 水面高度
-          const cosP = c*rc - s*rs;                  // cos(相位) → 高度场的坡度
-          h += waves[k].a*sinP;
-          gx += waves[k].a*cosP*waves[k].kx; gy += waves[k].a*cosP*waves[k].ky;
-        }
-        let v = (gx*Lx + gy*Ly)*gain;
-        // 指针涟漪：扩散的阻尼波锋。既加进明暗，也加进高度场，
-        // 周围的波峰线就会跟着涟漪一起弯，而不是只叠一个孤立的圆环。
-        let rip = 0;
-        for (const r of L.ripples){
-          // 水面是斜着看的：同样一圈涟漪在倒影里横向拉长、纵向压扁，所以 dy 放大 1.7 倍
-          const dx=x-r.x, dy=(y-r.y)*1.7, dist=Math.sqrt(dx*dx+dy*dy);
-          // rAF 的时间戳可能早于本帧内刚写入的 t0，age 必须夹到非负，否则 ctx.arc 会拿到负半径
-          const age=Math.max(0,(t-r.t0)/1000), d=dist-age*78;
-          if (d < -32 || d > 32) continue;
-          const env=Math.exp(-d*d/240)*Math.exp(-age*2.2)/(1+dist*.008);
-          rip += env*Math.sin(d*.34)*r.amp;
-        }
-        h += rip*1.5*(2.0+wv*1.8); v += rip*.8*(2.0+wv*1.8);
-        v = v>1.8?1.8:(v<-1.8?-1.8:v);
-        // 真实水面倒影的波峰是「沿水深方向排列、被多方向涌浪推弯」的横向长线，
-        // 不是 2D 高度场的闭合等值线（那个会画成一圈圈气泡）。所以主相位由 y 决定，
-        // 多方向波的高度 h 只作为扰动量把线推弯、拉出斜向交叉；涟漪也通过 h 把线掰弯。
-        let crest=Math.max(0,Math.cos(y*.242 + h*.85 - p*.42));
-        crest*=crest; crest*=crest; crest*=crest;      // 8 次方把高光收成细脊线
-        // 另一组方向约 24° 的弱交叉波：两组不同方向的波峰互相穿过，才是真实水面，
-        // 只有一组会退化成整齐横条纹。
-        let cross=Math.max(0,Math.cos(x*.075 + y*.165 + h*.55 - p*.28));
-        cross*=cross; cross*=cross; cross*=cross; cross*=cross;
-        // 沿线的明暗包络：波峰时隐时现、有长有短，不会每根线都一模一样地贯穿整屏
-        const env=.62 + .38*Math.sin(x*.010 + h*.45 + p*.18);
-        const ridge=(crest*.90 + cross*.32)*env;
-        const hi=v>0?v:0, lo=v<0?-v:0;
-        const white=ridge*.44 + hi*hi*.16 + hi*.07;   // 波峰脊线 + 迎光坡面
-        const dark =lo*lo*.16 + lo*.06;               // 波谷 / 背光坡面
-        const o=(j*w+i)*4;
-        if (white>=dark){
-          data[o]=236; data[o+1]=250; data[o+2]=252;
-          data[o+3]=Math.min(112,(white-dark)*fade*255);
-        } else {
-          data[o]=8; data[o+1]=26; data[o+2]=30;
-          data[o+3]=Math.min(96,(dark-white)*fade*255);
-        }
-      }
-    }
-    ctx.putImageData(img,0,0);
-    // 波锋再描一圈极细的明暗环，视觉上就是「小小的涟漪」向外散开
+    const { ctx, w, h, ds } = L;
+    ctx.clearRect(0,0,w,h); L.dirty = true;
     for (const r of L.ripples){
-      const age=Math.max(0,(t-r.t0)/1000), a=.26*Math.exp(-age*2.6);
-      if (a<.012) continue;
-      const rx=age*78/ds, ry=rx/1.7;               // age 已夹非负，半径必为正
-      ctx.lineWidth=.7;
-      ctx.strokeStyle=`rgba(240,255,255,${a.toFixed(3)})`;
-      ctx.beginPath(); ctx.ellipse(r.x/ds,r.y/ds,rx,ry,0,0,Math.PI*2); ctx.stroke();
-      ctx.strokeStyle=`rgba(8,26,32,${(a*.5).toFixed(3)})`;
-      ctx.beginPath(); ctx.ellipse(r.x/ds,r.y/ds,rx+6/ds,ry+3.5/ds,0,0,Math.PI*2); ctx.stroke();
+      const age=Math.max(0,(t-r.t0)/1000), life=Math.max(0,1-age/1.05);
+      const a=.32*life*life*r.amp;
+      if (a<.006) continue;
+      const cx=r.x/ds, cy=r.y/ds;
+      // 中心一点极淡的隆起：像指尖轻轻按了一下水面。先压扁成 1.7:1 再画径向渐变
+      ctx.save(); ctx.translate(cx,cy); ctx.scale(1,1/1.7);
+      const gr=ctx.createRadialGradient(0,0,0,0,0,30/ds);
+      gr.addColorStop(0,`rgba(226,248,250,${(a*.30).toFixed(3)})`);
+      gr.addColorStop(.55,"rgba(226,248,250,0)");
+      gr.addColorStop(.80,`rgba(8,26,32,${(a*.13).toFixed(3)})`);
+      gr.addColorStop(1,"rgba(8,26,32,0)");
+      ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(0,0,30/ds,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      // 三道向外散开的波锋：亮环在前、暗环紧随，时间越久越淡
+      for (let k=0;k<3;k++){
+        const rad=age*66-k*9;
+        if (rad<=2) continue;
+        const rx=rad/ds, ry=rad/(1.7*ds), fade=a*(1-k*.26);
+        ctx.lineWidth=k===0?1.1:.8;
+        ctx.strokeStyle=`rgba(230,250,252,${fade.toFixed(3)})`;
+        ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
+        ctx.strokeStyle=`rgba(8,26,32,${(fade*.55).toFixed(3)})`;
+        ctx.beginPath(); ctx.ellipse(cx,cy+1.6/ds,rx+3/ds,ry+1.8/ds,0,0,Math.PI*2); ctx.stroke();
+      }
     }
-    if (reduce) L.staticDone = true;
   }
 }
 
-/* 鼠标划过水面 → 一圈小涟漪。监听挂在 window、canvas 保持 pointer-events:none，
+/* 鼠标划过静水 → 命中处泛起一圈小涟漪。监听挂在 window、canvas 保持 pointer-events:none，
    所以照片环、点阵字、手风琴的交互一个都不受影响。移动太密时按距离/时间节流。 */
 addEventListener("pointermove", e=>{
   if (reduce || route.view!=="home" || e.pointerType==="touch") return;
@@ -2305,34 +2217,16 @@ addEventListener("pointermove", e=>{
   }
 }, { passive:true });
 
-/* ---------------- 水面倒影：滚轮冲量 → 倾角 / 幅度 / 晃动频率 ---------------- */
-const waterDisp = $("#waterDisp"), waterTurb = $("#waterTurb");
-function reflectTick(t){
+/* ---------------- 水面倒影：滚轮冲量 → 倾角 ----------------
+   水面本身是静的：没有相位、没有噪声位移、没有自发波纹。只有滚轮带来的整体倾斜还在，
+   停下后弹簧慢慢回正。鼠标涟漪由上面的 canvas 单独负责。 */
+function reflectTick(){
   if (reduce) return;
-  const dt = Math.min(50, Math.max(0, t - (REFL.t0 || t))); REFL.t0 = t;
   REFL.target *= .955;                                   // 停止滚动后约 1 秒慢慢回正
-  REFL.energy *= .96;
   REFL.tilt   += (REFL.target - REFL.tilt)*.075;         // 弹簧追随，不跟着滚轮一格一格跳
-  // 「照片滑动的速度」= 滚轮冲量与照片环自身惯性取大者：方向键、触摸拖动也能把水面带急
-  const ringV = Math.min(1, Math.abs(ring.tu - ring.u)/2.5);
-  REFL.wave   += ((.14 + Math.max(REFL.energy, ringV)*.86) - REFL.wave)*.06;
-  // 相位推进速度 = 静止的轻摇 + 滑动速度带来的额外频率：滑得越快，周期越短、晃得越急
-  REFL.phase  += dt * (.0006 + Math.max(0, REFL.wave - .14)*.011);
-  // 相位逐帧累加（很便宜），分级节流：CSS 变量每 2 帧、SVG 滤镜每 6 帧，慢水波照样顺
-  REFL.tick = (REFL.tick + 1) % 6;
-  if (REFL.tick % 2) return;
-  const p = REFL.phase, w = REFL.wave;
-  frame.style.setProperty("--refl-tilt", (REFL.tilt + Math.sin(p*.6)*.55).toFixed(2)+"deg");
-  frame.style.setProperty("--wave", w.toFixed(3));
-  if (REFL.tick !== 0) return;
-  // 两个方向各自慢慢摆动：有时偏横向、有时偏纵向，镜像照片的扭曲方向不断变化。
-  // 频率刻意压低、位移幅度收小：高频大位移会把照片拉成竖向撕裂的条子，不像水。
-  const fx = (.019 + Math.sin(p*.42)*.006).toFixed(4);
-  const fy = (.024 + Math.sin(p*.80+1.1)*.010).toFixed(4);
-  waterTurb.setAttribute("baseFrequency", `${fx} ${fy}`);
-  // 位移幅度随速度加大但封顶，避免照片边缘被撕出白色锯齿
-  const scale = (3.5 + w*6 + Math.sin(p*1.3)*(.6+w*1.4)).toFixed(1);
-  if (waterDisp.getAttribute("scale") !== scale) waterDisp.setAttribute("scale", scale);
+  REFL.tick = (REFL.tick + 1) & 1;
+  if (REFL.tick) return;                                 // 倾角每 2 帧写一次就够顺
+  frame.style.setProperty("--refl-tilt", REFL.tilt.toFixed(2)+"deg");
 }
 
 /* ---------------- 主循环 ---------------- */
@@ -2344,7 +2238,7 @@ function loop(t){
     const cell = Math.floor(ring.u);
     if (cell!==ring.cell){ if (ring.cell!==undefined) sndStep(Math.sign(cell - ring.cell), Math.abs(ring.tu - ring.u)); ring.cell = cell; }
     renderRing(t);
-    reflectTick(t);
+    reflectTick();
     drawWater(t);
     stepDots();
   } else if (route.view==="chapter"){
