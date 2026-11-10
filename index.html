@@ -118,25 +118,25 @@ a{color:inherit;text-decoration:none}
 /* 下层照片环：容器自己接管触摸，滑动仍只转环、不滚页面（原交互不变） */
 .ring-section{position:relative;width:100%;touch-action:none}
 /* 水面倒影：不再用 -webkit-box-reflect（那是画在原元素上的静态效果，没法单独倾斜、起波纹，
-   Firefox 也看不到）。改成一份镜像 DOM：同样的瓷砖、同样的轮动，只是翻转 + 渐隐，
-   由主循环按滚轮速度写 transform / --wave。照片环本身一张照片都不动。 */
+   Firefox 也看不到）。改成一份镜像 DOM：同样的瓷砖、同样的轮动，只是翻转 + 渐隐；
+   再叠一层 canvas 水面，由主循环按滚轮速度写倾角、相位与水纹。照片环本身一张照片都不动。 */
 .water-defs{position:absolute;overflow:hidden;pointer-events:none}
 .ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
   transform:scaleY(-1) skewX(var(--refl-tilt,0deg));
   opacity:var(--refl-opacity,.7);
-  /* 水面底色不参与渐隐：从水面一直铺到倒影末端，波纹亮线才有对比度、才能覆盖整片倒影。
-     to top = 翻转后贴住照片带的水面；末端 alpha 自己归零，不会留下一条硬边。 */
+  /* 水面底色不参与渐隐：从水面铺到倒影末端，给波纹明暗提供对比度。
+     to top = 翻转后贴住照片带的水面；末端 alpha 自己归零，不会留下一条硬边。
+     它同时是「深色垫底」：位移滤镜放在内层，边缘被拉开时露出的是这层深色，不是白纸，
+     照片带底边就不会再出现一条被采样出来的白色亮线。 */
   background:linear-gradient(to top,
-    rgba(20,32,34,.62),rgba(20,32,34,.46) 38%,rgba(20,32,34,.26) 72%,rgba(20,32,34,0) 100%);
-  /* 这里只做水纹位移，不再压暗整片：brightness 会把波纹亮线一起吃掉，倒影末端就看不到水纹了 */
-  filter:url(#waterRippleFilter);
+    rgba(20,32,34,.80),rgba(20,32,34,.52) 38%,rgba(20,32,34,.26) 72%,rgba(20,32,34,0) 100%);
   will-change:transform}
-/* 只有「照片镜像」自己渐隐 + 压暗。遮罩放在内层而不是 .reflect 上，波纹伪元素才不会被一起抹掉；
-   brightness 也只作用在这一层，照片倒影调暗但波纹层保持可见。两栏共用同一条曲线和 --refl-h。 */
+/* 只有「照片镜像」自己渐隐 + 压暗 + 位移。遮罩放在内层而不是 .reflect 上，水纹层不受影响；
+   brightness 也只作用在这一层，照片倒影调暗但水纹层保持可见。两栏共用同一条曲线和 --refl-h。 */
 .ring-section .reflect-img{position:absolute;inset:0;overflow:hidden;
   /* 深灰水面底色：瓷砖之间的亚像素缝被位移放大时会露出深色而不是白纸 */
   background:rgba(26,34,36,.55);
-  filter:brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
+  filter:url(#waterRippleFilter) brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
   -webkit-mask-image:linear-gradient(to top,
     rgba(0,0,0,.78),rgba(0,0,0,.46) 40%,rgba(0,0,0,.12) 76%,transparent 100%);
           mask-image:linear-gradient(to top,
@@ -149,35 +149,16 @@ a{color:inherit;text-decoration:none}
 .ring-section .reflect .tile{pointer-events:none;
   top:calc(var(--refl-h,90px) - var(--c) - 2px);
   width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
-/* 涟漪：倒影整体被 scaleY(-1) 翻转，所以涟漪中心要放在伪元素的「底部」(at 50% 100%)，
-   翻转后才正好落在水面、向下扩散铺满整片倒影。椭圆半径用固定 px，倒影变矮也不会被压扁。 */
-.ring-section .reflect::before{content:"";position:absolute;inset:-20% -4%;z-index:1;pointer-events:none;
-  background:repeating-radial-gradient(ellipse 46% 54px at 50% 100%,
-    rgba(255,255,255,0) 0 12px,
-    rgba(255,255,255,.34) 14px 17px,
-    rgba(10,186,181,.12) 18px 21px,
-    rgba(255,255,255,0) 22px 38px);
-  opacity:calc(.26 + var(--wave,.15) * .30);
-  transform:scale(var(--ring-scale,1));transform-origin:50% 100%}
-/* 水线：inset:0 精确铺满倒影盒，明暗横纹一直延伸到渐隐末端；亮水面线在 to top 的 0 处，
-   翻转后正好贴住照片带底边。位置由 --line-shift 逐帧驱动。 */
-.ring-section .reflect::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:
-    linear-gradient(to top,rgba(255,255,255,.46) 0 1px,rgba(10,186,181,.16) 1px 3px,transparent 6px),
-    repeating-linear-gradient(to bottom,
-      rgba(255,255,255,0) 0 9px,
-      rgba(255,255,255,.34) 10px 12px,
-      rgba(0,0,0,.20) 13px 15px,
-      rgba(255,255,255,0) 16px 26px);
-  opacity:calc(.30 + var(--wave,.15) * .34);
-  background-position:0 0,0 var(--line-shift,0px);
-  transform:scaleY(1.04)}
-/* 波纹层只在倒影最末端 10% 收边，避免留下矩形硬边；其余 90% 高度保持完整可见。
-   这条羽化只管波纹，不碰照片镜像，所以水纹能一直覆盖到渐隐段。 */
-.ring-section .reflect::before,.ring-section .reflect::after{
-  -webkit-mask-image:linear-gradient(to top,#000 0 90%,transparent 100%);
-          mask-image:linear-gradient(to top,#000 0 90%,transparent 100%);
-  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+/* 水面波纹层：不再用等距横纹 / 同心圆环 / 1px 亮水面线这些一眼看穿的机械图案
+   （那条亮线在照片带底边还会被位移滤镜拉成一条带色边的白线）。改成 <canvas> 逐帧画
+   多方向行波叠加出的明暗高度场：波峰细高光、波谷柔阴影，互相交错干涉，接近真实水面。
+   canvas 是 .reflect 的兄弟层，不吃 SVG 位移滤镜，只跟着同一个倾角一起斜，因此水纹不被撕碎。
+   不设 z-index：按 DOM 顺序排在 .reflect 之上、.center 之下，中间文字永远盖得住它。 */
+.ring-section .water-canvas{position:absolute;display:block;pointer-events:none;
+  transform:skewX(var(--refl-tilt,0deg));transform-origin:50% 50%;
+  opacity:var(--water-opacity,.85);will-change:transform}
+.ring-section .water-canvas.top{--water-opacity:.5}
+.ring-section .water-canvas.bottom{--water-opacity:.9}
 
 /* ---------- home: photo ring ---------- */
 .frame{position:absolute;--c:120px}
@@ -443,9 +424,11 @@ a{color:inherit;text-decoration:none}
   .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
   .hero-card.is-open::after{animation:none;opacity:.4}
   /* 压暗/模糊只留在 .reflect-img 内层；外层关掉 SVG 位移滤镜即可，别叠加两次 brightness */
-  .ring-section .reflect{transform:scaleY(-1)!important;filter:none}
+  .ring-section .reflect{transform:scaleY(-1)!important}
+  /* 减弱动效时内层也去掉 SVG 位移，只保留静态压暗 */
   .ring-section .reflect-img{filter:brightness(.52) contrast(1.08) saturate(.85) blur(.5px)}
-  .ring-section .reflect::before,.ring-section .reflect::after{opacity:.2}
+  /* 静置一层很淡的水纹，不摇、也不响应鼠标涟漪 */
+  .ring-section .water-canvas{transform:none!important;opacity:.28}
 }
 </style>
 </head>
@@ -457,9 +440,10 @@ a{color:inherit;text-decoration:none}
   <defs>
     <!-- 倒影盒变矮后，8% 的垂直余量小于位移幅度会把边缘的水纹削掉；给足余量让波纹覆盖整片倒影 -->
     <filter id="waterRippleFilter" x="-8%" y="-30%" width="116%" height="160%" color-interpolation-filters="sRGB">
-      <!-- 噪声不用固定时长的 SMIL 动画：主循环按统一相位改 baseFrequency 和位移幅度，
-           这样「晃动频率」能跟着照片滑动速度实时变。位移幅度刻意压住，太大照片边缘会撕裂。 -->
-      <feTurbulence id="waterTurb" type="fractalNoise" baseFrequency="0.012 0.075" numOctaves="2" seed="5" result="noise"/>
+      <!-- 噪声不用固定时长的 SMIL 动画：主循环按统一相位改 baseFrequency 的 x/y 两个分量
+           和位移幅度，这样水纹的方向与「晃动频率」都能跟着照片滑动速度实时变。
+           位移幅度刻意压住，太大照片边缘会撕裂。 -->
+      <feTurbulence id="waterTurb" type="fractalNoise" baseFrequency="0.019 0.024" numOctaves="2" seed="5" result="noise"/>
       <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="10"
                          xChannelSelector="R" yChannelSelector="G"/>
     </filter>
@@ -726,7 +710,7 @@ const TILES = ringTiles();
 
 /* ---------------- 首页：照片环 ---------------- */
 const frame = $("#frame"), center = $("#center");
-const ring = { u:0, tu:0, strips:[], reflects:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
+const ring = { u:0, tu:0, strips:[], reflects:[], waters:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
   input:matchMedia("(hover: none), (pointer: coarse)").matches ? "touch" : "mouse", preview:null, suppressUntil:0 };
 /* 水面倒影的状态：滚轮速度 → 倾角 / 波纹幅度 / 晃动频率。
    phase 是所有水波共用的相位，推进速度随 wave 变，所以滑得越快晃得越急。 */
@@ -832,8 +816,8 @@ function layoutRing(){
   const counts = need.map((n,i)=>n + Math.floor(extra*weight[i]/wsum));
   let left = total - counts.reduce((a,b)=>a+b,0); for (let i=0; left>0; i=(i+1)%defs.length, left--) counts[i]++;
 
-  frame.querySelectorAll(".strip,.reflect").forEach(s=>s.remove());
-  ring.strips = []; ring.reflects = []; let k = 0;
+  frame.querySelectorAll(".strip,.reflect,.water-canvas").forEach(s=>s.remove());
+  ring.strips = []; ring.reflects = []; ring.waters = []; let k = 0;
   defs.forEach((d,i)=>{
     const el = document.createElement("div"); el.className = "strip";
     Object.assign(el.style,{ left:d.x+"px", top:d.y+"px", width:d.w+"px", height:d.h+"px" });
@@ -850,16 +834,29 @@ function layoutRing(){
       m.innerHTML = src.innerHTML;
       return m;
     });
-    // 照片镜像单独包一层：渐隐遮罩只作用在这一层，.reflect 上的波纹伪元素不受影响，
+    // 照片镜像单独包一层：渐隐遮罩只作用在这一层，水纹层不受影响，
     // 因此水纹能从水面一直铺到倒影末端，而不是跟着照片一起被抹掉。
     const img = document.createElement("div");
     img.className = "reflect-img";
     refTiles.forEach(e=>img.appendChild(e));
     ref.appendChild(img);
+    // 水面层：低分辨率画布（1/3），浏览器放大时天然平滑，正好是水波的柔和质感。
+    // 放在 .reflect 之外，不吃 SVG 位移滤镜；插在 center 之前，中间文字仍画在它上面。
+    const wcv = document.createElement("canvas");
+    wcv.className = "water-canvas " + d.name;
+    wcv.setAttribute("aria-hidden","true");
+    const DS = 3;
+    wcv.width = Math.max(1,Math.ceil(d.w/DS)); wcv.height = Math.max(1,Math.ceil(reflH/DS));
+    Object.assign(wcv.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:reflH+"px" });
+    const wctx = wcv.getContext("2d");
     k += counts[i];
     frame.insertBefore(el, center);
     frame.insertBefore(ref, center);         // 都插在 center 之前：中间文字始终画在倒影之上
+    frame.insertBefore(wcv, center);
     ring.reflects.push(ref);
+    ring.waters.push({ cv:wcv, ctx:wctx, w:wcv.width, h:wcv.height, ds:DS,
+      img:wctx.createImageData(wcv.width,wcv.height), ripples:[], staticDone:false,
+      colS:null, colC:null, rowS:null, rowC:null });
     ring.strips.push({ ...d, tiles, refTiles, len:tiles.length*c });
   });
   renderRing();
@@ -2194,6 +2191,143 @@ async function go(){
 }
 addEventListener("hashchange", go);
 
+/* ---------------- 水面：多方向行波 + 指针涟漪 ----------------
+   真实水面的明暗来自「高度场的坡度」：几组波长、方向、传播速度都不同的行波叠加，
+   迎光的坡亮、背光的坡暗，于是自然出现交错、分叉、随时间游走的波纹，
+   而不是等距横纹或同心圆环那种一眼看穿的机械图案（也不会在照片带底边留下白亮线）。
+   鼠标划过时往高度场里注入一圈沿半径扩散、逐渐衰减的阻尼波，就是局部的小涟漪。 */
+const WATER = {
+  // 波矢方向 deg；波峰线与波矢垂直，所以 70~110° 得到拉长的水平波纹，
+  // 再掺几组斜向/近竖向的弱波做交叉干涉，就不会变成整齐的横条纹或一圈圈同心圆。
+  waves:[
+    { len:152, deg: 88, a:1.00, sp:1.00, ph:0.0 },   // 主涌浪：近水平长波峰
+    { len: 98, deg: 66, a:0.60, sp:1.45, ph:1.7 },   // 右斜短波
+    { len:208, deg:114, a:0.72, sp:0.62, ph:3.1 },   // 左斜慢速长波
+    { len: 74, deg: 34, a:0.28, sp:1.90, ph:0.6 },   // 少量近竖向交叉波
+    { len:262, deg:-74, a:0.42, sp:0.43, ph:2.4 },   // 大尺度缓起伏
+  ],
+  lastX:-1e4, lastY:-1e4, lastT:0, tick:0
+};
+for (const w of WATER.waves){
+  const k = 2*Math.PI/w.len, a = w.deg*Math.PI/180;
+  w.kx = k*Math.cos(a); w.ky = k*Math.sin(a);
+}
+const WN = WATER.waves.length;
+
+function drawWater(t){
+  const layers = ring.waters;
+  if (!layers.length) return;
+  if (!reduce && (++WATER.tick & 1)) return;         // 水面 30fps 足够，给主循环留余量
+  const p = reduce ? 0 : REFL.phase, wv = reduce ? .15 : REFL.wave;
+  const gain = 11 + wv*6;                            // 滑得越快，明暗起伏越明显
+  const Lx = .32, Ly = .95;                          // 光从上方略偏左照下来
+  for (const L of layers){
+    if (reduce && L.staticDone) continue;
+    const { ctx, w, h, ds, img } = L, data = img.data, waves = WATER.waves;
+    if (!L.colS){
+      L.colS = new Float32Array(w*WN); L.colC = new Float32Array(w*WN);
+      L.rowS = new Float32Array(h*WN); L.rowC = new Float32Array(h*WN);
+    }
+    const colS=L.colS, colC=L.colC, rowS=L.rowS, rowC=L.rowC;
+    // 相位可分离：sin(kx·x + ky·y + ωt) 拆成列因子和行因子，逐像素不必再算三角函数
+    for (let i=0;i<w;i++){
+      const x=i*ds, o=i*WN;
+      for (let k=0;k<WN;k++){ const q=waves[k].kx*x; colS[o+k]=Math.sin(q); colC[o+k]=Math.cos(q); }
+    }
+    for (let j=0;j<h;j++){
+      const y=j*ds, o=j*WN;
+      for (let k=0;k<WN;k++){
+        const q=waves[k].ky*y + waves[k].sp*p*2.0 + waves[k].ph;
+        rowS[o+k]=Math.sin(q); rowC[o+k]=Math.cos(q);
+      }
+    }
+    if (!reduce) L.ripples = L.ripples.filter(r=>t-r.t0 < 1150);
+    const fadeY = 1/(h*ds);
+    for (let j=0;j<h;j++){
+      const y=j*ds, ro=j*WN, fade = 1 - y*fadeY*.58;
+      for (let i=0;i<w;i++){
+        const x=i*ds, co=i*WN;
+        let gx=0, gy=0, h=0;
+        for (let k=0;k<WN;k++){
+          const s=colS[co+k], c=colC[co+k], rs=rowS[ro+k], rc=rowC[ro+k];
+          const sinP = s*rc + c*rs;                  // sin(相位) → 水面高度
+          const cosP = c*rc - s*rs;                  // cos(相位) → 高度场的坡度
+          h += waves[k].a*sinP;
+          gx += waves[k].a*cosP*waves[k].kx; gy += waves[k].a*cosP*waves[k].ky;
+        }
+        let v = (gx*Lx + gy*Ly)*gain;
+        // 指针涟漪：扩散的阻尼波锋。既加进明暗，也加进高度场，
+        // 周围的波峰线就会跟着涟漪一起弯，而不是只叠一个孤立的圆环。
+        let rip = 0;
+        for (const r of L.ripples){
+          // 水面是斜着看的：同样一圈涟漪在倒影里横向拉长、纵向压扁，所以 dy 放大 1.7 倍
+          const dx=x-r.x, dy=(y-r.y)*1.7, dist=Math.sqrt(dx*dx+dy*dy);
+          // rAF 的时间戳可能早于本帧内刚写入的 t0，age 必须夹到非负，否则 ctx.arc 会拿到负半径
+          const age=Math.max(0,(t-r.t0)/1000), d=dist-age*78;
+          if (d < -32 || d > 32) continue;
+          const env=Math.exp(-d*d/240)*Math.exp(-age*2.2)/(1+dist*.008);
+          rip += env*Math.sin(d*.34)*r.amp;
+        }
+        h += rip*1.5*(2.0+wv*1.8); v += rip*.8*(2.0+wv*1.8);
+        v = v>1.8?1.8:(v<-1.8?-1.8:v);
+        // 真实水面倒影的波峰是「沿水深方向排列、被多方向涌浪推弯」的横向长线，
+        // 不是 2D 高度场的闭合等值线（那个会画成一圈圈气泡）。所以主相位由 y 决定，
+        // 多方向波的高度 h 只作为扰动量把线推弯、拉出斜向交叉；涟漪也通过 h 把线掰弯。
+        let crest=Math.max(0,Math.cos(y*.242 + h*.85 - p*.42));
+        crest*=crest; crest*=crest; crest*=crest;      // 8 次方把高光收成细脊线
+        // 另一组方向约 24° 的弱交叉波：两组不同方向的波峰互相穿过，才是真实水面，
+        // 只有一组会退化成整齐横条纹。
+        let cross=Math.max(0,Math.cos(x*.075 + y*.165 + h*.55 - p*.28));
+        cross*=cross; cross*=cross; cross*=cross; cross*=cross;
+        // 沿线的明暗包络：波峰时隐时现、有长有短，不会每根线都一模一样地贯穿整屏
+        const env=.62 + .38*Math.sin(x*.010 + h*.45 + p*.18);
+        const ridge=(crest*.90 + cross*.32)*env;
+        const hi=v>0?v:0, lo=v<0?-v:0;
+        const white=ridge*.44 + hi*hi*.16 + hi*.07;   // 波峰脊线 + 迎光坡面
+        const dark =lo*lo*.16 + lo*.06;               // 波谷 / 背光坡面
+        const o=(j*w+i)*4;
+        if (white>=dark){
+          data[o]=236; data[o+1]=250; data[o+2]=252;
+          data[o+3]=Math.min(112,(white-dark)*fade*255);
+        } else {
+          data[o]=8; data[o+1]=26; data[o+2]=30;
+          data[o+3]=Math.min(96,(dark-white)*fade*255);
+        }
+      }
+    }
+    ctx.putImageData(img,0,0);
+    // 波锋再描一圈极细的明暗环，视觉上就是「小小的涟漪」向外散开
+    for (const r of L.ripples){
+      const age=Math.max(0,(t-r.t0)/1000), a=.26*Math.exp(-age*2.6);
+      if (a<.012) continue;
+      const rx=age*78/ds, ry=rx/1.7;               // age 已夹非负，半径必为正
+      ctx.lineWidth=.7;
+      ctx.strokeStyle=`rgba(240,255,255,${a.toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(r.x/ds,r.y/ds,rx,ry,0,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle=`rgba(8,26,32,${(a*.5).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(r.x/ds,r.y/ds,rx+6/ds,ry+3.5/ds,0,0,Math.PI*2); ctx.stroke();
+    }
+    if (reduce) L.staticDone = true;
+  }
+}
+
+/* 鼠标划过水面 → 一圈小涟漪。监听挂在 window、canvas 保持 pointer-events:none，
+   所以照片环、点阵字、手风琴的交互一个都不受影响。移动太密时按距离/时间节流。 */
+addEventListener("pointermove", e=>{
+  if (reduce || route.view!=="home" || e.pointerType==="touch") return;
+  const now=performance.now();
+  if (now-WATER.lastT < 110 &&
+      Math.abs(e.clientX-WATER.lastX)+Math.abs(e.clientY-WATER.lastY) < 24) return;
+  WATER.lastX=e.clientX; WATER.lastY=e.clientY; WATER.lastT=now;
+  for (const L of ring.waters){
+    const r=L.cv.getBoundingClientRect();
+    if (e.clientX<r.left || e.clientX>r.right || e.clientY<r.top || e.clientY>r.bottom) continue;
+    L.ripples.push({ x:e.clientX-r.left, y:e.clientY-r.top, t0:now, amp:.8+Math.random()*.35 });
+    if (L.ripples.length>4) L.ripples.shift();
+    break;
+  }
+}, { passive:true });
+
 /* ---------------- 水面倒影：滚轮冲量 → 倾角 / 幅度 / 晃动频率 ---------------- */
 const waterDisp = $("#waterDisp"), waterTurb = $("#waterTurb");
 function reflectTick(t){
@@ -2213,12 +2347,14 @@ function reflectTick(t){
   const p = REFL.phase, w = REFL.wave;
   frame.style.setProperty("--refl-tilt", (REFL.tilt + Math.sin(p*.6)*.55).toFixed(2)+"deg");
   frame.style.setProperty("--wave", w.toFixed(3));
-  frame.style.setProperty("--ring-scale", (1.03 + Math.sin(p*.72)*(.05+w*.18)).toFixed(3));
-  frame.style.setProperty("--line-shift", (Math.sin(p*1.15)*(7+w*24)).toFixed(1)+"px");
   if (REFL.tick !== 0) return;
-  // 噪声密度随相位轻轻起伏；位移幅度随速度加大，但封顶约 20px，避免照片边缘被撕出锯齿
-  waterTurb.setAttribute("baseFrequency", `0.012 ${(.075 + Math.sin(p*.8)*.010).toFixed(4)}`);
-  const scale = (8 + w*12 + Math.sin(p*1.3)*(1+w*3)).toFixed(1);
+  // 两个方向各自慢慢摆动：有时偏横向、有时偏纵向，镜像照片的扭曲方向不断变化。
+  // 频率刻意压低、位移幅度收小：高频大位移会把照片拉成竖向撕裂的条子，不像水。
+  const fx = (.019 + Math.sin(p*.42)*.006).toFixed(4);
+  const fy = (.024 + Math.sin(p*.80+1.1)*.010).toFixed(4);
+  waterTurb.setAttribute("baseFrequency", `${fx} ${fy}`);
+  // 位移幅度随速度加大但封顶，避免照片边缘被撕出白色锯齿
+  const scale = (3.5 + w*6 + Math.sin(p*1.3)*(.6+w*1.4)).toFixed(1);
   if (waterDisp.getAttribute("scale") !== scale) waterDisp.setAttribute("scale", scale);
 }
 
@@ -2232,6 +2368,7 @@ function loop(t){
     if (cell!==ring.cell){ if (ring.cell!==undefined) sndStep(Math.sign(cell - ring.cell), Math.abs(ring.tu - ring.u)); ring.cell = cell; }
     renderRing(t);
     reflectTick(t);
+    drawWater(t);
     stepDots();
   } else if (route.view==="chapter"){
     renderChapter();
