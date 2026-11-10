@@ -160,6 +160,41 @@ a{color:inherit;text-decoration:none}
   opacity:var(--water-opacity,.85);will-change:transform}
 .ring-section .water-canvas.top{--water-opacity:.5}
 .ring-section .water-canvas.bottom{--water-opacity:.9}
+/* 透明帘子：倒影前面的一层薄纱。里层 .refl-curtain-bands 是一串不规则节奏的柔光/柔影竖条纹，
+   以 240px 为周期横向缓慢漂移（transform 位移，GPU 合成、无缝循环）；
+   外层 .refl-curtain 固定在水线一端（transform-origin 在元素底边），用 skewX 左右缓摆，
+   两条动画叠起来就是「风吹动一层透明帘子」。元素比倒影盒左右各宽 260px，
+   位移满 -240px 后仍完整覆盖，多出的部分被 .reflect 的 overflow 裁掉。
+   遮罩让它贴着水线最实、到倒影末端渐隐，跟照片镜像的渐隐同一条曲线方向。
+   pointer-events:none，鼠标涟漪照常画在它上面。 */
+.ring-section .refl-curtain{position:absolute;top:0;bottom:0;left:-260px;right:-260px;pointer-events:none;
+  transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.30) 55%,rgba(0,0,0,.05));
+          mask-image:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.30) 55%,rgba(0,0,0,.05));
+  animation:refl-curtain-swing 14s ease-in-out infinite alternate;
+  will-change:transform}
+.ring-section .refl-curtain-bands{position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,
+    rgba(240,250,252,0)     0px,
+    rgba(240,250,252,.11)  16px,
+    rgba(240,250,252,.04)  34px,
+    rgba(240,250,252,0)    52px,
+    rgba(10,26,32,0)       70px,
+    rgba(10,26,32,.10)    92px,
+    rgba(10,26,32,.03)   116px,
+    rgba(10,26,32,0)     134px,
+    rgba(240,250,252,0)  152px,
+    rgba(240,250,252,.075) 176px,
+    rgba(240,250,252,0)  198px,
+    rgba(10,26,32,0)     212px,
+    rgba(10,26,32,.09)  228px,
+    rgba(10,26,32,0)     240px);
+  animation:refl-curtain-drift 16s linear infinite;
+  will-change:transform}
+/* 上栏倒影的帘子往反方向漂，两片纱不至于同步 */
+.ring-section .reflect.top .refl-curtain-bands{animation-direction:reverse}
+@keyframes refl-curtain-swing{from{transform:skewX(-2.4deg)}to{transform:skewX(2.4deg)}}
+@keyframes refl-curtain-drift{from{transform:translateX(0)}to{transform:translateX(-240px)}}
 
 /* ---------- home: photo ring ---------- */
 .frame{position:absolute;--c:120px}
@@ -427,10 +462,10 @@ a{color:inherit;text-decoration:none}
   /* 减弱动效：手风琴直接切换、光晕静止、水面不摇 */
   .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
   .hero-card.is-open::after{animation:none;opacity:.4}
-  /* 倒影完全静止：不倾斜、不压暗两次，涟漪层直接隐藏 */
+  /* 倒影完全静止：不倾斜、不压暗两次，涟漪层与帘子层直接隐藏 */
   .ring-section .reflect{transform:scaleY(-1)!important}
   .ring-section .reflect-img{filter:brightness(.52) contrast(1.08) saturate(.85) blur(.5px)}
-  .ring-section .water-canvas{display:none}
+  .ring-section .water-canvas,.ring-section .refl-curtain{display:none}
 }
 </style>
 </head>
@@ -826,6 +861,14 @@ function layoutRing(){
     img.className = "reflect-img";
     refTiles.forEach(e=>img.appendChild(e));
     ref.appendChild(img);
+    // 透明帘子：一层横向漂移 + 摆动的柔光竖条纹，让倒影像挂在一层薄纱后面。
+    // 纯 CSS 动画（transform），不进主循环；不接事件，鼠标涟漪照常画在它上面。
+    const cur = document.createElement("div");
+    cur.className = "refl-curtain";
+    const cb = document.createElement("div");
+    cb.className = "refl-curtain-bands";
+    cur.appendChild(cb);
+    ref.appendChild(cur);
     // 水面层：低分辨率画布（1/3），浏览器放大时天然平滑。静水时完全透明，
     // 只在鼠标划过时画局部涟漪。放在 .reflect 之外，不吃照片镜像的遮罩/压暗；
     // 插在 center 之前，中间文字仍画在它上面。
