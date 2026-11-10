@@ -122,51 +122,45 @@ a{color:inherit;text-decoration:none}
    由主循环按滚轮速度写 transform / --wave。照片环本身一张照片都不动。 */
 .water-defs{position:absolute;overflow:hidden;pointer-events:none}
 .ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
-  transform:scaleY(-1);
-  /* 渐隐拉满整层：旧版 52% 就把水面抹白了，波纹根本没地方显示 */
+  transform:scaleY(-1) skewX(var(--refl-tilt,0deg));
   -webkit-mask-image:linear-gradient(to top,
     rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
           mask-image:linear-gradient(to top,
     rgba(0,0,0,.8),rgba(0,0,0,.58) 40%,rgba(0,0,0,.2) 76%,transparent 100%);
-  opacity:var(--refl-opacity,.84);
-  /* SVG 位移滤镜让倒影里的照片本身被水纹扭曲；伪元素的水线/涟漪也会一起被扭，更自然 */
-  filter:url(#waterRippleFilter) blur(.3px) saturate(.96);
+  opacity:var(--refl-opacity,.7);
+  /* 深灰水面底色：瓷砖之间的亚像素缝被位移放大时会露出深色而不是白纸，也顺带压暗倒影 */
+  background:rgba(26,34,36,.55);
+  /* brightness 把整片倒影压成深水面；波纹层也在里面，会一起变淡 */
+  filter:url(#waterRippleFilter) brightness(.52) contrast(1.08) saturate(.85) blur(.3px);
   will-change:transform}
 /* 顶部照片带的倒影落在中间文字区上方：仍压得短一些，别盖住 byline / 提示 */
 .ring-section .reflect.top{
   -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
           mask-image:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.24) 48%,transparent 62%);
-  --refl-opacity:.55}
-.ring-section .reflect .tile{pointer-events:none}
-/* 涟漪：同心椭圆环，尺寸收小、间距收窄，保证几条环真的落在可见的水面里；
-   只用普通 alpha 叠加（mix-blend-mode:screen 在浅色倒影上会把高光吃掉，旧版就栽在这）。 */
+  --refl-opacity:.44}
+/* 镜像格比原图多 2px，让相邻格互相盖住，位移滤镜就不会把缝隙拉成白色锯齿 */
+.ring-section .reflect .tile{pointer-events:none;width:calc(var(--c) + 2px);height:calc(var(--c) + 2px)}
+/* 涟漪痕迹：只留很淡的一层，晃动交给主循环的相位变量，不再用固定时长的 CSS 动画 */
 .ring-section .reflect::before{content:"";position:absolute;inset:-24% -8%;z-index:1;pointer-events:none;
   background:repeating-radial-gradient(ellipse 32% 12% at 50% 0%,
     rgba(255,255,255,0) 0 12px,
-    rgba(255,255,255,.52) 14px 17px,
-    rgba(10,186,181,.20) 18px 21px,
+    rgba(255,255,255,.22) 14px 17px,
+    rgba(10,186,181,.08) 18px 21px,
     rgba(255,255,255,0) 22px 36px);
-  opacity:calc(.44 + var(--wave,.15) * .42);
-  animation:waterRings 5.4s ease-in-out infinite alternate}
-@keyframes waterRings{
-  from{transform:scale(.82) translateY(-5%)}
-  to  {transform:scale(1.5) translateY(5%)}
-}
-/* 水线：明暗交替的横向波纹 + 紧贴照片带的那道亮水面线（to top 的第 0 层，翻转后正好在水面顶） */
+  opacity:calc(.16 + var(--wave,.15) * .24);
+  transform:scale(var(--ring-scale,1))}
+/* 水线痕迹：明暗都压低，水面亮线只留 1px；位置与缩放由 --line-* 变量逐帧驱动 */
 .ring-section .reflect::after{content:"";position:absolute;inset:-12% -6%;z-index:2;pointer-events:none;
   background:
-    linear-gradient(to top,rgba(255,255,255,.9) 0 2px,rgba(10,186,181,.3) 2px 5px,transparent 7px),
+    linear-gradient(to top,rgba(255,255,255,.38) 0 1px,rgba(10,186,181,.12) 1px 3px,transparent 5px),
     repeating-linear-gradient(to bottom,
       rgba(255,255,255,0) 0 10px,
-      rgba(255,255,255,.55) 11px 14px,
-      rgba(0,0,0,.22) 15px 18px,
-      rgba(255,255,255,0) 19px 30px);
-  opacity:calc(.5 + var(--wave,.15) * .45);
-  animation:waterLines 3.4s ease-in-out infinite alternate}
-@keyframes waterLines{
-  from{transform:translate(-2%,-4%) scaleY(1);background-position:0 0,0 0}
-  to  {transform:translate(2%,4%) scaleY(1.16);background-position:0 0,0 30px}
-}
+      rgba(255,255,255,.22) 11px 13px,
+      rgba(0,0,0,.10) 14px 16px,
+      rgba(255,255,255,0) 17px 30px);
+  opacity:calc(.22 + var(--wave,.15) * .28);
+  background-position:0 0,0 var(--line-shift,0px);
+  transform:scaleY(1.04)}
 
 /* ---------- home: photo ring ---------- */
 .frame{position:absolute;--c:120px}
@@ -431,8 +425,9 @@ a{color:inherit;text-decoration:none}
   /* 减弱动效：手风琴直接切换、光晕静止、水面不摇 */
   .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
   .hero-card.is-open::after{animation:none;opacity:.4}
-  .ring-section .reflect{transform:scaleY(-1)!important;filter:blur(.5px) saturate(.95)}
-  .ring-section .reflect::before,.ring-section .reflect::after{animation:none;opacity:.4}
+  .ring-section .reflect{transform:scaleY(-1)!important;
+    filter:brightness(.52) contrast(1.08) saturate(.85) blur(.5px)}
+  .ring-section .reflect::before,.ring-section .reflect::after{opacity:.15}
 }
 </style>
 </head>
@@ -443,11 +438,10 @@ a{color:inherit;text-decoration:none}
 <svg class="water-defs" width="0" height="0" aria-hidden="true" focusable="false">
   <defs>
     <filter id="waterRippleFilter" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.075" numOctaves="2" seed="5" result="noise">
-        <animate attributeName="baseFrequency" dur="9s" repeatCount="indefinite"
-                 values="0.012 0.075;0.018 0.100;0.012 0.075"/>
-      </feTurbulence>
-      <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="13"
+      <!-- 噪声不用固定时长的 SMIL 动画：主循环按统一相位改 baseFrequency 和位移幅度，
+           这样「晃动频率」能跟着照片滑动速度实时变。位移幅度刻意压住，太大照片边缘会撕裂。 -->
+      <feTurbulence id="waterTurb" type="fractalNoise" baseFrequency="0.012 0.075" numOctaves="2" seed="5" result="noise"/>
+      <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="10"
                          xChannelSelector="R" yChannelSelector="G"/>
     </filter>
   </defs>
@@ -715,8 +709,9 @@ const TILES = ringTiles();
 const frame = $("#frame"), center = $("#center");
 const ring = { u:0, tu:0, strips:[], reflects:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
   input:matchMedia("(hover: none), (pointer: coarse)").matches ? "touch" : "mouse", preview:null, suppressUntil:0 };
-/* 水面倒影的状态：滚轮速度 → 目标倾角 / 波纹能量，主循环里用弹簧追上、指数衰减回平静 */
-const REFL = { tilt:0, target:0, energy:0, wave:.15 };
+/* 水面倒影的状态：滚轮速度 → 倾角 / 波纹幅度 / 晃动频率。
+   phase 是所有水波共用的相位，推进速度随 wave 变，所以滑得越快晃得越急。 */
+const REFL = { tilt:0, target:0, energy:0, wave:.15, phase:0, t0:0, tick:0 };
 const touchEnter = $("#touchEnter"), touchGuide = $("#touchGuide");
 function updateTouchGuide(){
   touchGuide.textContent = ring.input==="mouse" ? "Scroll to travel" : ring.preview ? "再点照片，或进入章节" : "轻点预览 · 滑动浏览";
@@ -2171,23 +2166,32 @@ async function go(){
 }
 addEventListener("hashchange", go);
 
-/* ---------------- 水面倒影：滚轮冲量 → 倾角 / 波纹 ---------------- */
-const waterDisp = $("#waterDisp");          // SVG 位移滤镜：滚轮速度 → 水波扭曲幅度
+/* ---------------- 水面倒影：滚轮冲量 → 倾角 / 幅度 / 晃动频率 ---------------- */
+const waterDisp = $("#waterDisp"), waterTurb = $("#waterTurb");
 function reflectTick(t){
   if (reduce) return;
+  const dt = Math.min(50, Math.max(0, t - (REFL.t0 || t))); REFL.t0 = t;
   REFL.target *= .955;                                   // 停止滚动后约 1 秒慢慢回正
   REFL.energy *= .96;
   REFL.tilt   += (REFL.target - REFL.tilt)*.075;         // 弹簧追随，不跟着滚轮一格一格跳
-  REFL.wave   += ((.14 + REFL.energy*.86) - REFL.wave)*.06;
-  const tilt = (REFL.tilt + Math.sin(t*.00055)*.55).toFixed(2);   // 静止时也有极轻的水面起伏
-  const wave = REFL.wave.toFixed(3);
-  // 静止保留 13px 的基础扭曲，滚得越快水面越汹涌；只在数值变化时写 SVG，避免每帧无谓重算
-  const scale = (13 + REFL.wave*26).toFixed(1);
+  // 「照片滑动的速度」= 滚轮冲量与照片环自身惯性取大者：方向键、触摸拖动也能把水面带急
+  const ringV = Math.min(1, Math.abs(ring.tu - ring.u)/2.5);
+  REFL.wave   += ((.14 + Math.max(REFL.energy, ringV)*.86) - REFL.wave)*.06;
+  // 相位推进速度 = 静止的轻摇 + 滑动速度带来的额外频率：滑得越快，周期越短、晃得越急
+  REFL.phase  += dt * (.0006 + Math.max(0, REFL.wave - .14)*.011);
+  // 相位逐帧累加（很便宜），分级节流：CSS 变量每 2 帧、SVG 滤镜每 6 帧，慢水波照样顺
+  REFL.tick = (REFL.tick + 1) % 6;
+  if (REFL.tick % 2) return;
+  const p = REFL.phase, w = REFL.wave;
+  frame.style.setProperty("--refl-tilt", (REFL.tilt + Math.sin(p*.6)*.55).toFixed(2)+"deg");
+  frame.style.setProperty("--wave", w.toFixed(3));
+  frame.style.setProperty("--ring-scale", (1.03 + Math.sin(p*.72)*(.05+w*.18)).toFixed(3));
+  frame.style.setProperty("--line-shift", (Math.sin(p*1.15)*(7+w*24)).toFixed(1)+"px");
+  if (REFL.tick !== 0) return;
+  // 噪声密度随相位轻轻起伏；位移幅度随速度加大，但封顶约 20px，避免照片边缘被撕出锯齿
+  waterTurb.setAttribute("baseFrequency", `0.012 ${(.075 + Math.sin(p*.8)*.010).toFixed(4)}`);
+  const scale = (8 + w*12 + Math.sin(p*1.3)*(1+w*3)).toFixed(1);
   if (waterDisp.getAttribute("scale") !== scale) waterDisp.setAttribute("scale", scale);
-  for (const el of ring.reflects){
-    el.style.transform = `scaleY(-1) skewX(${tilt}deg)`;
-    el.style.setProperty("--wave", wave);
-  }
 }
 
 /* ---------------- 主循环 ---------------- */
