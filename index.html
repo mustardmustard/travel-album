@@ -20,6 +20,7 @@
   --on-accent:#FFFBF7;
   --hdr:56px;
   --ease:cubic-bezier(.7,0,.2,1);
+  --ease-card:cubic-bezier(.32,.72,.18,1);  /* 手风琴专用：慢起、长缓出，展开更丝滑 */
   --cjk:"Noto Sans SC",sans-serif;                          /* 中文配字 */
   --display:"Archivo",var(--cjk);                           /* 宽体无衬线，像站牌和招牌 */
   --stretch:125%;            /* display 字宽：125% 宽体 / 100% 正常 / 62% 窄体（字体要支持 wdth 轴） */
@@ -78,31 +79,74 @@ a{color:inherit;text-decoration:none}
 .hero-cards{display:flex;gap:clamp(10px,1.6vw,18px);width:min(880px,100%);
   margin-top:clamp(26px,4vh,42px);height:clamp(230px,30vh,300px);--slim:64px}
 .hero-card{position:relative;display:block;flex:0 0 var(--slim);min-width:0;overflow:hidden;
-  border-radius:26px;background:var(--ph);
-  transition:flex .65s var(--ease),border-radius .65s var(--ease)}
-.hero-card.is-open{flex:1 1 auto}
+  border-radius:26px;background:var(--ph);isolation:isolate;
+  transition:flex 1.05s var(--ease-card),box-shadow 1.05s var(--ease-card)}
+/* flex-basis 用 0% 而不是 auto：px ↔ auto 不可插值，会在起手时「跳」一下；px ↔ 0% 可以平滑插值。
+   展开卡的 flex-grow 再把剩余宽度吃满，最终宽度和原来一样，只是整段过渡连续了。 */
+.hero-card.is-open{flex:1 1 0%;
+  box-shadow:0 0 0 1px rgba(10,186,181,.30),0 16px 44px -18px rgba(10,186,181,.5)}
 .hero-card .ph{position:absolute;inset:0;overflow:hidden}
 .hero-card img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;
-  transform:scale(1.001);transition:transform .8s var(--ease)}
-@media (hover:hover){ .hero-card:hover img{transform:scale(1.04)} }
+  transform:scale(1.001);transition:transform 1.35s var(--ease-card)}
+.hero-card.is-open img{transform:scale(1.035)}
+/* 展开的那张：一层缓慢扫过的蒂芙尼蓝渐变光 + 极轻的外发光，像照片被水光轻轻照过 */
+.hero-card::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(108deg,
+    rgba(10,186,181,0) 16%,rgba(10,186,181,.10) 38%,
+    rgba(255,255,255,.28) 50%,
+    rgba(10,186,181,.10) 62%,rgba(10,186,181,0) 84%);
+  background-size:220% 100%;mix-blend-mode:screen;opacity:0;
+  transition:opacity .9s var(--ease-card)}
+.hero-card.is-open::after{animation:cardGlow 7s ease-in-out infinite alternate}
+@keyframes cardGlow{
+  from{background-position:100% 0;opacity:.26}
+  to  {background-position:0% 0;opacity:.78}
+}
 /* 收起时显示编号，展开时显示章节名（压在底部的渐变上，不挡照片主体） */
-.hero-card .num{position:absolute;left:0;right:0;bottom:14px;text-align:center;
+.hero-card .num{position:absolute;left:0;right:0;bottom:14px;z-index:3;text-align:center;
   font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;
-  text-shadow:0 1px 6px rgba(0,0,0,.65);transition:opacity .3s}
-.hero-card .cap{position:absolute;left:0;right:0;bottom:0;padding:44px 22px 20px;
+  text-shadow:0 1px 6px rgba(0,0,0,.65);transition:opacity .38s var(--ease-card)}
+.hero-card .cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:44px 22px 20px;
   color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));
-  opacity:0;transition:opacity .45s var(--ease);pointer-events:none}
+  opacity:0;transition:opacity .5s var(--ease-card);pointer-events:none}
 .hero-card .cap b{display:block;font-size:clamp(14px,1.6vw,22px);font-weight:700;
   letter-spacing:.14em;text-transform:uppercase}
 .hero-card .cap span{display:block;margin-top:4px;font-family:var(--cjk);font-size:11px;
   letter-spacing:.08em;opacity:.85}
 .hero-card.is-open .num{opacity:0}
-.hero-card.is-open .cap{opacity:1}
+.hero-card.is-open .cap{opacity:1;transition-delay:.24s}
 /* 下层照片环：容器自己接管触摸，滑动仍只转环、不滚页面（原交互不变） */
 .ring-section{position:relative;width:100%;touch-action:none}
-/* 上下两条横向照片带：下方一层由深到透明的水面倒影；照片环轮动时倒影会跟着动 */
-.ring-section .strip{
-  -webkit-box-reflect: below 2px linear-gradient(to top, rgba(0,0,0,.45), transparent 45%);
+/* 水面倒影：不再用 -webkit-box-reflect（那是画在原元素上的静态效果，没法单独倾斜、起波纹，
+   Firefox 也看不到）。改成一份镜像 DOM：同样的瓷砖、同样的轮动，只是翻转 + 渐隐，
+   由主循环按滚轮速度写 transform / --wave。照片环本身一张照片都不动。 */
+.ring-section .reflect{position:absolute;overflow:hidden;pointer-events:none;isolation:isolate;
+  transform:scaleY(-1);
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.62),transparent 52%);
+          mask-image:linear-gradient(to top,rgba(0,0,0,.62),transparent 52%);
+  opacity:var(--refl-opacity,.6);filter:blur(.6px) saturate(.92);
+  will-change:transform}
+/* 顶部照片带的倒影落在中间文字区上方，压得更淡更短，不盖住 byline / 提示 */
+.ring-section .reflect.top{
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.4),transparent 40%);
+          mask-image:linear-gradient(to top,rgba(0,0,0,.4),transparent 40%);
+  --refl-opacity:.4}
+.ring-section .reflect .tile{pointer-events:none}
+/* 水波：一层缓慢漂移的高光横纹 + 一层水面边缘光；--wave 越大（滚得越快）越明显 */
+.ring-section .reflect::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(255,255,255,0) 0 7px,
+      rgba(255,255,255,.22) 8px 9px,
+      rgba(10,186,181,.10) 10px 12px,
+      rgba(255,255,255,0) 13px 20px),
+    radial-gradient(130% 55% at 50% 0%,rgba(255,255,255,.20),transparent 72%);
+  background-size:100% 100%,160% 100%;mix-blend-mode:screen;
+  opacity:calc(.22 + var(--wave,.15) * .6);
+  animation:waterRipple 7s ease-in-out infinite alternate}
+@keyframes waterRipple{
+  from{background-position:0 0,0 0;transform:translateX(-1.2%) scaleY(1)}
+  to  {background-position:0 18px,26px 0;transform:translateX(1.2%) scaleY(1.1)}
 }
 
 /* ---------- home: photo ring ---------- */
@@ -365,6 +409,11 @@ a{color:inherit;text-decoration:none}
 @media (prefers-reduced-motion:reduce){
   .tile img,.ov{transition:none}
   .hint i::after{animation:none}
+  /* 减弱动效：手风琴直接切换、光晕静止、水面不摇 */
+  .hero-card,.hero-card img,.hero-card .cap,.hero-card .num{transition:none}
+  .hero-card.is-open::after{animation:none;opacity:.4}
+  .ring-section .reflect{transform:scaleY(-1)!important}
+  .ring-section .reflect::after{animation:none}
 }
 </style>
 </head>
@@ -630,8 +679,10 @@ const TILES = ringTiles();
 
 /* ---------------- 首页：照片环 ---------------- */
 const frame = $("#frame"), center = $("#center");
-const ring = { u:0, tu:0, strips:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
+const ring = { u:0, tu:0, strips:[], reflects:[], c:120, cols:7, rows:5, lastInput:0, hover:false,
   input:matchMedia("(hover: none), (pointer: coarse)").matches ? "touch" : "mouse", preview:null, suppressUntil:0 };
+/* 水面倒影的状态：滚轮速度 → 目标倾角 / 波纹能量，主循环里用弹簧追上、指数衰减回平静 */
+const REFL = { tilt:0, target:0, energy:0, wave:.15 };
 const touchEnter = $("#touchEnter"), touchGuide = $("#touchGuide");
 function updateTouchGuide(){
   touchGuide.textContent = ring.input==="mouse" ? "Scroll to travel" : ring.preview ? "再点照片，或进入章节" : "轻点预览 · 滑动浏览";
@@ -729,26 +780,49 @@ function layoutRing(){
   const counts = need.map((n,i)=>n + Math.floor(extra*weight[i]/wsum));
   let left = total - counts.reduce((a,b)=>a+b,0); for (let i=0; left>0; i=(i+1)%defs.length, left--) counts[i]++;
 
-  frame.querySelectorAll(".strip").forEach(s=>s.remove());
-  ring.strips = []; let k = 0;
+  frame.querySelectorAll(".strip,.reflect").forEach(s=>s.remove());
+  ring.strips = []; ring.reflects = []; let k = 0;
   defs.forEach((d,i)=>{
     const el = document.createElement("div"); el.className = "strip";
     Object.assign(el.style,{ left:d.x+"px", top:d.y+"px", width:d.w+"px", height:d.h+"px" });
     const tiles = Array.from({length:counts[i]},(_,j)=>tileEl(TILES[(k+j)%total]));
     tiles.forEach(e=>el.appendChild(e));
+    // 镜像层：同一批照片再画一遍，放在照片带正下方并上下翻转。纯装饰，不接事件、不进 Tab 顺序。
+    const ref = document.createElement("div");
+    ref.className = "reflect " + d.name;
+    ref.setAttribute("aria-hidden","true");
+    Object.assign(ref.style,{ left:d.x+"px", top:(d.y+d.h)+"px", width:d.w+"px", height:d.h+"px" });
+    const refTiles = tiles.map(src=>{
+      const m = document.createElement("div");
+      m.className = src.className.replace(/\bpreview\b/g,"").trim() + " reflect-tile";
+      m.innerHTML = src.innerHTML;
+      return m;
+    });
+    refTiles.forEach(e=>ref.appendChild(e));
     k += counts[i];
     frame.insertBefore(el, center);
-    ring.strips.push({ ...d, tiles, len:tiles.length*c });
+    frame.insertBefore(ref, center);         // 都插在 center 之前：中间文字始终画在倒影之上
+    ring.reflects.push(ref);
+    ring.strips.push({ ...d, tiles, refTiles, len:tiles.length*c });
   });
   renderRing();
 }
-function renderRing(){
+function renderRing(t = performance.now()){
   const c = ring.c, off = ring.u*c;
+  // 倒影里的每一格比原图多一点点横向荡漾：相邻格错开相位，连起来就是一道缓慢走过的水纹。
+  // 只改镜像层，原照片环的位移一格都不动。
+  const waveAmp = reduce ? 0 : REFL.wave*7;
   for (const s of ring.strips){
     s.tiles.forEach((el,j)=>{
       let p = mod(j*c + s.dir*off, s.len);
       if (p > s.len - c) p -= s.len;               // 跨过起点的那张，从另一头露出来
       el.style.transform = s.axis==="x" ? `translate3d(${p}px,0,0)` : `translate3d(0,${p}px,0)`;
+      const m = s.refTiles?.[j];
+      if (m){
+        const wob = waveAmp ? Math.sin(t*.0019 + j*.82 + (s.name==="bottom"?1.7:0))*waveAmp : 0;
+        const q = (p+wob).toFixed(2);
+        m.style.transform = s.axis==="x" ? `translate3d(${q}px,0,0)` : `translate3d(0,${q}px,0)`;
+      }
     });
   }
 }
@@ -758,7 +832,11 @@ function nudge(d){ if (ring.preview) clearTouchPreview(); ring.tu += d; ring.las
 // 上层展示区用滚轮正常翻页；进入下层照片环后，滚轮依旧推动照片环（惯性、音阶、自动漂移都不变）
 $("#home").addEventListener("wheel", e=>{
   if (e.target.closest?.(".hero")) return;
-  nudge((e.deltaY+e.deltaX)/240);
+  const d = (e.deltaY+e.deltaX)/240;
+  nudge(d);
+  // 滚轮越快 → 倒影倾角越大、水波越强；倾斜方向跟着滚动方向。停下后由主循环慢慢衰减回水平。
+  REFL.target = Math.max(-9, Math.min(9, d*5));
+  REFL.energy = Math.min(1, Math.abs(d)/1.2);
 }, { passive:true });
 let homeTouch = null;
 $("#home").addEventListener("touchstart", e=>{
@@ -809,25 +887,38 @@ function buildHero(){
       <span class="num">${pad2(i+1)}</span>
       <span class="cap"><b>${up(c.en)}</b><span>${c.zh}</span></span>
     </a>`).join("");
-  // 手风琴：鼠标进入哪张哪张展开，其余自动收成细条；离开整排回到第一张展开。
-  // 用明确的状态而不是纯 CSS :hover，避免容器进入瞬间第一张收起造成的布局跳动 / 鼠标错位。
+  // 手风琴：鼠标在哪张停下 90ms，哪张展开，其余收成细条；离开整排回到第一张展开。
+  // 关键：只认「鼠标真的移动过」的 pointermove，不认动画期间浏览器因布局变化补发的
+  // pointerenter / 同坐标 pointermove。旧版靠 700ms 硬锁挡住滑动中的连锁 hover，
+  // 代价是鼠标换卡片时明显卡一下；改成 hover-intent 后过渡能放慢到 1.05s 也不漂移。
   const cards = $("#heroCards"), items = [...cards.querySelectorAll(".hero-card")];
-  let openIdx = -1, lockUntil = 0;
-  const setOpen = (i, lock=false) => {
+  let openIdx = -1, intent = 0, pending = -1, lastX = -1, lastY = -1;
+  const setOpen = i => {
     if (i===openIdx) return;
     openIdx = i;
     items.forEach((el,k)=>el.classList.toggle("is-open", k===i));
-    // 展开动画期间其它卡片会从鼠标下方滑过，锁定这段时间避免展开项被连锁 pointerenter 带跑
-    if (lock) lockUntil = performance.now() + 700;
   };
-  const free = e => e.pointerType!=="touch" && performance.now()>lockUntil;
-  items.forEach((el,i)=>{
-    el.addEventListener("pointerenter", e=>{ if (free(e)) setOpen(i, true); });
-    el.addEventListener("pointermove",  e=>{ if (free(e)) setOpen(i, true); });
-    el.addEventListener("focus", ()=>setOpen(i));                    // 键盘 Tab 也能展开
+  const cancel = ()=>{ clearTimeout(intent); pending = -1; };
+  const schedule = i => {
+    if (i<0 || i===openIdx || i===pending) return;
+    pending = i;
+    clearTimeout(intent);
+    intent = setTimeout(()=>{ pending = -1; setOpen(i); }, 90);
+  };
+  cards.addEventListener("pointermove", e=>{
+    if (e.pointerType==="touch") return;
+    // 卡片从静止光标下滑过时，Chrome 会补发同坐标的 pointermove；过滤掉就不会被带跑
+    if (e.clientX===lastX && e.clientY===lastY) return;
+    lastX = e.clientX; lastY = e.clientY;
+    const card = e.target.closest?.(".hero-card");
+    schedule(card ? items.indexOf(card) : -1);
   });
-  cards.addEventListener("pointerleave", e=>{ if (e.pointerType!=="touch") setOpen(0); });
-  cards.addEventListener("focusout", e=>{ if (!cards.contains(e.relatedTarget)) setOpen(0); });
+  cards.addEventListener("pointerleave", e=>{
+    if (e.pointerType==="touch") return;
+    cancel(); lastX = lastY = -1; setOpen(0);
+  });
+  items.forEach((el,i)=>el.addEventListener("focus", ()=>{ cancel(); setOpen(i); }));   // 键盘 Tab 也能展开
+  cards.addEventListener("focusout", e=>{ if (!cards.contains(e.relatedTarget)){ cancel(); setOpen(0); } });
   setOpen(0);                                                          // 默认第一张展开
 }
 const cssRGB = name => { const h = getComputedStyle(document.documentElement).getPropertyValue(name).trim().slice(1); return [0,2,4].map(i=>parseInt(h.slice(i, i+2), 16)); };
@@ -2046,6 +2137,21 @@ async function go(){
 }
 addEventListener("hashchange", go);
 
+/* ---------------- 水面倒影：滚轮冲量 → 倾角 / 波纹 ---------------- */
+function reflectTick(t){
+  if (reduce) return;
+  REFL.target *= .955;                                   // 停止滚动后约 1 秒慢慢回正
+  REFL.energy *= .96;
+  REFL.tilt   += (REFL.target - REFL.tilt)*.075;         // 弹簧追随，不跟着滚轮一格一格跳
+  REFL.wave   += ((.14 + REFL.energy*.86) - REFL.wave)*.06;
+  const tilt = (REFL.tilt + Math.sin(t*.00055)*.55).toFixed(2);   // 静止时也有极轻的水面起伏
+  const wave = REFL.wave.toFixed(3);
+  for (const el of ring.reflects){
+    el.style.transform = `scaleY(-1) skewX(${tilt}deg)`;
+    el.style.setProperty("--wave", wave);
+  }
+}
+
 /* ---------------- 主循环 ---------------- */
 function loop(t){
   if (route.view==="home"){
@@ -2054,7 +2160,8 @@ function loop(t){
     ring.u += (ring.tu - ring.u)*THEME.motion.follow;
     const cell = Math.floor(ring.u);
     if (cell!==ring.cell){ if (ring.cell!==undefined) sndStep(Math.sign(cell - ring.cell), Math.abs(ring.tu - ring.u)); ring.cell = cell; }
-    renderRing();
+    renderRing(t);
+    reflectTick(t);
     stepDots();
   } else if (route.view==="chapter"){
     renderChapter();
