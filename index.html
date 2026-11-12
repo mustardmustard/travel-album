@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The World — XCJ 的旅行相册</title>   <!-- 和 THEME.title 一致 -->
+<title>FORGE — 健身房影像展</title>   <!-- 和 THEME.title 一致 -->
 <meta name="author" content="XCJ">
+<link rel="icon" href="data:,">   <!-- 不请求 favicon.ico，避免控制台 404 -->
 <!-- 字体：display 字体 + 中文配字。换字体时同步改 :root --display 和 THEME.font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ===== 风格区（CSS）：换成别人的相册时改这里。每个值从照片里来，见 skills/photo-album/references/style-dna.md ===== */
+/* ===== 风格区（CSS）：换成别的场馆时改这里。每个值从照片里来，见 skills/photo-album/references/style-dna.md ===== */
 :root{
   --bg:#FFFBF7;              /* 纸：带一点暖的白，让照片先说话 */
   --ink:#121212;             /* 墨：近黑 */
@@ -22,7 +23,7 @@
   --ease:cubic-bezier(.7,0,.2,1);
   --ease-card:cubic-bezier(.32,.72,.18,1);  /* 手风琴专用：慢起、长缓出，展开更丝滑 */
   --cjk:"Noto Sans SC",sans-serif;                          /* 中文配字 */
-  --display:"Archivo",var(--cjk);                           /* 宽体无衬线，像站牌和招牌 */
+  --display:"Archivo",var(--cjk);                           /* 宽体无衬线，像器械铭牌和场馆标识 */
   --stretch:125%;            /* display 字宽：125% 宽体 / 100% 正常 / 62% 窄体（字体要支持 wdth 轴） */
   --case:uppercase;          /* 标签和标题全大写；要大小写混排就改成 none，并把 THEME.font.upper 改成 false */
   --ph:#eae4dc;              /* 照片加载前的占位色 */
@@ -499,7 +500,7 @@ a{color:inherit;text-decoration:none}
   </nav>
 </header>
 
-<section class="view" id="home" aria-label="旅行相册首页">
+<section class="view" id="home" aria-label="健身房影像展首页">
   <!-- 上层：Tiffany 式编排。点阵大字仍在这里躲鼠标、悬停照片时重组成章节名 -->
   <div class="hero" id="hero">
     <div class="hero-top x" id="heroTop"></div>
@@ -513,7 +514,7 @@ a{color:inherit;text-decoration:none}
       <div class="center" id="center">
         <p class="sub x"></p>
         <p class="places x"></p>
-        <p class="hint x"><i></i><span id="touchGuide">Scroll to travel</span><i></i></p>
+        <p class="hint x"><i></i><span id="touchGuide">Scroll to train</span><i></i></p>
         <a class="touch-enter" id="touchEnter" hidden href="#/"></a>
       </div>
     </div>
@@ -540,14 +541,14 @@ a{color:inherit;text-decoration:none}
 <section class="view about" id="about" hidden aria-labelledby="authorName">
   <div class="ch-head x">
     <a class="back" id="authorBack" href="#/">← Back</a>
-    <h1 class="ch-title"><small>A travel journal</small>About <span>关于</span></h1>
+    <h1 class="ch-title"><small>A training gallery</small>About <span>关于我们</span></h1>
     <span class="ch-count" id="authorYear"></span>
   </div>
   <div class="author-page">
     <div>
-      <p class="author-kicker">Behind the journal</p>
+      <p class="author-kicker">Behind the gym</p>
       <h2 class="author-name" id="authorName" tabindex="-1"></h2>
-      <p class="author-intro" id="authorIntro">这是我的旅行相册。<br>也可以在这些地方找到我。</p>
+      <p class="author-intro" id="authorIntro">这是一间健身房的影像记录。<br>也可以在这些地方找到我。</p>
     </div>
     <div>
     <nav class="author-socials" id="authorSocials" aria-label="XCJ 的社交主页"></nav>
@@ -596,15 +597,15 @@ a{color:inherit;text-decoration:none}
 <script src="photos/tints.js"></script>
 <script>
 /* ============================================================
-   风格区（JS）：换成别人的相册，改这里的 THEME、CHAPTERS、TEXT_TILES，
+   风格区（JS）：换成别的场馆，改这里的 THEME、CHAPTERS、TEXT_TILES，
    再加上 :root 的颜色、字体链接，和后面「声音：风格区」里的 SCENES / VOICE / LB_SND。
    其余都是引擎。每个值怎么从照片里推出来，见 skills/photo-album/SKILL.md
    ============================================================ */
 const THEME = {
-  title:"The World — XCJ 的旅行相册",
-  logo:["Travel", "THE WORLD"],                       // 左上角：一个词 + 方框里的缩写
+  title:"FORGE — 健身房影像展",
+  logo:["Training", "FORGE"],                      // 左上角：一个词 + 方框里的缩写
   year:"2026",
-  journal:"A travel journal",
+  journal:"A training gallery",
   author:{
     name:"XCJ",
     email:"1533161538@qq.com",
@@ -613,12 +614,12 @@ const THEME = {
       // { icon:"github", label:"GitHub", url:"https://github.com/your-name" },
     ],
   },
-  home:{ word:"ZENG Y^2", sub:"Travel  2025/2026", line:"Jingdezhen·Hunan·Wulin·Henan·Sanya·Jiangxi" },   // 首页点阵大字、副标题、地点行
+  home:{ word:"ZENG Y^2", sub:"Training  2026", line:"Deadlift · Glutes · Shoulders · Yoga" },   // 首页点阵大字、副标题、项目行
   font:{ family:"Archivo", weight:900, stretch:"expanded", upper:true },   // 点阵字用的字体，和 :root --display 的第一个一致；upper 和 --case 一致
-  scale:[0,3,5,7,10], base:62,                 // 羽调式五声音阶（适合空灵钢琴的开放式琶音）和基准音高（MIDI 音符号）
-  presence:1,                                  // 章节环境声的音量：.5 若有若无 / 1 默认 / 1.5 有存在感
+  scale:[0,2,3,5,7,9,10], base:57,            // 多利亚音阶（house / funk 的律动感）和基准音高（MIDI 音符号）
+  presence:.9,                                 // 章节环境声的音量：.5 若有若无 / 1 默认 / 1.5 有存在感
   soundOn:true,                               // 进站默认开启；需要用户手势的浏览器会在首次触摸/按键时接通
-  motion:{                                     // 动效性格：利落的城市感。数值越小越慢、越软
+  motion:{                                     // 动效性格：利落的力量感。数值越小越慢、越软
     drift:.0032,     // 没人操作时照片环自己转的速度（格/帧）
     follow:.075,     // 照片环、章节页追手的快慢（0–1）
     spring:.06, damp:.82, repel:60,   // 点阵字：弹回原位的力、阻尼、躲开鼠标的半径（px）
@@ -627,49 +628,36 @@ const THEME = {
 };
 // 照片：src 对应 photos/sq/ 与 photos/full/ 下的同名文件；w、h 是 full 图的实际宽高；非 jpg 用 ext 标注
 const CHAPTERS = [
-  { en:"Jingdezhen", zh:"景德镇", line:"窑火和旧木梁，把颜色都留住了。", photos:[
-    { src:"写真2", w:1085, h:1600, cap:"圆门里还亮着一整面彩绘。" },
-    { src:"写真3", w:1098, h:1600, cap:"凤冠一戴，连呼吸都慢下来。" },
-    { src:"旅行2", w:1179, h:1519, cap:"一只写着「摆」的碗，摆在院子中间。" },
+  { en:"Deadlift", zh:"硬拉", line:"杠铃离地那一下，整个场馆都安静了。", photos:[
+    { src:"deadlift-01-plates", w:1536, h:1024, cap:"铁片摞在墙边，还没人说话。" },
+    { src:"deadlift-02-setup", w:1024, h:1536, cap:"握稳，先把气沉下去。" },
+    { src:"deadlift-03-lockout", w:1024, h:1536, cap:"站直的那一刻，光刚好落在肩上。" },
+    { src:"deadlift-04-grip", w:1024, h:1536, cap:"镁粉留在掌心，也留在杆上。" },
   ]},
-  { en:"Hunan", zh:"湖南", line:"一桌接着一桌，辣得人不想说话。", photos:[
-    { src:"美食1", w:1179, h:1546, cap:"几碗面摆开，汤还冒着热气。" },
-    { src:"美食2", w:1179, h:1528, cap:"肉切得薄，下锅之前先拍一张。" },
-    { src:"美食3", w:1179, h:1533, cap:"一整桌颜色，谁也顾不上谦让。" },
-    { src:"美食4", w:1179, h:1548, cap:"炸鸡蘸一口，就算收尾了。" },
+  { en:"Glutes", zh:"臀腿", line:"酸胀是一组一组攒出来的。", photos:[
+    { src:"glutes-01-rack", w:1536, h:1024, cap:"架子空着，等下一个人走过去。" },
+    { src:"glutes-02-squat", w:1024, h:1536, cap:"蹲到最低处，只剩自己的呼吸。" },
+    { src:"glutes-03-hipthrust", w:1024, h:1536, cap:"顶上去，停半秒，再放下。" },
+    { src:"glutes-04-lunge", w:1024, h:1536, cap:"一步一步，把地板走热。" },
   ]},
-  { en:"Wulin", zh:"武林", line:"山在后面，风在前面，人就张开手。", photos:[
-    { src:"旅行1", w:868, h:1600, cap:"举着旗子站在云底下。" },
-    { src:"旅行4", w:1179, h:1546, cap:"崖壁一层层退到很远。" },
-    { src:"旅行5", w:883, h:1600, cap:"雪地里，把手臂张到最开。" },
-    { src:"运动1", w:1179, h:1539, cap:"从上面看下去，人小得像一枚棋子。" },
-    { src:"运动2", w:1179, h:1538, cap:"器械旁边，鞋底还沾着跑道。" },
+  { en:"Shoulders", zh:"肩部", line:"轻一点，反而更要稳。", photos:[
+    { src:"shoulders-01-dumbbells", w:1536, h:1024, cap:"一排哑铃，按重量排得整整齐齐。" },
+    { src:"shoulders-02-press", w:1024, h:1536, cap:"举过头顶，手臂连成一条线。" },
+    { src:"shoulders-03-lateral", w:1024, h:1536, cap:"向两边打开，像把窗推开。" },
+    { src:"shoulders-04-facepull", w:1024, h:1536, cap:"绳索收回来，肩胛慢慢合上。" },
   ]},
-  { en:"Henan", zh:"河南", line:"灯亮起来之后，镜头就转向了自己。", photos:[
-    { src:"旅行3", w:1179, h:1455, cap:"圣诞树底下，红衣服举高了手。" },
-    { src:"写真1", w:1074, h:1600, cap:"白裙子，侧过身，光刚好落在肩上。" },
-    { src:"写真4", w:951, h:1600, cap:"逆着光，只留下半边轮廓。" },
-    { src:"自拍1", w:893, h:1600, cap:"贴纸挡住脸，反而更像自己。" },
-    { src:"自拍2", w:909, h:1600, cap:"凑得很近，连头发丝都数得清。" },
-    { src:"自拍3", w:1179, h:1555, cap:"捧着一碗，笑得眼睛都弯了。" },
-  ]},
-  { en:"Sanya", zh:"三亚", line:"和谁一起，比去了哪里更要紧。", photos:[
-    { src:"家人2", w:1085, h:1600, cap:"两个人挨着站，衣服都是浅的。" },
-    { src:"朋友1", w:1179, h:1546, cap:"木墙前面，肩并着肩。" },
-    { src:"朋友2", w:1179, h:1545, cap:"圆镜子里，两个人一起举手机。" },
-    { src:"朋友3", w:1059, h:1600, cap:"笑着的两张脸，和一只很配合的狗。" },
-  ]},
-  { en:"Jiangxi", zh:"江西", line:"回到家，饭菜和书都还在老位置。", photos:[
-    { src:"家人1", w:1179, h:1527, cap:"桌上有菜，两位长辈坐得很端正。" },
-    { src:"学习1", w:1179, h:1462, cap:"白墙上贴满纸，背影一动不动。" },
-    { src:"学习2", w:969, h:1600, cap:"台灯底下，笔一直没停。" },
+  { en:"Yoga", zh:"瑜伽", line:"把呼吸放慢，这一天才算练完。", photos:[
+    { src:"yoga-01-studio", w:1536, h:1024, cap:"垫子卷着，晨光先到了。" },
+    { src:"yoga-02-downwarddog", w:1024, h:1536, cap:"身体折成一个安静的角。" },
+    { src:"yoga-03-warrior", w:1024, h:1536, cap:"站稳，手臂向两边伸出去。" },
+    { src:"yoga-04-savasana", w:1024, h:1536, cap:"躺下来，什么都不用再做。" },
   ]},
 ];
-const STATS = `${CHAPTERS.reduce((n,c)=>n + c.photos.length, 0)} photos · ${CHAPTERS.length} chapters`;
+const STATS = `${CHAPTERS.reduce((n,c)=>n + c.photos.length, 0)} photos · ${CHAPTERS.length} programs`;
 // 照片环里插的两块文字砖：a 是强调色底，b 是墨色底
 const TEXT_TILES = [
-  { cls:"a", html:'<small>Travel / 26</small><p>Where<br>streets<br>turn into<br>stories</p>' },
-  { cls:"b", html:`<small>Travel Log</small><p class="w2">The World</p><small>${STATS}</small>` },
+  { cls:"a", html:'<small>Training / 26</small><p>Show up<br>and<br>do the<br>work</p>' },
+  { cls:"b", html:`<small>Training Log</small><p class="w2">FORGE</p><small>${STATS}</small>` },
 ];
 
 /* ============================================================ */
@@ -698,7 +686,7 @@ function initAuthor(){
   // links 留空时不显示空导航，免得多出一段空白；填了才挂 aria-label
   socials.style.display = author.links.length ? "" : "none";
   if(author.links.length) socials.setAttribute("aria-label", `${author.name} 的社交主页`);
-  else $("#authorIntro").innerHTML = "这是我的旅行相册。<br>欢迎通过邮件和我交流。";
+  else $("#authorIntro").innerHTML = "这是这间健身房的影像记录。<br>欢迎通过邮件和我交流。";
   author.links.forEach(link=>{
     const a = document.createElement("a");
     a.className = "social-icon"; a.dataset.platform = link.icon;
@@ -756,7 +744,7 @@ const ring = { u:0, tu:0, strips:[], reflects:[], waters:[], c:120, cols:7, rows
 const REFL = { tilt:0, target:0, tick:0 };
 const touchEnter = $("#touchEnter"), touchGuide = $("#touchGuide");
 function updateTouchGuide(){
-  touchGuide.textContent = ring.input==="mouse" ? "Scroll to travel" : ring.preview ? "再点照片，或进入章节" : "轻点预览 · 滑动浏览";
+  touchGuide.textContent = ring.input==="mouse" ? "Scroll to train" : ring.preview ? "再点照片，或进入章节" : "轻点预览 · 滑动浏览";
 }
 function clearTouchPreview(reset=true){
   ring.preview = null;
@@ -978,7 +966,7 @@ function buildHero(){
   const up = s => THEME.font.upper ? String(s).toUpperCase() : s;
   $("#heroTop").innerHTML =
     `<span>${HOME.sub}</span>` +
-    `<span class="ht-mid">A travel journal by ${THEME.author.name}</span>` +
+    `<span class="ht-mid">A training gallery by ${THEME.author.name}</span>` +
     `<a href="mailto:${THEME.author.email}">Contact us</a>`;
   $("#heroNav").innerHTML = CHAPTERS.map((c,i)=>`<a href="#/ch/${i+1}">${up(c.en)}</a>`).join('<i>·</i>');
   $("#heroCards").innerHTML = CHAPTERS.slice(0,4).map((c,i)=>`
@@ -1153,7 +1141,7 @@ function hoverChapter(ci, src){
 function setCaption(ci){
   const ch = CHAPTERS[ci];
   subEl.textContent = ci<0 ? HOME.sub : ring.input==="touch" ? `CH.${pad2(ci+1)} / ${ch.zh}` : `CH.${pad2(ci+1)} / ${ch.zh} / ${pad2(ch.photos.length)} photos`;
-  if (ci<0) subEl.append(authorLink(`A travel journal by ${THEME.author.name}`, "home-byline"));
+  if (ci<0) subEl.append(authorLink(`A training gallery by ${THEME.author.name}`, "home-byline"));
   lineEl.textContent = ci<0 ? HOME.line : ch.line;
   if (!reduce) [subEl, lineEl].forEach(el=>el.animate([{ opacity:0, transform:"translateY(6px)" },{ opacity:1, transform:"none" }], { duration:380, easing:"cubic-bezier(.2,.7,.2,1)" }));
 }
@@ -1783,14 +1771,14 @@ function sndInit(){
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8;   // 总线限幅，防爆音
   SND.out = ac.createGain(); SND.out.gain.value = 0; SND.out.connect(comp).connect(ac.destination);
   // 混响：一段指数衰减的噪声当冲激响应
-  // 长一点的混响：4.2s、缓衰减，前面留 32ms 预延迟并压暗高频，尾音才「空」而不糊
-  const len = ac.sampleRate*4.2, ir = ac.createBuffer(2, len, ac.sampleRate);
-  for (let c=0; c<2; c++){ const b = ir.getChannelData(c); for (let i=0; i<len; i++) b[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.1); }
+  // 短混响：1.2s、快衰减，12ms 预延迟，让四四拍的鼓点干净不糊
+  const len = ac.sampleRate*1.2, ir = ac.createBuffer(2, len, ac.sampleRate);
+  for (let c=0; c<2; c++){ const b = ir.getChannelData(c); for (let i=0; i<len; i++) b[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.6); }
   const verb = ac.createConvolver(); verb.buffer = ir; verb.connect(SND.out);
-  const wetTone = ac.createBiquadFilter(); wetTone.type="lowpass"; wetTone.frequency.value=2400; wetTone.Q.value=.4;
-  const pre = ac.createDelay(.2); pre.delayTime.value=.032;
+  const wetTone = ac.createBiquadFilter(); wetTone.type="lowpass"; wetTone.frequency.value=3800; wetTone.Q.value=.4;
+  const pre = ac.createDelay(.2); pre.delayTime.value=.012;
   wetTone.connect(pre).connect(verb);
-  SND.wet = ac.createGain(); SND.wet.gain.value = .52; SND.wet.connect(wetTone);
+  SND.wet = ac.createGain(); SND.wet.gain.value = .2; SND.wet.connect(wetTone);
   // fx 总线：悬停音、转场；lp 总线：章节环境声，横向滚动时改它的亮度
   SND.fx = ac.createGain(); SND.fx.connect(SND.out); SND.fx.connect(SND.wet);
   const hl = ac.createBiquadFilter(); hl.type = "lowpass"; hl.frequency.value = 3200; hl.Q.value = .5;   // 悬停音再过一道柔和低通，去掉刺耳的高频
@@ -1806,46 +1794,7 @@ function sndInit(){
 }
 function env(g, t, a, peak, dec){ g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t+a); g.gain.exponentialRampToValueAtTime(.0001, t+a+dec); }
 const V = {
-  bell(f, t, dest, v=.16, soft=false){         // 钟：FM 合成。soft：调制深度封顶，泛音少、起音软
-    const ac = A(), c = ac.createOscillator(), m = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
-    const idx = soft ? Math.min(f*2.4, 520) : f*2.4;
-    c.frequency.value = f; m.frequency.value = f*3.51;
-    mg.gain.setValueAtTime(idx, t); mg.gain.exponentialRampToValueAtTime(Math.max(1, idx/60), t+2.6);
-    m.connect(mg).connect(c.frequency); c.connect(g).connect(dest); env(g, t, soft ? .01 : .004, v, 3.4);
-    c.start(t); m.start(t); c.stop(t+3.6); m.stop(t+3.6);
-  },
-  pluck(f, t, dest, v=.3, soft=false){         // 拨弦：Karplus-Strong，每个音高的波形算一次就缓存。soft：起音的噪声先磨圆
-    const ac = A(), key = Math.round(f) + (soft ? "s" : ""); let buf = SND.ks.get(key);
-    if (!buf){
-      const sr = ac.sampleRate, n = Math.floor(sr*2.4), p = Math.max(2, Math.round(sr/f));
-      buf = ac.createBuffer(1, n, sr); const x = buf.getChannelData(0);
-      for (let i=0; i<p; i++) x[i] = Math.random()*2-1;
-      if (soft) for (let k=0; k<3; k++) for (let i=1; i<p; i++) x[i] = (x[i] + x[i-1])*.5;
-      for (let i=p; i<n; i++) x[i] = (x[i-p] + x[i-p+1])*.4985;
-      SND.ks.set(key, buf);
-    }
-    const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = buf; g.gain.value = v; s.connect(g).connect(dest); s.start(t);
-  },
-  synth(f, t, dest, v=.07, dur=.2, soft=false){   // 霓虹：两个略走音的锯齿波 + 共振低通往下扫。soft：共振和起扫频率都压低
-    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
-    fl.type = "lowpass"; fl.Q.value = soft ? 3 : 7; fl.frequency.setValueAtTime(Math.min(soft ? 2800 : 12000, f*9), t); fl.frequency.exponentialRampToValueAtTime(f*1.2, t+dur);
-    fl.connect(g).connect(dest); env(g, t, soft ? .01 : .004, v, dur);
-    [0,7].forEach(dt=>{ const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.detune.value = dt; o.connect(fl); o.start(t); o.stop(t+dur+.05); });
-  },
-  keys(f, t, dest, v=.07, dur=1.8){            // lo-fi 电钢：正弦加两个泛音
-    const ac = A(), g = ac.createGain(); g.connect(dest); env(g, t, .008, v, dur);
-    [[1,1],[2,.22],[3,.06]].forEach(([k,a])=>{ const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f*k; og.gain.value = a; o.connect(og).connect(g); o.start(t); o.stop(t+dur+.1); });
-  },
-  wood(f, t, dest, v=.16){                     // 木琴般的短音
-    const ac = A(), o = ac.createOscillator(), g = ac.createGain(); o.type = "triangle"; o.frequency.value = f;
-    o.connect(g).connect(dest); env(g, t, .002, v, .45); o.start(t); o.stop(t+.5);
-  },
-  chirp(t, dest, v=.035){                      // 鸟鸣
-    const ac = A(), o = ac.createOscillator(), g = ac.createGain(), f0 = rnd(2600, 4200);
-    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0*1.45, t+.05); o.frequency.exponentialRampToValueAtTime(f0*.85, t+.11);
-    o.connect(g).connect(dest); env(g, t, .008, v, .11); o.start(t); o.stop(t+.15);
-  },
-  swoosh(t, dest, v=.12, dur=.55){             // 转场的一阵风
+  swoosh(t, dest, v=.12, dur=.55){             // 页面转场的一阵风
     const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
     s.buffer = SND.noise; fl.type = "bandpass"; fl.Q.value = 1.2;
     fl.frequency.setValueAtTime(300, t); fl.frequency.exponentialRampToValueAtTime(3200, t+dur*.6); fl.frequency.exponentialRampToValueAtTime(600, t+dur);
@@ -1860,9 +1809,17 @@ function loopNoise(dest, buf, type, freq, q, gain){
 }
 function lfo(param, rate, depth){ const ac = A(), o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = rate; g.gain.value = depth; o.connect(g).connect(param); o.start(); return o; }
 function drone(dest, f, type, gain){ const ac = A(), o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = gain; o.connect(g).connect(dest); o.start(); return o; }
-// 环境效果（风 / 浪、霓虹起音、黑胶底噪）＋ 本站唯一的主乐器：轻柔空灵钢琴族。
-// 钢琴不靠采样：每个音由带非谐性的正弦泛音叠成，长混响与缓慢拍频把尾音铺开。
+// 环境效果（转场、上扫、房间气声）＋ 本站的乐器族：欧美动感 house / EDM。
+// 四四拍底鼓、拍手、hi-hat、sub bass、和弦 stab 与明亮 lead 全部由振荡器和噪声现场合成，零音频文件。
 Object.assign(V, {
+  riser(t, dest, v=.04, dur=.8, f0=200, f1=4000, root=146.8){
+    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    fl.type = "lowpass"; fl.Q.value = 9;
+    fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t+dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+dur*.85); g.gain.linearRampToValueAtTime(0, t+dur+.06);
+    fl.connect(g).connect(dest);
+    [[1,0],[1,9],[1.5,-6],[.5,4]].forEach(([k,dt])=>{ const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.value = root*k; o.detune.value = dt; o.connect(fl); o.start(t); o.stop(t+dur+.1); });
+  },
   wind(t, dest, v=.08, dur=1, f0=300, f1=2400, q=1.2, type="bandpass"){
     const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
     s.buffer = SND.noise; s.loop = true; fl.type = type; fl.Q.value = q;
@@ -1870,200 +1827,212 @@ Object.assign(V, {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+dur*.45); g.gain.linearRampToValueAtTime(0, t+dur);
     s.connect(fl).connect(g).connect(dest); s.start(t, Math.random()); s.stop(t+dur+.05);
   },
-  riser(t, dest, v=.04, dur=.8, f0=200, f1=4000, root=146.8){   // 三个锯齿波叠成和弦，共振低通从 f0 扫到 f1
-    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
-    fl.type = "lowpass"; fl.Q.value = 9; fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t+dur);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+dur*.85); g.gain.linearRampToValueAtTime(0, t+dur+.06);
-    fl.connect(g).connect(dest);
-    [[1,0],[1,9],[1.5,-6],[.5,4]].forEach(([k,dt])=>{ const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.value = root*k; o.detune.value = dt; o.connect(fl); o.start(t); o.stop(t+dur+.1); });
-  },
   vinyl(t, dest, v=.6, dur=1){
     const ac = A(), s = ac.createBufferSource(), g = ac.createGain();
     s.buffer = SND.crackle; s.loop = true; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+.08); g.gain.linearRampToValueAtTime(0, t+dur);
     s.connect(g).connect(dest); s.start(t, Math.random()*2); s.stop(t+dur+.05);
   },
-  /* —— 钢琴（piano）：槌击弦的柔和声学模型。全部现场合成，零音频文件。
-        六个略带非谐性的正弦泛音各自衰减（越高越快），起音一口极轻的槌触噪声；
-        基频由三根只差几音分的同音弦叠出缓慢拍频，低通模拟琴盖与房间，
-        再交给长混响把尾音铺成「空灵」。风格区的参数沿用：
-        bright→泛音亮度，breath→空气层，vib→同音弦走音幅度，
-        soft→弱音踏板（起音更慢、泛音更少），bend→落键时极轻的张力滑音。 */
-  piano(f, t, dest, v=.06, dur=1.2, o={}){
-    v = Math.max(.0005, v);                 // 亮度为 0 时指数包络也不能从 0 起跳
-    const ac=A(), bright=o.bright ?? 1, air=o.breath ?? 1, chorus=o.vib ?? 1, una=!!o.soft;
-    const atk = una ? .030 : .014, span = Math.max(.35, dur)*1.08;
-    const end = t + span + .55;            // 钢琴是自然衰减，尾音要留足
-    // 琴盖 / 房间的柔和低通：起音时略开，余韵里慢慢合上
-    const body=ac.createBiquadFilter(); body.type="lowpass"; body.Q.value=.4;
-    body.frequency.setValueAtTime(Math.min(5400,Math.max(1100,f*5.2*bright*(una?.78:1))),t);
-    body.frequency.exponentialRampToValueAtTime(Math.min(2600,Math.max(520,f*2.2)),t+span*.8);
-    const hp=ac.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=105;
-    body.connect(hp).connect(dest);
-    // 0.1Hz 的极慢滤波器呼吸：空气在动，而不是音量在颤
-    const sh=ac.createOscillator(), sg=ac.createGain();
-    sh.frequency.value=.09+Math.random()*.05; sg.gain.value=150;
-    sh.connect(sg).connect(body.frequency); sh.start(t); sh.stop(end);
-    // 弦的非谐性：f_k = k·f·√(1+B·k²)，B≈0.00035（真实钢琴中音区量级）
-    const B=.00035, glide=o.bend || 0;
-    [[1,1],[2,.36],[3,.17],[4,.085],[5,.042],[6,.022]].forEach(([k,amp])=>{
-      const pf=f*k*Math.sqrt(1+B*k*k);
-      const og=ac.createGain(), peak=v*amp*(una && k>2 ? .55 : 1)*Math.min(1.4,bright);
-      const dec=Math.max(.24,span/(1+k*.26));
-      og.gain.setValueAtTime(0,t);
-      og.gain.linearRampToValueAtTime(peak,t+atk);
-      og.gain.exponentialRampToValueAtTime(Math.max(.0002,peak*.34),t+atk+.14);
-      og.gain.exponentialRampToValueAtTime(.0001,t+atk+.14+dec);
-      og.connect(body);
-      // 同音三弦：只有基音叠三根，微微走音的拍频是钢琴「湿润」的来源
-      const voices=k===1?[-1.6,0,1.9]:[0];
-      voices.forEach((dt,vi)=>{
-        const osc=ac.createOscillator(), vg=ac.createGain(); osc.type="sine";
-        osc.frequency.setValueAtTime(pf*Math.pow(2,glide*k/1200),t);
-        if (glide) osc.frequency.exponentialRampToValueAtTime(pf,t+.09);
-        osc.detune.value=dt*chorus;
-        vg.gain.value=voices.length===3?(vi===1?.6:.24):1;
-        osc.connect(vg).connect(og); osc.start(t); osc.stop(t+atk+.14+dec+.05);
-      });
+  air(t, dest, v=.03, dur=1.2, f0=500, f1=1500){
+    const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = SND.noise; s.loop = true; fl.type = "bandpass"; fl.Q.value = .5;
+    fl.frequency.setValueAtTime(f0, t);
+    fl.frequency.exponentialRampToValueAtTime(f1, t+dur*.45);
+    fl.frequency.exponentialRampToValueAtTime(f0*.8, t+dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+dur*.32); g.gain.linearRampToValueAtTime(0, t+dur+.08);
+    s.connect(fl).connect(g).connect(dest); s.start(t, Math.random()); s.stop(t+dur+.1);
+  },
+  /* —— 节奏组 —— */
+  kick(t, dest, v=.16, o={}){
+    const ac = A(), g = ac.createGain(), osc = ac.createOscillator();
+    const f0 = o.f0 ?? 150, f1 = o.f1 ?? 48, dur = o.dur ?? .3;
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(f0, t); osc.frequency.exponentialRampToValueAtTime(f1, t+.12);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+.003); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    osc.connect(g).connect(dest); osc.start(t); osc.stop(t+dur+.05);
+    const s = ac.createBufferSource(), hp = ac.createBiquadFilter(), cg = ac.createGain();
+    s.buffer = SND.noise; hp.type = "highpass"; hp.frequency.value = 2200;
+    cg.gain.setValueAtTime(v*.26, t); cg.gain.exponentialRampToValueAtTime(.0001, t+.022);
+    s.connect(hp).connect(cg).connect(dest); s.start(t, Math.random()); s.stop(t+.04);
+  },
+  clap(t, dest, v=.08){
+    const ac = A();
+    [0, .011, .023].forEach((dt,i)=>{
+      const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+      s.buffer = SND.noise; fl.type = "bandpass"; fl.frequency.value = 1500; fl.Q.value = 1.1;
+      env(g, t+dt, .001, v*(1-i*.18), i===2 ? .16 : .018);
+      s.connect(fl).connect(g).connect(dest); s.start(t+dt, Math.random()); s.stop(t+dt+.24);
     });
-    // 槌触：75ms 内消失的一口柔噪声，只让起音有「落键」的实体感
-    const hm=ac.createBufferSource(), hf=ac.createBiquadFilter(), hg=ac.createGain();
-    hm.buffer=SND.noise; hm.loop=true; hf.type="bandpass";
-    hf.frequency.value=Math.min(4200,Math.max(900,f*3.4)); hf.Q.value=.6;
-    hg.gain.setValueAtTime(0,t);
-    hg.gain.linearRampToValueAtTime(v*.26*(una?.6:1),t+.006);
-    hg.gain.exponentialRampToValueAtTime(.0001,t+.075);
-    hm.connect(hf).connect(hg).connect(dest); hm.start(t,Math.random()); hm.stop(t+.1);
-    // 空气层：几不可闻的房间气声，把余韵托在空间里
-    if (air>0){
-      const s=ac.createBufferSource(), af=ac.createBiquadFilter(), ag=ac.createGain();
-      s.buffer=SND.noise; s.loop=true; af.type="lowpass"; af.frequency.value=1450; af.Q.value=.35;
-      const a=v*.055*Math.min(1.8,air);
-      ag.gain.setValueAtTime(0,t);
-      ag.gain.linearRampToValueAtTime(a,t+.18);
-      ag.gain.linearRampToValueAtTime(a*.35,t+span*.6);
-      ag.gain.linearRampToValueAtTime(0,end);
-      s.connect(af).connect(ag).connect(dest); s.start(t,Math.random()); s.stop(end+.05);
-    }
   },
-  pianoTouch(f,t,dest,v=.08){     // 极轻的短触键：代替打击乐的节奏点，仍是同一台钢琴
-    V.piano(f,t,dest,v*.78,.30,{bright:1.1,breath:.55,vib:.6});
+  hat(t, dest, v=.035, open=false){
+    const ac = A(), s = ac.createBufferSource(), hp = ac.createBiquadFilter(), g = ac.createGain(), dur = open ? .18 : .045;
+    s.buffer = SND.noise; hp.type = "highpass"; hp.frequency.value = 7200;
+    env(g, t, .001, v, dur);
+    s.connect(hp).connect(g).connect(dest); s.start(t, Math.random()); s.stop(t+dur+.05);
   },
-  pianoChord(freqs,t,dest,v=.05,dur=1.2,o={}){   // 几个音先后 12ms 落下，像手指不是绝对齐的
-    const k=Math.sqrt(freqs.length);
-    freqs.forEach((f,i)=>V.piano(f,t+i*.012,dest,v/k,dur,{...o,breath:(o.breath ?? 1)*.5}));
+  sub(f, t, dest, v=.09, dur=.4){
+    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    fl.type = "lowpass"; fl.frequency.value = Math.min(420, Math.max(180, f*2)); fl.Q.value = .6;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+.008); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    fl.connect(g).connect(dest);
+    [[1,1],[2,.12]].forEach(([k,a])=>{ const o = ac.createOscillator(), og = ac.createGain(); o.type = "sine"; o.frequency.value = f*k; og.gain.value = a; o.connect(og).connect(fl); o.start(t); o.stop(t+dur+.05); });
   },
-  air(t,dest,v=.03,dur=1.2,f0=500,f1=1500){      // 没有音高的柔和气声：一扇窗、一阵过堂风
-    const ac=A(), s=ac.createBufferSource(), fl=ac.createBiquadFilter(), g=ac.createGain();
-    s.buffer=SND.noise; s.loop=true; fl.type="bandpass"; fl.Q.value=.5;
-    fl.frequency.setValueAtTime(f0,t);
-    fl.frequency.exponentialRampToValueAtTime(f1,t+dur*.45);
-    fl.frequency.exponentialRampToValueAtTime(f0*.8,t+dur);
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(v,t+dur*.32);
-    g.gain.linearRampToValueAtTime(0,t+dur+.08);
-    s.connect(fl).connect(g).connect(dest); s.start(t,Math.random()); s.stop(t+dur+.1);
+  bass(f, t, dest, v=.08, dur=.22, o={}){
+    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    fl.type = "lowpass"; fl.Q.value = 5;
+    fl.frequency.setValueAtTime(Math.min(2600, f*7), t);
+    fl.frequency.exponentialRampToValueAtTime(Math.max(120, f*1.3), t+dur);
+    env(g, t, .004, v, dur); fl.connect(g).connect(dest);
+    [0,8].forEach(dt=>{ const osc = ac.createOscillator(); osc.type = "sawtooth"; osc.frequency.value = f; osc.detune.value = dt; osc.connect(fl); osc.start(t); osc.stop(t+dur+.05); });
+    const s = ac.createOscillator(), sg = ac.createGain(); s.type = "sine"; s.frequency.value = f/2; sg.gain.value = .5;
+    s.connect(sg).connect(fl); s.start(t); s.stop(t+dur+.05);
+  },
+  stab(freqs, t, dest, v=.07, dur=.35, o={}){
+    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    fl.type = "lowpass"; fl.Q.value = 3.2;
+    fl.frequency.setValueAtTime(o.open ? 5200 : 3000, t);
+    fl.frequency.exponentialRampToValueAtTime(900, t+dur);
+    env(g, t, .006, v, dur); fl.connect(g).connect(dest);
+    freqs.forEach(f=>[-7,7].forEach(dt=>{
+      const osc = ac.createOscillator(), og = ac.createGain();
+      osc.type = "sawtooth"; osc.frequency.value = f; osc.detune.value = dt;
+      og.gain.value = 1/Math.sqrt(freqs.length*2); osc.connect(og).connect(fl);
+      osc.start(t); osc.stop(t+dur+.06);
+    }));
+  },
+  lead(f, t, dest, v=.06, dur=.3, o={}){
+    const ac = A(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    fl.type = "lowpass"; fl.Q.value = 2.4; fl.frequency.value = o.bright ? 6200 : 4200;
+    env(g, t, .005, v, dur); fl.connect(g).connect(dest);
+    [0,9].forEach(dt=>{
+      const osc = ac.createOscillator(), og = ac.createGain();
+      osc.type = dt ? "square" : "sawtooth";
+      osc.frequency.setValueAtTime(f*.94, t); osc.frequency.exponentialRampToValueAtTime(f, t+.055);
+      osc.detune.value = dt; og.gain.value = dt ? .22 : .8;
+      osc.connect(og).connect(fl); osc.start(t); osc.stop(t+dur+.06);
+    });
+  },
+  sweep(t, dest, v=.05, dur=.9, f0=400, f1=6000){
+    const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = SND.noise; s.loop = true; fl.type = "bandpass"; fl.Q.value = .8;
+    fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t+dur*.85);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+dur*.7); g.gain.linearRampToValueAtTime(0, t+dur+.05);
+    s.connect(fl).connect(g).connect(dest); s.start(t, Math.random()); s.stop(t+dur+.1);
+  },
+  impact(t, dest, v=.12){
+    V.kick(t, dest, v*.9, {f0:180, f1:42, dur:.5});
+    const ac = A(), s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = SND.noise; fl.type = "lowpass"; fl.frequency.value = 1800;
+    env(g, t, .002, v*.5, .22); s.connect(fl).connect(g).connect(dest); s.start(t, Math.random()); s.stop(t+.3);
   },
 });
 const arp = (t, degs, gap, fn) => degs.forEach((d,k)=>fn(d, t + k*gap));
 
-/* ===== 声音：风格区 ===== 每章一套钢琴的触键与环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
-   hz(音级, 八度, 基准) 按 THEME.scale 取音；V.piano / V.pianoTouch / V.pianoChord / V.air 是上面的钢琴族
-   本站整册只有一件乐器：钢琴。六章靠音区、触键轻重、单音与琶音、和弦与留白速度区分，不再用任何打击乐或拨弦 */
+/* ===== 声音：风格区 ===== 每章一套 house / EDM 节拍与环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
+   hz(音级, 八度, 基准) 按 THEME.scale 取音；V.kick / V.hat / V.clap / V.sub / V.bass / V.stab / V.lead 是上面的乐器族。
+   四章按一次训练由重到轻：124 / 126 / 128 / 100 BPM，底鼓、反拍 hi-hat、sub bass 与和弦 stab 的密度依次变化。 */
 // 首页：照片环每走一格弹 melody 里的下一个音（step）；风格台切换时响一声（chime）
 const RING_SND = {
-  melody:[0,2,4,7,9,7,4,2,0,2,4,7],
-  step:(f,t,d,v)=>V.piano(f, t, d, v*.85, .42, {bright:1.05, breath:1, vib:.7}),
-  chime:(f,t,d,v)=>V.piano(f, t, d, v*.6, 1.1, {bright:.85, breath:.9, vib:1.3, soft:true}),
+  melody:[0,2,4,6,4,2,0,3,5,7,5,3],
+  step:(f,t,d,v)=>V.lead(f, t, d, v*.5, .16, {bright:true}),
+  chime:(f,t,d,v)=>V.stab([f, f*Math.pow(2,3/12), f*Math.pow(2,7/12)], t, d, v*.45, .4, {open:true}),
 };
 // 大图里每章一套声音：open 聚拢 / step 显影每一级 / done 成像 / look 放大镜 / swap 切换 / close 关闭
 const LB_SND = [
-  { // 景德镇：低音区长音，踏板留足余韵
-    open:t=>{ V.air(t, SND.fx, .05, 1.1, 320, 1100); V.piano(hz(0,-1), t+.08, SND.fx, .055, 1.5, {bright:.72, breath:1.4, vib:1.2, soft:true, bend:.5}); },
-    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .05, .5, {bright:.8, breath:1.2, vib:.5}),
-    done:t=>arp(t, [0,2,4,7], .11, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .045, .8, {bright:.8, breath:1.1})),
-    look:(t,d,v)=>V.pianoTouch(hz(d,0), t, SND.fx, .07*v),
-    swap:t=>V.piano(hz(4,-1), t, SND.fx, .05, .7, {bright:.8, bend:.4}),
-    close:t=>arp(t, [7,4,2,0], .14, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .04, .9, {bright:.75, breath:1.2})),
+  { // 硬拉：低频冲击，成像时一记重落
+    open:t=>{ V.sweep(t, SND.fx, .055, 1.0, 280, 5000); V.sub(hz(0,-1), t+.1, SND.fx, .08, .9); },
+    step:(t,j)=>V.hat(t, SND.fx, .04+.004*j, false),
+    done:t=>{ V.impact(t, SND.fx, .13); V.stab([0,2,4].map(d=>hz(d,0)), t+.07, SND.fx, .06, .5, {open:true}); },
+    look:(t,d,v)=>V.lead(hz(d,1), t, SND.fx, .045*v, .14, {bright:true}),
+    swap:t=>V.bass(hz(0,-1), t, SND.fx, .09, .2),
+    close:t=>arp(t, [7,5,3,0], .11, (d,s)=>V.lead(hz(d,0), s, SND.fx, .055, .18)),
   },
-  { // 湖南：中音区轻触键，音密、起音清透
-    open:t=>arp(t, [0,2,4], .07, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .08)),
-    step:(t,j)=>V.pianoTouch(hz(j,1), t, SND.fx, .085),
-    done:t=>arp(t, [0,2,4,7,9], .075, (d,s)=>V.piano(hz(d,1), s, SND.fx, .07, .3, {bright:1.25, breath:1.2})),
-    look:(t,d,v)=>V.pianoTouch(hz(d,1), t, SND.fx, .05*v),
-    swap:t=>V.piano(hz(4,1), t, SND.fx, .075, .35, {bright:1.2, bend:.6}),
-    close:t=>arp(t, [9,7,4,2,0], .07, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .06)),
+  { // 臀腿：切分律动，显影时 hi-hat 逐级加密
+    open:t=>{ V.riser(t, SND.fx, .045, .8, 200, 3800, hz(0,-1)); V.hat(t+.1, SND.fx, .035, true); },
+    step:(t,j)=>{ V.hat(t, SND.fx, .035+.004*j, false); if (j%2) V.bass(hz(j,-1), t, SND.fx, .055, .16); },
+    done:t=>{ V.clap(t, SND.fx, .07); V.stab([0,2,4].map(d=>hz(d,0)), t+.05, SND.fx, .055, .7, {open:true}); },
+    look:(t,d,v)=>V.bass(hz(d,-1), t, SND.fx, .05*v, .14),
+    swap:t=>V.clap(t, SND.fx, .055),
+    close:t=>arp(t, [7,5,3,0], .1, (d,s)=>V.hat(s, SND.fx, .045, false)),
   },
-  { // 武林：山风里的长音与缓慢拍频
-    open:t=>{ V.air(t, SND.fx, .07, 1.6, 500, 1900); V.piano(hz(0,-1), t+.06, SND.fx, .05, 2.0, {bright:.85, breath:1.3, vib:1.8, soft:true}); },
-    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .055, 1.1, {bright:.85, breath:1.2, vib:1.2}),
-    done:t=>{ V.air(t, SND.fx, .045, 1.1, 650, 1500); arp(t+.15, [0,2,4], .14, (d,s)=>V.piano(hz(d,0), s, SND.fx, .045, 1.0, {vib:1.4})); },
-    look:(t,d,v)=>V.piano(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.2}),
-    swap:t=>{ V.air(t, SND.fx, .06, .55, 900, 2200); V.piano(hz(2,0), t+.03, SND.fx, .05, .5, {bend:.5}); },
-    close:t=>V.piano(hz(0,-2), t, SND.fx, .055, 2.2, {bright:.7, breath:1.5, vib:1.8, soft:true, bend:.7}),
+  { // 肩部：明亮 lead 上行，最轻快
+    open:t=>arp(t, [0,3,5,7], .075, (d,s)=>V.lead(hz(d,1), s, SND.fx, .045, .2, {bright:true})),
+    step:(t,j)=>V.lead(hz(j,1), t, SND.fx, .04, .14, {bright:true}),
+    done:t=>{ V.stab([0,2,4,7].map(d=>hz(d,0)), t, SND.fx, .06, .6, {open:true}); V.lead(hz(7,1), t+.06, SND.fx, .05, .3, {bright:true}); },
+    look:(t,d,v)=>V.lead(hz(d,1), t, SND.fx, .04*v, .12, {bright:true}),
+    swap:t=>V.lead(hz(4,1), t, SND.fx, .055, .16, {bright:true}),
+    close:t=>arp(t, [7,5,3,0], .09, (d,s)=>V.lead(hz(d,1), s, SND.fx, .045, .16, {bright:true})),
   },
-  { // 河南：柔和铺开的开放式暖和弦
-    open:t=>V.pianoChord([0,2,4].map(d=>hz(d,0)), t, SND.fx, .06, 1.0, {bright:.95, breath:.9}),
-    step:(t,j)=>V.piano(hz(j,0), t, SND.fx, .055, .6, {bright:.95}),
-    done:t=>V.pianoChord([0,2,4,7].map(d=>hz(d,-1)), t, SND.fx, .055, 1.4, {bright:.9, soft:true}),
-    look:(t,d,v)=>V.piano(hz(d,1), t, SND.fx, .028*v, .4, {vib:.4}),
-    swap:t=>V.piano(hz(4,1), t, SND.fx, .045, .6, {bright:1.05}),
-    close:t=>arp(t, [4,2,0], .12, (d,s)=>V.piano(hz(d,0), s, SND.fx, .05, .8, {bright:.9})),
-  },
-  { // 三亚：高音区明快，快速的单音循环
-    open:t=>arp(t, [0,2,4,7,9], .055, (d,s)=>V.piano(hz(d,1), s, SND.fx, .05, .28, {bright:1.3, breath:1.1, vib:.4})),
-    step:(t,j)=>V.piano(hz(j,1), t, SND.fx, .07, .35, {bright:1.3}),
-    done:t=>{ arp(t, [0,2,4,7,9], .055, (d,s)=>V.pianoTouch(hz(d,1), s, SND.fx, .065)); V.piano(hz(0,2), t+.1, SND.fx, .05, 1.0, {bright:1.25, vib:1.1}); },
-    look:(t,d,v)=>V.pianoTouch(hz(d,1), t, SND.fx, .045*v),
-    swap:t=>V.piano(hz(9,1), t, SND.fx, .07, .4, {bright:1.3, bend:.8}),
-    close:t=>arp(t, [9,7,4,2,0], .06, (d,s)=>V.piano(hz(d,1), s, SND.fx, .055, .3, {bright:1.25})),
-  },
-  { // 江西：低音慢和弦，长旋律在上面
-    open:t=>{ V.piano(hz(0,-1), t, SND.fx, .05, 1.8, {bright:.78, breath:1.3, vib:1.5, soft:true}); V.pianoChord([0,2].map(d=>hz(d,-2)), t+.12, SND.fx, .035, 2.0, {bright:.7}); },
-    step:(t,j)=>V.piano(hz(j,-1), t, SND.fx, .06, .8, {bright:.8, breath:1.2}),
-    done:t=>{ V.piano(hz(0,0), t, SND.fx, .05, 1.6, {vib:1.6, soft:true}); [0,2,4].forEach((d,k)=>V.piano(hz(d,-1), t+.12+k*.08, SND.fx, .035, .9, {bright:.8})); },
-    look:(t,d,v)=>V.piano(hz(d,0), t, SND.fx, .035*v, .5, {breath:1.1}),
-    swap:t=>V.piano(hz(2,0), t, SND.fx, .06, .6, {bright:.9, bend:.3}),
-    close:t=>arp(t, [4,2,0,-2], .15, (d,s)=>V.piano(hz(d,-1), s, SND.fx, .04, 1.2, {bright:.75, breath:1.3, vib:1.4})),
+  { // 瑜伽：长气息与留白，收得最慢
+    open:t=>{ V.air(t, SND.fx, .04, 1.6, 380, 1050); V.stab([0,2,4].map(d=>hz(d,0)), t+.2, SND.fx, .045, 1.4, {open:true}); },
+    step:(t,j)=>V.hat(t, SND.fx, .012+.002*j, true),
+    done:t=>V.stab([0,2,4,6].map(d=>hz(d,0)), t, SND.fx, .05, 1.8, {open:true}),
+    look:(t,d,v)=>V.lead(hz(d,0), t, SND.fx, .025*v, .4),
+    swap:t=>V.air(t, SND.fx, .025, .6, 500, 1300),
+    close:t=>arp(t, [4,2,0], .22, (d,s)=>V.stab([d].map(x=>hz(x,0)), s, SND.fx, .035, 1.0, {open:true})),
   },
 ];
-
-// 悬停音色：六章都是钢琴，只是音区、触键、拍频与和弦不同
+// 悬停音色：四章分别用 sub / bass / lead / stab，越往后越轻
 const VOICE = [
-  (f,t,d)=>V.piano(f, t, d, .055, .45, {bright:.78, breath:1.3, vib:.6}),
-  (f,t,d)=>V.pianoTouch(f, t, d, .085),
-  (f,t,d)=>V.piano(f, t, d, .06, 1.0, {bright:.85, breath:1.2, vib:1.3}),
-  (f,t,d)=>V.pianoChord([f, f*1.5], t, d, .05, .55, {bright:.95}),
-  (f,t,d)=>V.piano(f, t, d, .055, .3, {bright:1.3, breath:1.1, vib:.4}),
-  (f,t,d)=>V.piano(f, t, d, .05, 1.2, {bright:.8, breath:1.3, vib:1.5, soft:true}),
+  (f,t,d)=>V.sub(f/2, t, d, .07, .22),
+  (f,t,d)=>V.bass(f/2, t, d, .065, .16),
+  (f,t,d)=>V.lead(f, t, d, .05, .16, {bright:true}),
+  (f,t,d)=>V.stab([f, f*Math.pow(2,3/12)], t, d, .04, .45, {open:true}),
 ];
-// 每章的环境声：返回要停掉的持续声源，和一个按时间排下一个音的 tick
-// 底层只留风/气/房间噪声，凡是有音高的声音都由钢琴发出
+// 每章的环境声：tick 一次排满一个小节（4 拍），返回下一小节的起点，节拍不受 60ms 调度抖动影响
 const SCENES = [
-  b=>{ const w=loopNoise(b, SND.noise, "lowpass", 420, .5, .04);                                  // 景德镇：低沉气流里的低音长音
-       return { nodes:[w.s, lfo(w.g.gain,.05,.015)],
-         tick:t=>{ V.piano(hz(pick([0,2,4]),-1), t, b, .045, 1.7, {bright:.72, breath:1.35, vib:1.1, soft:true});
-                   if (Math.random()<.35) V.air(t+.35, b, .028, .9, 300, 850); return t+rnd(2.6,4.8); } }; },
-  b=>{ const n=loopNoise(b, SND.noise, "bandpass", 1000, .7, .042);                               // 湖南：中音区轻触键的快句
-       return { nodes:[n.s, lfo(n.g.gain,.08,.016)],
-         tick:t=>{ arp(t, pick([[0,2,4,7],[4,2,0,2]]), .085, (d,s)=>V.pianoTouch(hz(d,1), s, b, .065));
-                   if (Math.random()<.3) V.piano(hz(pick([0,4]),0), t+.3, b, .035, .8, {bright:1.1, vib:.8}); return t+rnd(1.8,3.1); } }; },
-  b=>{ const w=loopNoise(b, SND.noise, "bandpass", 560, .7, .065);                               // 武林：山风里的长音与缓慢拍频
-       return { nodes:[w.s, lfo(w.fl.frequency,.045,220), lfo(w.g.gain,.09,.026)],
-         tick:t=>{ V.piano(hz(pick([0,2,4]),-1), t, b, .04, 2.4, {bright:.85, breath:1.3, vib:1.8, soft:true});
-                   if (Math.random()<.4) V.air(t+.5, b, .03, 1.2, 500, 1700); return t+rnd(3.0,5.2); } }; },
-  b=>{ const a=loopNoise(b, SND.noise, "lowpass", 900, .5, .03);                                 // 河南：慢换的钢琴和弦
-       return { nodes:[a.s],
-         tick:t=>{ V.pianoChord([0,2,4].map(d=>hz(d,-1)), t, b, .042, 2.0, {bright:.9, soft:true});
-                   if (Math.random()<.35) V.piano(hz(7,0), t+.4, b, .032, 1.1, {bright:1, vib:1.2}); return t+rnd(3.0,4.8); } }; },
-  b=>{ const w=loopNoise(b, SND.noise, "lowpass", 700, .6, .045); let i=0; const seq=[0,2,4,7,9,7,4,2];  // 三亚：高音区明快的循环
-       return { nodes:[w.s, lfo(w.g.gain,.06,.02)],
-         tick:t=>{ V.piano(hz(seq[i%8],1), t, b, .04, .32, {bright:1.3, breath:1.1, vib:.4});
-                   if (i%8===0) V.piano(hz(0,0), t, b, .03, 1.2, {bright:1.1}); i++; return t+rnd(.45,.72); } }; },
-  b=>{ const n=loopNoise(b, SND.noise, "lowpass", 2200, .5, .02), prog=[[0,2,4],[-2,1,3],[3,5,7],[1,4,6]]; let i=0;  // 江西：低音慢和弦，长旋律在上面
-       return { nodes:[n.s], tick:t=>{ V.pianoChord(prog[i%4].map(d=>hz(d,-1)), t, b, .038, 2.2, {bright:.8, soft:true});
-                   V.piano(hz(prog[i%4][0],0), t+.35, b, .035, 1.8, {bright:.8, breath:1.25, vib:1.5, soft:true}); i++; return t+60/64*2; } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "lowpass", 380, .5, .022); const beat = 60/124; let bar = 0;       // 硬拉 124 BPM：四四拍重底鼓 + 反拍开镲
+       return { nodes:[n.s, lfo(n.g.gain,.08,.008)], tick:t=>{
+         for (let k=0;k<4;k++){
+           const s = t + k*beat;
+           V.kick(s, b, .17);
+           V.hat(s, b, .02, false);
+           V.hat(s + beat*.5, b, .038, true);
+         }
+         V.sub(hz(0,-1), t, b, .085, beat*.9);
+         if (bar%2===0) V.stab([0,2,4].map(d=>hz(d,0)), t + beat*2, b, .05, beat*1.4);
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "bandpass", 900, .7, .02); const beat = 60/126; let bar = 0;       // 臀腿 126 BPM：16 分 hi-hat + 切分贝斯
+       const line = [0,0,3,0,5,3,0,2];
+       return { nodes:[n.s, lfo(n.g.gain,.1,.007)], tick:t=>{
+         for (let k=0;k<4;k++){
+           const s = t + k*beat;
+           V.kick(s, b, .155);
+           for (let h=0;h<4;h++) V.hat(s + h*beat/4, b, h%2 ? .015 : .025, false);
+           V.bass(hz(line[(bar*4+k)%8],-1), s + beat*.5, b, .065, beat*.28);
+         }
+         if (bar%2===1){ V.clap(t + beat, b, .055); V.clap(t + beat*3, b, .055); }
+         V.stab([0,2,4].map(d=>hz(d,0)), t + beat*2.5, b, .045, beat*.8, {open:true});
+         V.sub(hz(0,-1), t, b, .07, beat*.9);
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "bandpass", 1400, .6, .016); const beat = 60/128; let bar = 0;     // 肩部 128 BPM：2/4 拍拍手 + lead 短句
+       const seq = [0,3,5,7,5,3,2,4];
+       return { nodes:[n.s, lfo(n.g.gain,.12,.006)], tick:t=>{
+         for (let k=0;k<4;k++){
+           const s = t + k*beat;
+           V.kick(s, b, .14);
+           for (let h=0;h<4;h++) V.hat(s + h*beat/4, b, h===2 ? .026 : .016, false);
+           if (k===1 || k===3) V.clap(s, b, .055);
+           V.bass(hz(seq[(bar*4+k)%8],-1), s + beat*.25, b, .055, beat*.22);
+         }
+         arp(t + beat*.5, [0,3,5,7], beat*.5, (d,s)=>V.lead(hz(d,1), s, b, .04, beat*.35, {bright:true}));
+         if (bar%2===0) V.stab([0,2,4].map(d=>hz(d,0)), t + beat*2, b, .04, beat*.7, {open:true});
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "lowpass", 600, .4, .018); const beat = 60/100; let bar = 0;        // 瑜伽 100 BPM：soft kick 每两拍、长和弦、气息与留白
+       return { nodes:[n.s, lfo(n.g.gain,.06,.006)], tick:t=>{
+         V.kick(t, b, .075, {f0:110, f1:44, dur:.42});
+         V.kick(t + beat*2, b, .062, {f0:110, f1:44, dur:.42});
+         V.hat(t + beat, b, .014, true); V.hat(t + beat*3, b, .014, true);
+         V.sub(hz(0,-1), t, b, .06, beat*2.2);
+         V.stab([0,2,4,6].map(d=>hz(d,0)), t + .3, b, .04, beat*3.2, {open:true});
+         if (bar%2===0) V.air(t + .6, b, .02, 2.4, 420, 1100);
+         bar++; return t + 4*beat;
+       } }; },
 ];
 /* ===== 声音：风格区结束 ===== */
+
 
 function lbSnd(name, ...a){ if (!sndReady()) return; const f = LB_SND[LB.ci]?.[name]; if (f) f(A().currentTime + .01, ...a); }
 // 大图打开时，章节环境声压低、变闷，让位给大图的声音；关掉后恢复
@@ -2125,10 +2094,10 @@ function activateSound(){
   if (!sndReady() || SND.active) return;
   SND.active = true;
   const ac = A();
-  SND.out.gain.cancelScheduledValues(ac.currentTime); SND.out.gain.setTargetAtTime(.9, ac.currentTime, .15);
+  SND.out.gain.cancelScheduledValues(ac.currentTime); SND.out.gain.setTargetAtTime(.84, ac.currentTime, .15);
   SND.cur = -2; sndScene();
   if (LB.open){ LB.ducked = false; sndDuck(true); }
-  V.piano(hz(4,1), ac.currentTime + .05, SND.fx, .05, 1.0, {bright:1.05, breath:1.1});
+  V.stab([0,2,4].map(d=>hz(d,0)), ac.currentTime + .05, SND.fx, .05, .55, {open:true});
   syncSoundUI();
 }
 function resumeSound(){

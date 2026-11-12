@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""量照片：给"风格 DNA"提供可计算的那一半信号。
+"""量照片：给"风格 DNA"提供可计算的那一半信号（健身房照片展示）。
 
   python3 analyze_photos.py [照片文件夹，默认 photos/full] [--out 输出文件夹，默认当前目录]
 
 输出两样东西：
   dna-seed.json  每张照片的 5 个主色、明暗、反差、饱和度、冷暖、色相集中度；
                  整组照片的总体判断（tone / chroma / temperature / hue_spread / night_share）、
-                 强调色候选（每个都注明来自哪张照片）、纸色和墨色建议、按颜色粗分的章节草案
-  contact.jpg    全部照片的缩略图总览，每张下面带 5 个主色，给 agent 自己"看图"用
+                 强调色候选（每个都注明来自哪张照片）、纸色和墨色建议、
+                 按颜色粗分的分组草案（chapter_draft_by_color，只是辅助信号）、
+                 以及按训练项目标签的分组（exercise_draft_by_label，若 --out 下有 chapters.json）
+  contact.jpg    全部照片的缩略图总览，每张下面带 5 个主色，给 agent 自己"看图"用；
+                 能从 chapters.json 拿到项目标签时，编号旁会标出 label
 
-脚本只量，不做设计决定。怎么把这些数字变成颜色、字体、动效和声音，见 references/style-dna.md。
+脚本只量，不做设计决定。正式分组以训练项目（chapters.json 的 label，如 deadlift / glutes /
+shoulders / yoga）为准；chapter_draft_by_color 只是按颜色粗分，agent 还要结合动作、训练部位看图重新分。
+怎么把这些数字变成颜色、字体、动效和声音，见 references/style-dna.md。
 需要 Pillow（pip install pillow）。
 """
 import argparse, colorsys, json, math, random, sys
@@ -121,7 +126,8 @@ def paper_ink(photos, temperature):
 
 
 def chapter_draft(photos):
-    """只按颜色和明暗粗分；agent 还要结合地点、题材、时间重新分。"""
+    """只按颜色和明暗粗分，是辅助信号；正式分组以训练项目标签（chapters.json）为准，
+    agent 还要结合动作、训练部位看图重新分。"""
     n = len(photos)
     k = max(2, min(7, round(n / 4)))
     feat = []
@@ -141,7 +147,7 @@ def chapter_draft(photos):
     return [g for g in groups if g]
 
 
-def contact_sheet(photos, folder, out, cell=220, cols=6):
+def contact_sheet(photos, folder, out, cell=220, cols=6, labels=None):
     rows = math.ceil(len(photos) / cols)
     pad, cap = 14, 46
     sheet = Image.new("RGB", (cols * (cell + pad) + pad, rows * (cell + cap + pad) + pad), (244, 242, 238))
@@ -160,7 +166,9 @@ def contact_sheet(photos, folder, out, cell=220, cols=6):
             w = max(2, round(cell * c["share"]))
             dr.rectangle([sx, y + cell + 4, sx + w, y + cell + 16], fill=tuple(c["rgb"]))
             sx += w
-        dr.text((x, y + cell + 22), f"{i + 1:02d} {p['src']}"[:30], fill=(30, 30, 30), font=font)
+        label = (labels or {}).get(p["src"])
+        caption = f"{i + 1:02d} {label} / {p['src']}" if label else f"{i + 1:02d} {p['src']}"
+        dr.text((x, y + cell + 22), caption[:30], fill=(30, 30, 30), font=font)
     sheet.save(out, quality=86)
 
 
@@ -193,19 +201,34 @@ def main():
         "hue_spread": label(Cn, [.3, .55], ["varied", "mixed", "concentrated"]),
         "dominant_hue": round(math.degrees(math.atan2(hy, hx)) % 360) if hn else None,
         "night_share": round(sum(p["night_guess"] for p in photos) / len(photos), 2),
+        # portrait_share 即竖幅（vertical_share）占比；健身房里硬拉、深蹲这类竖幅全身动作多，
+        # 它是选版式的重要信号。字段名不要改，站点可能依赖。
         "portrait_share": round(sum(p["orientation"] == "portrait" for p in photos) / len(photos), 2),
         "raw": {"luminance": round(L, 3), "saturation": round(S, 3), "warmth": round(Wm, 3), "hue_concentration": round(Cn, 3)},
     }
+    # 训练项目分组：--out 下有 chapters.json（由 prepare_photos.py --label-from-folder 生成）就读它；
+    # 没有则 exercise_draft_by_label 为空数组，contact sheet 也不标 label。
+    chapter_data = []
+    chapters_path = a.out / "chapters.json"
+    if chapters_path.exists():
+        try:
+            chapter_data = json.loads(chapters_path.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"读 {chapters_path} 失败：{e}", file=sys.stderr)
+    exercise_draft = [{"label": ch["label"], "src": [p["src"] for p in ch.get("photos", [])]}
+                      for ch in chapter_data]
+    label_of = {p["src"]: ch["label"] for ch in chapter_data for p in ch.get("photos", [])}
     seed = {
         "summary": summary,
         "accent_candidates": accent_candidates(photos),
         "paper_ink": paper_ink(photos, temperature),
         "chapter_draft_by_color": chapter_draft(photos),
+        "exercise_draft_by_label": exercise_draft,
         "photos": photos,
     }
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "dna-seed.json").write_text(json.dumps(seed, ensure_ascii=False, indent=1))
-    contact_sheet(photos, a.src, a.out / "contact.jpg")
+    contact_sheet(photos, a.src, a.out / "contact.jpg", labels=label_of)
     print(json.dumps({"summary": summary, "accent_candidates": seed["accent_candidates"], "paper_ink": seed["paper_ink"]},
                      ensure_ascii=False, indent=1))
     print(f"\n写好了 {a.out / 'dna-seed.json'} 和 {a.out / 'contact.jpg'}", file=sys.stderr)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把每张方图缩成 32×32 的色块，写进 photos/tints.js。
+"""把每张方图缩成 32×32 的色块，写进 photos/tints.js（健身房照片展示用）。
 
 直接双击 index.html（file://）打开时，浏览器不让网页读取照片像素，首页点阵字就没法染上照片的颜色。
 页面读不到像素时，会改用这里预先算好的色块（photoTint → bakedTint），悬停音的音高也用它算亮度。
@@ -7,7 +7,8 @@
 用法：
   python3 bake_tints.py [网站根目录，默认当前目录]
 
-prepare_photos.py 跑完会自动调用它；手动换了 photos/sq 里的图，再单独跑一次。
+prepare_photos.py（把健身房照片按训练项目整理成 sq/full）跑完会自动调用它；
+手动换了 photos/sq 里的图，再单独跑一次。
 支持 jpg / png / webp；键名是不含扩展名的文件名，必须和 index.html 里 CHAPTERS 的 src 一致。
 需要 Pillow（pip install pillow）。
 """
