@@ -30,15 +30,15 @@ motion: { character: 利落·力量, drift: .0032, follow: .075, spring: .06, da
 texture:
   dots: circle
   styles: [orig, ink, dot, block]   # 油墨橙黑双色像器械铭牌和海报；网点像镜面颗粒；色块给出调色板
-sound: { scale: "[0,2,3,5,7,9,10] 多利亚", base: 57, presence: .9 }
+sound: { scale: "[0,2,4,7,9] 大调五声", base: 62, presence: 1.1 }
 chapters:
-  - { en: DEADLIFT,  zh: 硬拉, exercise: 传统硬拉,               body_part: 后链 / 臀·腘绳·背, intensity: 极重·爆发,     equipment: 杠铃·镁粉·腰带,   mood: 重,       ambient: 124BPM kick 每拍 + offbeat open hat + sub 根音 + stab 每 2 小节, voice: stab }
-  - { en: GLUTES,    zh: 臀腿, exercise: 臀推 / 深蹲 / 腿举,     body_part: 臀·股四头,         intensity: 中高·持续酸胀, equipment: 深蹲架·臀推凳,     mood: 持续酸胀, ambient: 126BPM kick 四拍 + 16 分 hat + offbeat bass 切分 + 反拍 stab, voice: stab }
-  - { en: SHOULDERS, zh: 肩部, exercise: 侧平举 / 推举 / 面拉,   body_part: 三角肌,             intensity: 中·精准轻快,   equipment: 哑铃·龙门架,       mood: 精准轻快, ambient: 128BPM kick + clap 落 2/4 拍 + 16 分 hat + lead 短句, voice: lead }
-  - { en: YOGA,      zh: 瑜伽, exercise: 伸展体式 / 收操,         body_part: 全身·呼吸,          intensity: 低·慢与留白,   equipment: 瑜伽垫,             mood: 慢与呼吸, ambient: 100BPM soft kick 每 2 拍 + 长 stab/pad + air 气息 + 留白, voice: lead }
-  - { en: CUTTING,   zh: 减脂, exercise: 跳绳 / 战绳 / 冲刺,       body_part: 全身·心肺,          intensity: 高·间歇冲刺,   equipment: 跳绳·战绳·跑步机,   mood: 冲刺,     ambient: 132BPM 双 kick + 16 分 hat + 每 4 小节 riser, voice: lead }
-  - { en: DANCE,     zh: 舞蹈, exercise: 跳跃 / 旋转 / 群舞排练,   body_part: 全身·协调,          intensity: 中高·律动,     equipment: 镜面舞蹈房,         mood: 律动,     ambient: 130BPM 四四拍 + 反拍 open hat + 2/4 拍 clap + 宽 stab, voice: stab }
-  - { en: PILATES,   zh: 普拉提, exercise: 核心控制 / 慢速拉伸,     body_part: 核心·深层肌群,      intensity: 低·控制,       equipment: 普拉提床·凯迪拉克床, mood: 控制,     ambient: 92BPM soft kick 每小节 + 长 pad + air 气息, voice: stab }
+  - { en: DEADLIFT,  zh: 硬拉, exercise: 传统硬拉,               body_part: 后链 / 臀·腘绳·背, intensity: 极重·爆发,     equipment: 杠铃·镁粉·腰带,   mood: 重,       ambient: 108BPM 低音八度与和弦交替 + 慢 LFO 低通气声, voice: piano }
+  - { en: GLUTES,    zh: 臀腿, exercise: 臀推 / 深蹲 / 腿举,     body_part: 臀·股四头,         intensity: 中高·持续酸胀, equipment: 深蹲架·臀推凳,     mood: 持续酸胀, ambient: 116BPM oom-pah 分解和弦循环, voice: pianoTouch }
+  - { en: SHOULDERS, zh: 肩部, exercise: 侧平举 / 推举 / 面拉,   body_part: 三角肌,             intensity: 中·精准轻快,   equipment: 哑铃·龙门架,       mood: 精准轻快, ambient: 126BPM 高音区亮断奏连续十六分, voice: pianoTouch }
+  - { en: YOGA,      zh: 瑜伽, exercise: 伸展体式 / 收操,         body_part: 全身·呼吸,          intensity: 低·慢与留白,   equipment: 瑜伽垫,             mood: 慢与呼吸, ambient: 88BPM soft 和弦 + air 气息 + 留白, voice: piano(soft) }
+  - { en: CUTTING,   zh: 减脂, exercise: 跳绳 / 战绳 / 冲刺,       body_part: 全身·心肺,          intensity: 高·间歇冲刺,   equipment: 跳绳·战绳·跑步机,   mood: 冲刺,     ambient: 138BPM 最快的 16 分音阶跑动, voice: pianoTouch }
+  - { en: DANCE,     zh: 舞蹈, exercise: 跳跃 / 旋转 / 群舞排练,   body_part: 全身·协调,          intensity: 中高·律动,     equipment: 镜面舞蹈房,         mood: 律动,     ambient: 128BPM 切分断奏（反拍错半拍）+ 低音每拍, voice: pianoChord }
+  - { en: PILATES,   zh: 普拉提, exercise: 核心控制 / 慢速拉伸,     body_part: 核心·深层肌群,      intensity: 低·控制,       equipment: 普拉提床·凯迪拉克床, mood: 控制,     ambient: 100BPM 匀速单音与和弦交替, voice: piano }
 swaps: []
 ```
 
@@ -71,10 +71,10 @@ texture:
   styles: [orig, riso, pixel, block]   # riso 双色像旧海报；像素马赛克像铸铁颗粒
 sound: { scale: "[0,3,5,7,10] 小调五声", base: 55, presence: 1.3 }
 chapters:
-  - { en: DEADLIFT, zh: 硬拉, exercise: 传统硬拉,     body_part: 后链,       intensity: 极重·爆发, equipment: 杠铃·镁粉,   mood: 重,     ambient: 128BPM kick 每拍 + 饱和 sub, voice: stab }
-  - { en: SQUAT,    zh: 深蹲, exercise: 背蹲 / 前蹲,   body_part: 股四头·臀, intensity: 重·持续,   equipment: 深蹲架,       mood: 持续,   ambient: 126BPM 切分 stab,        voice: stab }
-  - { en: PRESS,    zh: 推举, exercise: 卧推 / 实力推, body_part: 胸·肩·三头, intensity: 中·精准,   equipment: 卧推架·杠铃, mood: 精准,   ambient: 124BPM 明亮 lead,        voice: lead }
-  - { en: CARRY,    zh: 行走, exercise: 农夫行走,     body_part: 握力·核心, intensity: 中低·收尾, equipment: 哑铃·壶铃,   mood: 收尾,   ambient: 100BPM 铺底 + sweep,     voice: lead }
+  - { en: DEADLIFT, zh: 硬拉, exercise: 传统硬拉,     body_part: 后链,       intensity: 极重·爆发, equipment: 杠铃·镁粉,   mood: 重,     ambient: 104BPM 低音八度 + 沉重单音,  voice: piano }
+  - { en: SQUAT,    zh: 深蹲, exercise: 背蹲 / 前蹲,   body_part: 股四头·臀, intensity: 重·持续,   equipment: 深蹲架,       mood: 持续,   ambient: 100BPM 分解和弦循环,      voice: pianoTouch }
+  - { en: PRESS,    zh: 推举, exercise: 卧推 / 实力推, body_part: 胸·肩·三头, intensity: 中·精准,   equipment: 卧推架·杠铃, mood: 精准,   ambient: 112BPM 中音区断奏,        voice: pianoTouch }
+  - { en: CARRY,    zh: 行走, exercise: 农夫行走,     body_part: 握力·核心, intensity: 中低·收尾, equipment: 哑铃·壶铃,   mood: 收尾,   ambient: 92BPM soft 长和弦 + 留白, voice: piano(soft) }
 swaps:
   - 大图显影 → 扫描线显影   # 质感是"铸铁、编号牌"，点阵由粗到细像印刷，跟老厂房铭牌的气质冲突
 ```
@@ -108,10 +108,10 @@ texture:
   styles: [orig, line, riso, block]   # 线稿：伸展的边缘；riso 双色像木地板与雾；色块保留
 sound: { scale: "[0,2,4,7,9] 大调五声", base: 64, presence: .6 }
 chapters:
-  - { en: FLOW,     zh: 流动, exercise: 拜日式串联,   body_part: 全身,     intensity: 低中·连贯, equipment: 瑜伽垫,       mood: 连贯,   ambient: 104BPM 软铺底 + 稀疏 hat, voice: lead }
-  - { en: BALANCE,  zh: 平衡, exercise: 站立体式,     body_part: 足踝·核心, intensity: 中·专注,   equipment: 瑜伽垫,       mood: 专注,   ambient: 102BPM 轻 stab,           voice: stab }
-  - { en: STRETCH,  zh: 伸展, exercise: 前屈 / 开髋,   body_part: 髋·腘绳,   intensity: 低·持续,   equipment: 瑜伽砖·伸展带, mood: 持续,   ambient: 100BPM 长音铺底,          voice: lead }
-  - { en: REST,     zh: 休息, exercise: 摊尸式 / 收操, body_part: 全身·呼吸, intensity: 最低·留白, equipment: 毛毯·瑜伽垫,   mood: 慢与呼吸, ambient: 96BPM 只留铺底与留白,    voice: lead }
+  - { en: FLOW,     zh: 流动, exercise: 拜日式串联,   body_part: 全身,     intensity: 低中·连贯, equipment: 瑜伽垫,       mood: 连贯,   ambient: 96BPM soft 分解和弦 + air, voice: piano(soft) }
+  - { en: BALANCE,  zh: 平衡, exercise: 站立体式,     body_part: 足踝·核心, intensity: 中·专注,   equipment: 瑜伽垫,       mood: 专注,   ambient: 92BPM 匀速单音与和弦交替,     voice: pianoTouch }
+  - { en: STRETCH,  zh: 伸展, exercise: 前屈 / 开髋,   body_part: 髋·腘绳,   intensity: 低·持续,   equipment: 瑜伽砖·伸展带, mood: 持续,   ambient: 88BPM soft 长和弦 + 气息,      voice: piano(soft) }
+  - { en: REST,     zh: 休息, exercise: 摊尸式 / 收操, body_part: 全身·呼吸, intensity: 最低·留白, equipment: 毛毯·瑜伽垫,   mood: 慢与呼吸, ambient: 84BPM 只留气息与留白,           voice: piano(soft) }
 swaps:
   - 首页照片环 → 无限网格漂移   # 动效性格是"柔软·柔韧"；四条边带的环形流动太"力量"，跟呼吸留白的整面墙冲突
 ```
@@ -143,10 +143,10 @@ texture:
   styles: [orig, scan, ascii, block]   # 扫描线像评估屏幕；ASCII 像角度刻度读数
 sound: { scale: "[0,2,3,5,7,8,10] 自然小调", base: 60, presence: .7 }
 chapters:
-  - { en: ASSESS,   zh: 评估, exercise: 体态评估 / 关节活动度, body_part: 全身,       intensity: 最低·静态, equipment: 评估表·角度尺, mood: 冷静,   ambient: 100BPM 铺底 + 稀疏 sweep, voice: lead }
-  - { en: MOBILIZE, zh: 活动, exercise: 弹力带激活 / 灵活性,   body_part: 肩髋·核心, intensity: 低·精准,   equipment: 弹力带·泡沫轴, mood: 精准,   ambient: 108BPM 轻 stab,           voice: stab }
-  - { en: LOAD,     zh: 加载, exercise: 轻负荷抗阻,             body_part: 目标肌群,   intensity: 中·可控,   equipment: 小哑铃·绳索,   mood: 可控,   ambient: 116BPM kick + sub,          voice: stab }
-  - { en: RECOVER,  zh: 放松, exercise: 拉伸 / 筋膜放松,         body_part: 全身·呼吸, intensity: 最低·收尾, equipment: 瑜伽垫·泡沫轴, mood: 慢与呼吸, ambient: 98BPM 只留铺底,          voice: lead }
+  - { en: ASSESS,   zh: 评估, exercise: 体态评估 / 关节活动度, body_part: 全身,       intensity: 最低·静态, equipment: 评估表·角度尺, mood: 冷静,   ambient: 84BPM soft 长和弦 + 留白,   voice: piano(soft) }
+  - { en: MOBILIZE, zh: 活动, exercise: 弹力带激活 / 灵活性,   body_part: 肩髋·核心, intensity: 低·精准,   equipment: 弹力带·泡沫轴, mood: 精准,   ambient: 96BPM 匀速单音交替,           voice: pianoTouch }
+  - { en: LOAD,     zh: 加载, exercise: 轻负荷抗阻,             body_part: 目标肌群,   intensity: 中·可控,   equipment: 小哑铃·绳索,   mood: 可控,   ambient: 108BPM 分解和弦循环,          voice: pianoTouch }
+  - { en: RECOVER,  zh: 放松, exercise: 拉伸 / 筋膜放松,         body_part: 全身·呼吸, intensity: 最低·收尾, equipment: 瑜伽垫·泡沫轴, mood: 慢与呼吸, ambient: 80BPM 只留气息与留白,          voice: piano(soft) }
 swaps:
   - 大图显影 → 扫描线显影   # 质感是"评估屏幕、刻度"，点阵由粗到细像印刷，跟冷白临床气质冲突
 ```

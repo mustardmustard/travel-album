@@ -35,11 +35,11 @@ texture:
   dots: circle        # 点阵字的粒子形态：circle / square / glyph / line（非 circle 要改 stepDots 的画法；这是旋钮，不算 swaps）
   styles: [orig, ink, dot, block]   # 风格台：原图 + 3 种，至少一种能给出调色板
 sound:
-  scale: [0,2,3,5,7,9,10]  # 多利亚；按训练强度 / 项目选，见 sound.md 第 3 节
-  base: 57
-  presence: .9        # THEME.presence：.5 若有若无 / .9 GYM 基线 / 1.5 有存在感
+  scale: [0,2,4,7,9]  # 大调五声（轻快钢琴默认）；按训练强度 / 项目选，见 sound.md 第 3 节
+  base: 62
+  presence: 1.1       # THEME.presence：.5 若有若无 / 1.1 GYM 基线 / 1.5 有存在感
 chapters:
-  - { en: DEADLIFT, zh: 硬拉, dir: deadlift, exercise: 传统硬拉, body_part: 后链（臀·腘绳·背）, intensity: 极重·爆发, equipment: 杠铃·杠铃片·镁粉·腰带, mood: 重, line: "…", photos: [...], ambient: "124BPM kick 每拍 + offbeat open hat + sub 根音", voice: stab }
+  - { en: DEADLIFT, zh: 硬拉, dir: deadlift, exercise: 传统硬拉, body_part: 后链（臀·腘绳·背）, intensity: 极重·爆发, equipment: 杠铃·杠铃片·镁粉·腰带, mood: 重, line: "…", photos: [...], ambient: "108BPM 低音八度与和弦交替 + 慢 LFO 低通气声", voice: piano }
   # dir 是照片子文件夹名（photos/sq/<dir>/、photos/full/<dir>/），也是 chapters.json 的章节键
   # 每张照片的 src 写成 "<dir>/<名字>"（如 cutting/cutting-01-cardio），tints.js 键名同它
   # 每章的 mood 写这一章的训练质感词：重 / 持续酸胀 / 精准轻快 / 慢与呼吸 / 冲刺 / 律动 / 控制
@@ -161,10 +161,10 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 ### 3.5 声音
 
 详见 `sound.md`，这里只列 DNA 级别的决定：
-- **音阶**：按训练强度 / 项目选（`sound.md` 第 3 节）。推荐多利亚 `[0,2,3,5,7,9,10]` 或自然小调，重项目偏小调色彩，收操可转明亮。
-- **整体速度**：跟着动效性格走。欧美动感 house / EDM 底鼓 124 / 126 / 128 BPM 四四拍（硬拉 / 臀腿 / 肩部），瑜伽降到 100 BPM；减脂冲到 132 BPM、舞蹈 130 BPM、普拉提 92 BPM。七章不是单调递减，前四章是「一次训练」，后三章是三种项目性格。
-- **每章的乐器**：跟着那一章的训练质感走（硬拉=kick 每拍 + sub 根音，臀腿=offbeat bass 切分 + 反拍 stab，肩部=clap + lead 短句，瑜伽=长 stab / pad + air，减脂=双 kick + 16 分 hat + riser，舞蹈=反拍 open hat + clap + 宽 stab，普拉提=soft kick + 长 pad + air）；`VOICE` 悬停音统一用 lead / stab 短音，`LB_SND / VOICE / SCENES` 项数必须等于章节数。
-- **presence**：环境声的总音量，填进 `THEME.presence`（.5 若有若无，.9 GYM 基线，1.5 有存在感）。门店大屏常年无人交互时，在 `THEME.soundOn` 上默认关声，而不是只压低 presence。
+- **音阶**：按训练强度 / 项目选（`sound.md` 第 3 节）。轻快钢琴默认大调五声 `[0,2,4,7,9]`，明亮无半音；要一点分量的铁馆册子可换多利亚，低音起手更沉。
+- **整体速度**：跟着动效性格走。轻快钢琴七章 108 / 116 / 126 / 88 / 138 / 128 / 100 BPM：前四章是「一次训练」由重到轻，后三章是冲刺 / 律动 / 控制三种性格。整册没有鼓，速度感全由触键密度与跑动速度表达。
+- **每章的触键与音型**：跟着那一章的训练质感走，全在一台钢琴上变（硬拉=低音八度起手 + 和弦落得干脆，臀腿=oom-pah 分解和弦，肩部=高音区亮断奏连续十六分，瑜伽=`soft` 和弦 + 气息留白，减脂=最快的 16 分音阶跑动，舞蹈=切分断奏，普拉提=匀速单音与和弦交替）；`VOICE` 悬停音统一用 `pianoTouch` 短音，`LB_SND / VOICE / SCENES` 项数必须等于章节数。
+- **presence**：环境声的总音量，填进 `THEME.presence`（.5 若有若无，1.1 GYM 基线，1.5 有存在感）。钢琴比鼓组轻，别把 presence 压太低。门店大屏常年无人交互时，在 `THEME.soundOn` 上默认关声，而不是只压低 presence。
 
 ### 3.6 首页和文案
 
@@ -199,7 +199,7 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 3. **"风格选 A 还是 B？"** 给两套 DNA 方向，每套用 3 行描述：
    - 色板，写成 `paper / ink / accent`，accent 注明出处；
    - 字体和动效性格；
-   - 声音（音阶加两种代表乐器，如底鼓、stab、lead、sub bass）。
+   - 声音（音阶加两种代表触键，如低音八度起手、16 分亮断奏跑动）。
 
    A 贴近照片本来的训练质感，B 往器械母题或反差上更大胆一些。
 4. **"声音要有存在感，还是若有若无？"** 门店大屏场景顺带确认是否默认关声。

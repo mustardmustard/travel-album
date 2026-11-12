@@ -1,8 +1,8 @@
 ---
 name: photo-album
 description: >-
-  把一文件夹健身房训练照片做成一个单文件的互动照片展示网站：照片环、会躲鼠标并染上照片颜色的点阵大字、横滑章节页、实时风格台、点阵显影的单张大图和放大镜，以及每章不同的现场合成 house / EDM 声音。风格从用户自己的照片里读出来，所以每家馆做出来都不一样。
-  Turn a folder of gym / fitness / training photos into a single-file interactive photo-display website (photo ring, particle type tinted by photos, chapters by training program, live print styles, a particle-developing photo viewer with loupe, per-chapter synthesized house / EDM sound) whose visual and sonic style is derived from the user's own photos. Use when someone wants a gym album, fitness portfolio, workout showcase, training gallery or studio site "like this one" or "in this style". 触发词：gym / fitness / 健身 / 训练 / workout / 健身房照片展示 / 训练相册.
+  把一文件夹健身房训练照片做成一个单文件的互动照片展示网站：照片环、会躲鼠标并染上照片颜色的点阵大字、横滑章节页、实时风格台、点阵显影的单张大图和放大镜，以及每章不同的现场合成轻快钢琴声音。风格从用户自己的照片里读出来，所以每家馆做出来都不一样。
+  Turn a folder of gym / fitness / training photos into a single-file interactive photo-display website (photo ring, particle type tinted by photos, chapters by training program, live print styles, a particle-developing photo viewer with loupe, per-chapter synthesized light, brisk piano sound) whose visual and sonic style is derived from the user's own photos. Use when someone wants a gym album, fitness portfolio, workout showcase, training gallery or studio site "like this one" or "in this style". 触发词：gym / fitness / 健身 / 训练 / workout / 健身房照片展示 / 训练相册.
 ---
 
 # Photo Album：照片即材料的健身房照片展示
@@ -29,7 +29,7 @@ description: >-
 | `references/style-dna.md` | 第 2–3 步，必读。照片 → DNA 的映射表、健身项目识别线索表、确认问题、防撞衫检查和健身专属规则 |
 | `references/examples.md` | 第 2 步。模板原始站的 GYM 基线 DNA，加 3 份截然不同的示例 |
 | `references/components.md` | 第 4 步。每个部件的契约、旋钮和可替换形式 |
-| `references/sound.md` | 第 4 步。EDM 乐器、按训练强度/项目选的音阶、每章声音配方、音量预算 |
+| `references/sound.md` | 第 4 步。轻快钢琴乐器族、按训练强度/项目选的音阶、每章声音配方、音量预算 |
 | `chapters.json` | 第 1 步。站点根目录下的项目 manifest：每章一条 `dir` + `label` + `photos:[{src,w,h,from}]`，`src` 是带章节目录的相对路径（如 `cutting/cutting-01-cardio`），直接抄进 `CHAPTERS` |
 | 项目分组（按项目分文件夹生成 manifest） | 第 1 步。照片按训练项目放进子文件夹（本站 7 个：`deadlift/`、`glutes/`、`shoulders/`、`yoga/`、`cutting/`、`dance/`、`pilates/`），由 `prepare_photos.py` 的 `--label-from-folder` 模式读取并输出 `chapters.json`；这是既有脚本的一个开关，没有独立的分类脚本文件 |
 | `scripts/prepare_photos.py` | 第 1 步。按章节生成 `photos/sq/<章节>/`、`photos/full/<章节>/`，并自动调用 `bake_tints.py`；加 `--label-from-folder` 时额外输出 `chapters.json`（`--order` 可定章节顺序） |
@@ -124,7 +124,7 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 - [ ] 每一章都能进入，横滑带惯性，照片保持原始比例；`photos/sq/<章节>/`、`photos/full/<章节>/` 全部 200，`tints.js` 键名与 `CHAPTERS.src` 完全一致
 - [ ] 风格台 1–4 都能出图；色块效果给出调色板
 - [ ] 大图：粒子飞出，由粗到细显影；左右切换；1–4 换风格；放大镜能放到看见像素；取色正常；Esc、返回键、点空白处都能关闭；`#/ch/N/M/view` 直接打开正常
-- [ ] 声音：第一次点击后自动开启；每章环境声不同；大图事件音齐全；`LB_SND / VOICE / SCENES` 项数 = 章节数，逐章进入都不报 undefined；七章按训练质感分布（力量 124/126/128、瑜伽 100、减脂 132、舞蹈 130、普拉提 92 BPM）；每章峰值在 0.10–0.32（测法见 `sound.md` 第 6 节）
+- [ ] 声音：第一次点击后自动开启；每章环境声不同；大图事件音齐全；`LB_SND / VOICE / SCENES` 项数 = 章节数，逐章进入都不报 undefined；七章按训练质感分布（硬拉 108、臀腿 116、肩部 126、瑜伽 88、减脂 138、舞蹈 128、普拉提 100 BPM，全在一台钢琴上）；每章大图峰值在 0.10–0.32（测法见 `sound.md` 第 6 节）
 
 **体验**
 - [ ] 手机宽度（375px）下没有横向滚动；大图变成底部抽屉；按住照片能拖放大镜
@@ -171,8 +171,8 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 - **合成触摸事件时，`setPointerCapture` 可能抛错**，要用 try/catch 包起来。
 - **从 window 上派发的 keydown，`e.target` 不是 Node**，判断之前先用 `instanceof Node`。
 - **有的预览面板在后台时会暂停 `requestAnimationFrame`**，动画看起来像"卡住"。验证时先截一张图把页面唤醒，或者直接读状态变量来确认。
-- **硬拉章的底鼓 stab 叠上环境声，峰值曾经冲到 0.56。** 要降这一章乐器的力度 `v`，不要动压缩器；底鼓瞬态本来就高，压总线会把 EDM 的冲击力一起压没。
-- **测声音峰值时数字跳得厉害**：house 鼓组是定拍的，但 riser / sweep 是随机排的，幕布转场还有一声风。测法见 `sound.md` 第 6 节，要多测几次取中位数。
+- **跑动密的章（减脂 16 分跑动）叠上环境声，峰值容易冲上预算上限。** 降这一章乐器的力度 `v`、减少同时落下的音数或拉开 `pianoRun` 的 `gap`，不要动压缩器；压总线会把钢琴的槌击瞬态一起压没。
+- **测声音峰值时数字跳得厉害**：和弦落点与混响尾巴的相位每轮不同，幕布转场还有一声风。测法见 `sound.md` 第 6 节，要多测几次取中位数。
 - **验证脚本连续改网址时**，两次之间至少等 1.2 秒，让幕布转场走完。引擎已经处理了"转场途中又跳到大图"的竞态，但等转场走完的结果最稳定。
 - **点阵大字用细字重时取不到足够的点。** display 字重要 ≥ 700。
 
