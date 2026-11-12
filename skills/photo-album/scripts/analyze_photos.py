@@ -12,8 +12,13 @@
   contact.jpg    全部照片的缩略图总览，每张下面带 5 个主色，给 agent 自己"看图"用；
                  能从 chapters.json 拿到项目标签时，编号旁会标出 label
 
-脚本只量，不做设计决定。正式分组以训练项目（chapters.json 的 label，如 deadlift / glutes /
-shoulders / yoga）为准；chapter_draft_by_color 只是按颜色粗分，agent 还要结合动作、训练部位看图重新分。
+脚本只量，不做设计决定。正式分组以训练项目（chapters.json 的 dir / label，如 deadlift / glutes /
+shoulders / yoga / cutting / dance / pilates）为准；chapter_draft_by_color 只是按颜色粗分，agent 还要
+结合动作、训练部位看图重新分。
+
+会递归扫描 src 下按章节分的子文件夹（photos/full/<章节>/<名字>.jpg）。每张的 src 记成相对 src 的
+路径、去掉扩展名（如 cutting/cutting-01-cardio），和 CHAPTERS.src、tints.js 键名一致；扁平结构时
+仍退化为纯文件名。
 怎么把这些数字变成颜色、字体、动效和声音，见 references/style-dna.md。
 需要 Pillow（pip install pillow）。
 """
@@ -47,7 +52,7 @@ def kmeans(px, k=5, iters=10):
                   key=lambda d: -d["share"])
 
 
-def measure(path):
+def measure(path, root):
     im = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
     W, H = im.size
     small = im.resize((64, 64), Image.BILINEAR)
@@ -73,7 +78,8 @@ def measure(path):
     hue = (math.degrees(math.atan2(hy, hx)) % 360) if hn else None
     bright = sorted(Ls)[int(.97 * len(Ls))]
     return {
-        "file": path.name, "src": path.stem, "w": W, "h": H,
+        "file": path.relative_to(root).as_posix(),
+        "src": path.relative_to(root).with_suffix("").as_posix(), "w": W, "h": H,
         "orientation": "portrait" if H > W * 1.05 else "landscape" if W > H * 1.05 else "square",
         "palette": kmeans(px),
         "luminance": round(L, 3), "contrast": round(contrast, 3),
@@ -177,13 +183,14 @@ def main():
     ap.add_argument("src", type=Path, nargs="?", default=Path("photos/full"))
     ap.add_argument("--out", type=Path, default=Path("."))
     a = ap.parse_args()
-    files = sorted(p for p in a.src.iterdir() if p.suffix.lower() in EXT)
+    # 递归：按章节分子文件夹后，photos/full/<章节>/<名字>.jpg 也要收进来
+    files = sorted(p for p in a.src.rglob("*") if p.is_file() and p.suffix.lower() in EXT)
     if not files:
         sys.exit(f"{a.src} 里没有照片")
     photos = []
     for f in files:
-        print(f"量 {f.name}", file=sys.stderr)
-        photos.append(measure(f))
+        print(f"量 {f.relative_to(a.src).as_posix()}", file=sys.stderr)
+        photos.append(measure(f, a.src))
 
     avg = lambda k: sum(p[k] for p in photos) / len(photos)
     L, S, Wm = avg("luminance"), avg("saturation"), avg("warmth")
@@ -215,7 +222,8 @@ def main():
             chapter_data = json.loads(chapters_path.read_text(encoding="utf-8"))
         except Exception as e:
             print(f"读 {chapters_path} 失败：{e}", file=sys.stderr)
-    exercise_draft = [{"label": ch["label"], "src": [p["src"] for p in ch.get("photos", [])]}
+    exercise_draft = [{"dir": ch.get("dir", ch["label"]), "label": ch["label"],
+                       "src": [p["src"] for p in ch.get("photos", [])]}
                       for ch in chapter_data]
     label_of = {p["src"]: ch["label"] for ch in chapter_data for p in ch.get("photos", [])}
     seed = {

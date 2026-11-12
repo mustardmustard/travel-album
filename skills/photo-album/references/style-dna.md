@@ -27,7 +27,7 @@ type:
   case: upper         # upper / mixed → :root --case（uppercase / none）、THEME.font.upper（true / false）
   cjk: Noto Sans SC   # 中文配字；馆名和口号里的英文走 display
   why: 为什么是这套字
-hero: { word: GYM, sub: "Training / 26 / 11", line: "Deadlift · Glutes · Shoulders · Yoga" }
+hero: { word: "MAX 健身工作室", sub: "Training / 26 / 11", line: "Deadlift · Glutes · Shoulders · Yoga · Cutting · Dance · Pilates" }
 motion:               # 对应 THEME.motion；缓动曲线写在 :root --ease
   character: 利落 / 爆发 / 柔韧 / 机械 …
   drift: .0032  follow: .075  spring: .06  damp: .82  repel: 60  gather: 950  develop: 1250
@@ -39,8 +39,10 @@ sound:
   base: 57
   presence: .9        # THEME.presence：.5 若有若无 / .9 GYM 基线 / 1.5 有存在感
 chapters:
-  - { en: DEADLIFT, zh: 硬拉, exercise: 传统硬拉, body_part: 后链（臀·腘绳·背）, intensity: 极重·爆发, equipment: 杠铃·杠铃片·镁粉·腰带, mood: 重, line: "…", photos: [...], ambient: "124BPM kick 每拍 + offbeat open hat + sub 根音", voice: stab }
-  # 每章的 mood 写这一章的训练质感词：重 / 持续酸胀 / 精准轻快 / 慢与呼吸
+  - { en: DEADLIFT, zh: 硬拉, dir: deadlift, exercise: 传统硬拉, body_part: 后链（臀·腘绳·背）, intensity: 极重·爆发, equipment: 杠铃·杠铃片·镁粉·腰带, mood: 重, line: "…", photos: [...], ambient: "124BPM kick 每拍 + offbeat open hat + sub 根音", voice: stab }
+  # dir 是照片子文件夹名（photos/sq/<dir>/、photos/full/<dir>/），也是 chapters.json 的章节键
+  # 每张照片的 src 写成 "<dir>/<名字>"（如 cutting/cutting-01-cardio），tints.js 键名同它
+  # 每章的 mood 写这一章的训练质感词：重 / 持续酸胀 / 精准轻快 / 慢与呼吸 / 冲刺 / 律动 / 控制
   # exercise / body_part / intensity / equipment 是识图得到的标签，写进项目 manifest
 swaps: []             # 要替换的默认部件，最多 2 个，每个写清是哪条 DNA 跟默认部件冲突
 ```
@@ -65,7 +67,9 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
    | 杠铃离地、髋铰链、镁粉、腰带、硬拉台 | 硬拉 DEADLIFT | 主项、最重、爆发、低频 |
    | 深蹲架、臀推凳、腿举机、杠铃在肩上 | 臀腿 GLUTES | 下肢辅助、持续酸胀 |
    | 哑铃侧平举、推举、绳索面拉、龙门架 | 肩部 SHOULDERS | 上肢、精准轻快 |
-   | 跑步机、跳绳、划船机、动感单车 | 有氧 | 不是推荐 4 章之一；照片多时单列一章，少时并入相邻章 |
+   | 跑步机、跳绳、战绳、冲刺、动感单车 | 减脂 CUTTING | 高强度间歇、心率、爆发与节奏；本站单列第 5 章 |
+   | 镜面舞蹈房、跳跃、旋转、群舞、八拍排练 | 舞蹈 DANCE | 团课 / 律动，和纯有氧区分；本站单列第 6 章 |
+   | 普拉提床、凯迪拉克床、核心控制、慢速拉伸 | 普拉提 PILATES | 低强度控制，和瑜伽的呼吸留白区分；本站单列第 7 章 |
 4. **起草"一句话"**：这次训练 / 这家馆是什么？例如"在城市综合馆，从最重的一组硬拉收在最后一个呼吸"。后面所有决定都要能回到这句话上来。
 5. **按下面的映射表**，逐项填 DNA。
 
@@ -158,17 +162,17 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 
 详见 `sound.md`，这里只列 DNA 级别的决定：
 - **音阶**：按训练强度 / 项目选（`sound.md` 第 3 节）。推荐多利亚 `[0,2,3,5,7,9,10]` 或自然小调，重项目偏小调色彩，收操可转明亮。
-- **整体速度**：跟着动效性格走。欧美动感 house / EDM 底鼓 124 / 126 / 128 BPM 四四拍（硬拉 / 臀腿 / 肩部），瑜伽章降到 100 BPM 的 chill / downtempo。
-- **每章的乐器**：跟着那一章的训练质感走（硬拉=kick 每拍 + sub 根音，臀腿=offbeat bass 切分 + 反拍 stab，肩部=clap + lead 短句，瑜伽=长 stab / pad + air 气息与留白）；`VOICE` 悬停音统一用 lead / stab 短音。
+- **整体速度**：跟着动效性格走。欧美动感 house / EDM 底鼓 124 / 126 / 128 BPM 四四拍（硬拉 / 臀腿 / 肩部），瑜伽降到 100 BPM；减脂冲到 132 BPM、舞蹈 130 BPM、普拉提 92 BPM。七章不是单调递减，前四章是「一次训练」，后三章是三种项目性格。
+- **每章的乐器**：跟着那一章的训练质感走（硬拉=kick 每拍 + sub 根音，臀腿=offbeat bass 切分 + 反拍 stab，肩部=clap + lead 短句，瑜伽=长 stab / pad + air，减脂=双 kick + 16 分 hat + riser，舞蹈=反拍 open hat + clap + 宽 stab，普拉提=soft kick + 长 pad + air）；`VOICE` 悬停音统一用 lead / stab 短音，`LB_SND / VOICE / SCENES` 项数必须等于章节数。
 - **presence**：环境声的总音量，填进 `THEME.presence`（.5 若有若无，.9 GYM 基线，1.5 有存在感）。门店大屏常年无人交互时，在 `THEME.soundOn` 上默认关声，而不是只压低 presence。
 
 ### 3.6 首页和文案
 
 | 项目 | 规则 |
 |---|---|
-| `hero.word` | 馆名，或者一句能概括这次训练的口号。最好不超过 9 个字母，超过时要带空格，`wordPoints` 会拆成两行。用户的母语不是拉丁字母时，也优先用拉丁字母大字，点阵效果最好；本地文字放进文字砖 |
+| `hero.word` | 馆名，或者一句能概括这次训练的口号。纯拉丁字母点阵最锐利；本站用中文混排 `MAX 健身工作室`，中文由系统 CJK 字体兜底，实测也能完整出点阵。`wordPoints` 只在 `word.length > 9 && 含空格` 时拆两行，九个字的「MAX 健身工作室」正好单行；更长的名字要么缩字数，要么确认两行排版不压到章节细导航 |
 | `hero.sub` | `Training / YY / MM` 这类格式，信息要短 |
-| `hero.line` | 训练项目列表，用 `·` 连接（如 `Deadlift · Glutes · Shoulders · Yoga`） |
+| `hero.line` | 训练项目列表，用 `·` 连接（如 `Deadlift · Glutes · Shoulders · Yoga · Cutting · Dance · Pilates`）；章节多了以后这行会变长，窄屏 `.places` 本来就是隐藏的 |
 | `TEXT_TILES` | 两块：a 是强调色底，放一句英文口号；b 是墨色底，放本地文字和统计数字（组数、次数、章节数） |
 | 章节导语 | 一句话，用第一人称的训练感受，不做动作说明 |
 | 图注 | 16 个字以内，写训练感受，**不写动作要领、不做教学示范**，也不写"这是 XX" |
@@ -179,10 +183,10 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 
 ## 4. 章节怎么分
 
-- **推荐 4 章 × 4 张 = 16 张**：每章 1 张氛围/器械图（空镜、器械、场馆光线）+ 3 张动作图。照片不足时按比例缩，每章至少 2 张；宁可少分一章，也不要出现只有 1 张的章。
+- **推荐 7 章 × 4 张 = 28 张（本站当前配置）**：每章 1 张氛围/器械图（空镜、器械、场馆光线）+ 3 张动作图。照片不足时可以缩到 4 章 × 4 张 = 16 张，每章至少 2 张；宁可少分一章，也不要出现只有 1 张的章。章节数变了，手风琴卡（`buildHero()` 遍历整个 `CHAPTERS`）、细导航和三个声音数组都会跟着变，窄屏要给 `--slim` 留够展开卡的宽度。
 - **按训练项目分，不按拍摄日期或组次流水账分。** `dna-seed.json` 里的 `chapter_draft_by_color` 只是按颜色粗分的辅助信号；`exercise_draft_by_label` 才是按项目标签分出来的正式草案（`--out` 下没有 `chapters.json` 时它是空数组）。最终要结合识图得到的动作、器械、身体部位、训练强度重新分（见第 2 节的识别线索表）。
 - 每章起一个英文项目名（en）、两个汉字（zh，或用户的语言），再配一句导语。
-- **顺序按一次训练的流程走**：主项 → 下肢辅助 → 上肢 → 收操，强度和音量由重到轻。推荐顺序：硬拉 DEADLIFT → 臀腿 GLUTES → 肩部 SHOULDERS → 瑜伽 YOGA。有氧照片多时可单列、插在主项之后；少时并入相邻章。
+- **顺序先按一次训练的流程走，再接特色课程**：主项 → 下肢辅助 → 上肢 → 收操，再是有氧、团课、控制类。本站顺序：硬拉 DEADLIFT → 臀腿 GLUTES → 肩部 SHOULDERS → 瑜伽 YOGA → 减脂 CUTTING → 舞蹈 DANCE → 普拉提 PILATES。有氧照片少时并入相邻章，别为凑数硬开一章。
 
 ---
 
@@ -190,7 +194,7 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 
 每个问题都带 agent 的推荐答案和理由，用户可以只回答"按你的来"。
 
-1. **"这家馆主要练什么、这次展示想传达什么？"** 附上 agent 起草的那句话（写进 `program`），以及据此定的 hero.word、hero.sub 和 4 个项目标签的顺序。
+1. **"这家馆主要练什么、这次展示想传达什么？"** 附上 agent 起草的那句话（写进 `program`），以及据此定的 hero.word、hero.sub 和各项目标签的顺序（本站 7 个，可按照片数量增减）。
 2. **"章节这样分可以吗？"** 列出每章的项目名、训练质感词和照片编号（对应 contact.jpg 上的编号）。
 3. **"风格选 A 还是 B？"** 给两套 DNA 方向，每套用 3 行描述：
    - 色板，写成 `paper / ink / accent`，accent 注明出处；
@@ -209,7 +213,7 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 把 DNA 跟模板原始站的 GYM 基线 DNA（见 `examples.md` A）逐项对比：paper、accent 色相、display 字体、动效性格、粒子形态、风格台效果、音阶、主要乐器。
 
 - **至少 4 项要不同。** 做不到的话，说明你在套模板而不是在读照片，回到第 2 步重看。
-- 唯一的例外：照片确实也是同一家综合馆、同样按这 4 个项目分章。这时也要在母题、强调色或章节上找到不同点。
+- 唯一的例外：照片确实也是同一家综合馆、同样按这批项目分章。这时也要在母题、强调色或章节上找到不同点。
 - 防撞衫基准已从 JAPAN 更换为 GYM 基线，对照时以 `examples.md` A 为准，不要跟旧基准比。
 
 ---
@@ -234,7 +238,7 @@ swaps: []             # 要替换的默认部件，最多 2 个，每个写清�
 ### 7.3 低光、镜面、竖幅占多数
 
 - 健身房常是低光加顶光/镜面亮斑，`night_guess`（整体暗但有亮光源）会把它们大量判成夜景，`night_share` 偏高，`paper_ink` 会给 `paper_dark_option`。以看图为准：镜面高光不是夜景灯，但低光器械压在深底上确实更好看，所以深色纸往往是合理选择，只是别顺手把它当成夜景题材去配音色和文案。
-- `portrait_share` 通常很高（全身动作、镜前自拍）。`photos/sq` 是 640×640 居中裁切，竖幅全身动作容易切掉头脚；浓缩短图前先看构图，必要时把关键动作放到画面中段。
+- `portrait_share` 通常很高（全身动作、镜前自拍）。`photos/sq/<章节>/` 是 640×640 居中裁切，竖幅全身动作容易切掉头脚；浓缩短图前先看构图，必要时用 `--sq-fit` 等比留白、把关键动作放到画面中段。
 - 镜面会拍到拍摄者和多余人像，识图时一并计入肖像授权检查。
 
 ### 7.4 图注不做教学示范

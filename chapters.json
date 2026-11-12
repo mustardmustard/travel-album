@@ -1,0 +1,212 @@
+[
+  {
+    "dir": "deadlift",
+    "label": "deadlift",
+    "photos": [
+      {
+        "src": "deadlift/deadlift-01-plates",
+        "w": 1536,
+        "h": 1024,
+        "from": "deadlift-01-plates.jpg"
+      },
+      {
+        "src": "deadlift/deadlift-02-setup",
+        "w": 1024,
+        "h": 1536,
+        "from": "deadlift-02-setup.jpg"
+      },
+      {
+        "src": "deadlift/deadlift-03-lockout",
+        "w": 1024,
+        "h": 1536,
+        "from": "deadlift-03-lockout.jpg"
+      },
+      {
+        "src": "deadlift/deadlift-04-grip",
+        "w": 1024,
+        "h": 1536,
+        "from": "deadlift-04-grip.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "glutes",
+    "label": "glutes",
+    "photos": [
+      {
+        "src": "glutes/glutes-01-rack",
+        "w": 1536,
+        "h": 1024,
+        "from": "glutes-01-rack.jpg"
+      },
+      {
+        "src": "glutes/glutes-02-squat",
+        "w": 1024,
+        "h": 1536,
+        "from": "glutes-02-squat.jpg"
+      },
+      {
+        "src": "glutes/glutes-03-hipthrust",
+        "w": 1024,
+        "h": 1536,
+        "from": "glutes-03-hipthrust.jpg"
+      },
+      {
+        "src": "glutes/glutes-04-lunge",
+        "w": 1024,
+        "h": 1536,
+        "from": "glutes-04-lunge.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "shoulders",
+    "label": "shoulders",
+    "photos": [
+      {
+        "src": "shoulders/shoulders-01-dumbbells",
+        "w": 1536,
+        "h": 1024,
+        "from": "shoulders-01-dumbbells.jpg"
+      },
+      {
+        "src": "shoulders/shoulders-02-press",
+        "w": 1024,
+        "h": 1536,
+        "from": "shoulders-02-press.jpg"
+      },
+      {
+        "src": "shoulders/shoulders-03-lateral",
+        "w": 1024,
+        "h": 1536,
+        "from": "shoulders-03-lateral.jpg"
+      },
+      {
+        "src": "shoulders/shoulders-04-facepull",
+        "w": 1024,
+        "h": 1536,
+        "from": "shoulders-04-facepull.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "yoga",
+    "label": "yoga",
+    "photos": [
+      {
+        "src": "yoga/yoga-01-studio",
+        "w": 1536,
+        "h": 1024,
+        "from": "yoga-01-studio.jpg"
+      },
+      {
+        "src": "yoga/yoga-02-downwarddog",
+        "w": 1024,
+        "h": 1536,
+        "from": "yoga-02-downwarddog.jpg"
+      },
+      {
+        "src": "yoga/yoga-03-warrior",
+        "w": 1024,
+        "h": 1536,
+        "from": "yoga-03-warrior.jpg"
+      },
+      {
+        "src": "yoga/yoga-04-savasana",
+        "w": 1024,
+        "h": 1536,
+        "from": "yoga-04-savasana.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "cutting",
+    "label": "cutting",
+    "photos": [
+      {
+        "src": "cutting/cutting-01-cardio",
+        "w": 1536,
+        "h": 1024,
+        "from": "cutting-01-cardio.jpg"
+      },
+      {
+        "src": "cutting/cutting-02-jumprope",
+        "w": 1024,
+        "h": 1536,
+        "from": "cutting-02-jumprope.jpg"
+      },
+      {
+        "src": "cutting/cutting-03-ropes",
+        "w": 1024,
+        "h": 1536,
+        "from": "cutting-03-ropes.jpg"
+      },
+      {
+        "src": "cutting/cutting-04-sprint",
+        "w": 1024,
+        "h": 1536,
+        "from": "cutting-04-sprint.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "dance",
+    "label": "dance",
+    "photos": [
+      {
+        "src": "dance/dance-01-studio",
+        "w": 1536,
+        "h": 1024,
+        "from": "dance-01-studio.jpg"
+      },
+      {
+        "src": "dance/dance-02-leap",
+        "w": 1024,
+        "h": 1536,
+        "from": "dance-02-leap.jpg"
+      },
+      {
+        "src": "dance/dance-03-rehearsal",
+        "w": 1024,
+        "h": 1536,
+        "from": "dance-03-rehearsal.jpg"
+      },
+      {
+        "src": "dance/dance-04-spin",
+        "w": 1024,
+        "h": 1536,
+        "from": "dance-04-spin.jpg"
+      }
+    ]
+  },
+  {
+    "dir": "pilates",
+    "label": "pilates",
+    "photos": [
+      {
+        "src": "pilates/pilates-01-studio",
+        "w": 1536,
+        "h": 1024,
+        "from": "pilates-01-studio.jpg"
+      },
+      {
+        "src": "pilates/pilates-02-reformer",
+        "w": 1024,
+        "h": 1536,
+        "from": "pilates-02-reformer.jpg"
+      },
+      {
+        "src": "pilates/pilates-03-core",
+        "w": 1024,
+        "h": 1536,
+        "from": "pilates-03-core.jpg"
+      },
+      {
+        "src": "pilates/pilates-04-stretch",
+        "w": 1024,
+        "h": 1536,
+        "from": "pilates-04-stretch.jpg"
+      }
+    ]
+  }
+]

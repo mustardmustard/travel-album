@@ -19,13 +19,13 @@ evidence:   # analyze_photos.py 实测
 color:
   paper: "#0F1419"   # tone 偏暗、night_guess 过半 → 深色纸，让顶光与镜面高光发亮；镜面亮斑不是夜景，看图确认过
   ink: "#EAF0F4"
-  accent: "#F26A2E"  # 护腕 / 杠铃片边缘的 #E2642C 提纯，色相 18° → 16°。母题：护腕、杠铃片、地垫边缘的橙，四章都出现，全站签名
+  accent: "#F26A2E"  # 护腕 / 杠铃片边缘的 #E2642C 提纯，色相 18° → 16°。母题：护腕、杠铃片、地垫边缘的橙，七章都出现，全站签名
   on_accent: "#0F1419"
 type:
   display: Archivo, stretch: expanded (--stretch 125%), case: upper (--case uppercase, upper:true)
   cjk: Noto Sans SC
   why: 器械铭牌、项目编号、组次标签都是宽体全大写，经得住点阵化
-hero: { word: GYM, sub: "Training / 26 / 11", line: "Deadlift · Glutes · Shoulders · Yoga" }
+hero: { word: "MAX 健身工作室", sub: "Training / 26 / 11", line: "Deadlift · Glutes · Shoulders · Yoga · Cutting · Dance · Pilates" }
 motion: { character: 利落·力量, drift: .0032, follow: .075, spring: .06, damp: .82, repel: 60, gather: 950, develop: 1250 }
 texture:
   dots: circle
@@ -36,10 +36,13 @@ chapters:
   - { en: GLUTES,    zh: 臀腿, exercise: 臀推 / 深蹲 / 腿举,     body_part: 臀·股四头,         intensity: 中高·持续酸胀, equipment: 深蹲架·臀推凳,     mood: 持续酸胀, ambient: 126BPM kick 四拍 + 16 分 hat + offbeat bass 切分 + 反拍 stab, voice: stab }
   - { en: SHOULDERS, zh: 肩部, exercise: 侧平举 / 推举 / 面拉,   body_part: 三角肌,             intensity: 中·精准轻快,   equipment: 哑铃·龙门架,       mood: 精准轻快, ambient: 128BPM kick + clap 落 2/4 拍 + 16 分 hat + lead 短句, voice: lead }
   - { en: YOGA,      zh: 瑜伽, exercise: 伸展体式 / 收操,         body_part: 全身·呼吸,          intensity: 低·慢与留白,   equipment: 瑜伽垫,             mood: 慢与呼吸, ambient: 100BPM soft kick 每 2 拍 + 长 stab/pad + air 气息 + 留白, voice: lead }
+  - { en: CUTTING,   zh: 减脂, exercise: 跳绳 / 战绳 / 冲刺,       body_part: 全身·心肺,          intensity: 高·间歇冲刺,   equipment: 跳绳·战绳·跑步机,   mood: 冲刺,     ambient: 132BPM 双 kick + 16 分 hat + 每 4 小节 riser, voice: lead }
+  - { en: DANCE,     zh: 舞蹈, exercise: 跳跃 / 旋转 / 群舞排练,   body_part: 全身·协调,          intensity: 中高·律动,     equipment: 镜面舞蹈房,         mood: 律动,     ambient: 130BPM 四四拍 + 反拍 open hat + 2/4 拍 clap + 宽 stab, voice: stab }
+  - { en: PILATES,   zh: 普拉提, exercise: 核心控制 / 慢速拉伸,     body_part: 核心·深层肌群,      intensity: 低·控制,       equipment: 普拉提床·凯迪拉克床, mood: 控制,     ambient: 92BPM soft kick 每小节 + 长 pad + air 气息, voice: stab }
 swaps: []
 ```
 
-共 16 张：每章 1 张氛围/器械图 + 3 张动作图；顺序是主项 → 下肢辅助 → 上肢 → 收操，强度与音量由重到轻。
+共 28 张：7 章 × 4 张，每章 1 张氛围/器械图 + 3 张动作图；顺序是力量主项 → 收操 → 有氧 → 团课 → 控制。照片按 `deadlift/`、`glutes/`、`shoulders/`、`yoga/`、`cutting/`、`dance/`、`pilates/` 分文件夹，站点 `photos/sq/<章节>/` 与 `photos/full/<章节>/` 同层级。
 
 ---
 

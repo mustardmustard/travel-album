@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FORGE — 健身房影像展</title>   <!-- 和 THEME.title 一致 -->
+<title>IN MAX — 健身房影像展</title>   <!-- 和 THEME.title 一致 -->
 <meta name="author" content="XCJ">
 <link rel="icon" href="data:,">   <!-- 不请求 favicon.ico，避免控制台 404 -->
 <!-- 字体：display 字体 + 中文配字。换字体时同步改 :root --display 和 THEME.font -->
@@ -77,8 +77,8 @@ a{color:inherit;text-decoration:none}
 .hero-nav a:hover{color:var(--accent)}
 .hero-nav i{font-style:normal;opacity:.45}
 /* 手风琴类目卡：默认第一张展开；鼠标移到哪张哪张展开，其余自动收成细长竖条 */
-.hero-cards{display:flex;gap:clamp(10px,1.6vw,18px);width:min(880px,100%);
-  margin-top:clamp(26px,4vh,42px);height:clamp(230px,30vh,300px);--slim:64px}
+.hero-cards{display:flex;gap:clamp(10px,1.6vw,18px);width:min(980px,100%);
+  margin-top:clamp(26px,4vh,42px);height:clamp(230px,30vh,300px);--slim:52px}
 .hero-card{position:relative;display:block;flex:0 0 var(--slim);min-width:0;overflow:hidden;
   border-radius:26px;background:var(--ph);isolation:isolate;
   transition:flex 1.05s var(--ease-card),box-shadow 1.05s var(--ease-card)}
@@ -348,7 +348,26 @@ a{color:inherit;text-decoration:none}
 .about .foot{position:static;flex:none;min-height:44px}
 .about .foot span:first-child{text-transform:none}
 .about-trigger:focus-visible,.home-byline:focus-visible,.author-signature:focus-visible,
-.author-page :is(a,button):focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.author-page :is(a,button):focus-visible,.contact-page :is(a,button):focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+
+/* ---------- 联系页：与 About 共用版式骨架，联系方式排成可复制的清单 ---------- */
+.contact-page{width:min(1100px,100%);margin:0 auto;flex:1;display:grid;grid-template-columns:1.1fr 1fr;
+  align-items:center;gap:clamp(40px,7vw,110px);padding:48px}
+.contact-kicker{font-size:12px;color:var(--muted);letter-spacing:.06em;margin-bottom:16px}
+.contact-name{font-family:var(--cjk);font-size:clamp(32px,4.4vw,60px);font-weight:700;
+  line-height:1.25;letter-spacing:.02em}
+.contact-name:focus{outline:none}
+.contact-intro{margin-top:22px;font-family:var(--cjk);font-size:14px;line-height:1.9;color:var(--muted)}
+.contact-list{list-style:none;border-top:1px solid var(--line)}
+.contact-list li{display:grid;grid-template-columns:104px 1fr auto;align-items:center;gap:12px;
+  padding:20px 0;border-bottom:1px solid var(--line)}
+.contact-list .k{font-family:var(--cjk);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.contact-list .v{font-size:clamp(15px,1.5vw,20px);font-weight:600;letter-spacing:.02em;overflow-wrap:anywhere}
+.contact-list a.v:hover{color:var(--accent)}
+.contact-copy{display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid var(--line);
+  font-family:var(--cjk);font-size:10px;letter-spacing:0;transition:color .2s,border-color .2s}
+.contact-copy:hover{color:var(--accent);border-color:var(--accent)}
+.contact-status{min-height:28px;margin-top:14px;color:var(--accent);font-family:var(--cjk);font-size:11px;line-height:1.6}
 
 /* ---------- 单张大图：点阵显影 + 放大镜 ---------- */
 .fig .pic{cursor:zoom-in}
@@ -430,18 +449,22 @@ a{color:inherit;text-decoration:none}
 
 @media (max-width:700px){
   :root{--hdr:50px}
-  .logo{padding:0 10px;font-size:14px}
-  .nav a{padding:0 8px;font-size:10px}
+  .logo{padding:0 6px;font-size:12px}
+  .logo .box{font-size:10px}
+  .nav a{padding:0 7px;font-size:9px;white-space:nowrap;flex:none}
   .nav [data-nav="home"]{display:none}
   .nav a.opt{display:none}
-  .snd{padding:0 10px}
+  .snd{padding:0 8px}
   .snd .lbl{display:none}
-  .about-trigger{padding:0 10px;font-size:10px}
+  .about-trigger{padding:0 7px;font-size:9px;white-space:nowrap;flex:none}
   .author-page{grid-template-columns:1fr;align-content:center;gap:28px;padding:28px 24px 32px}
   .author-name{font-size:76px}
   .author-intro{margin-top:18px;font-size:13px}
   .author-socials{gap:12px}
   .author-contact{margin-top:8px;padding-top:20px}
+  .contact-page{grid-template-columns:1fr;align-content:center;gap:26px;padding:28px 24px 32px}
+  .contact-name{font-size:34px}
+  .contact-list li{grid-template-columns:84px 1fr auto;padding:16px 0}
   .about .ch-head{height:76px}
   .about .ch-count{font-size:9px}
   .hero{padding:16px 16px 30px}
@@ -449,7 +472,7 @@ a{color:inherit;text-decoration:none}
   .hero-top .ht-mid{display:none}
   .hero-title{margin:16px 0 4px}
   .hero-nav{font-size:8px;gap:5px 10px;letter-spacing:.1em}
-  .hero-cards{height:230px;--slim:44px;gap:8px;margin-top:22px;width:100%}
+  .hero-cards{height:230px;--slim:26px;gap:6px;margin-top:22px;width:100%}
   .hero-card{border-radius:20px}
   .frame{--band-r:20px}
   .hero-card .cap{padding:32px 14px 14px}
@@ -471,9 +494,13 @@ a{color:inherit;text-decoration:none}
   .foot{padding:0 16px;font-size:9px}
   .foot span:nth-child(2){display:none}
 }
+/* 窄到放不下四个入口时先收掉 Chapters：首页细导航和章节页 Back 仍能回到各章 */
+@media (max-width:420px){
+  .nav [data-nav="ch"]{display:none}
+}
 @media (max-width:360px){
-  .logo{padding:0 8px}
-  .about-trigger{padding:0 8px}
+  .logo{padding:0 5px}
+  .about-trigger{padding:0 5px}
 }
 @media (prefers-reduced-motion:reduce){
   .tile img,.ov{transition:none}
@@ -493,6 +520,7 @@ a{color:inherit;text-decoration:none}
 <header class="hdr">
   <a class="logo x" id="logo" href="#/" aria-label="回到相册首页"></a>
   <nav class="nav x">
+    <a href="#/contact" data-nav="contact">Contact us</a>
     <a href="#/" data-nav="home">Album</a>
     <a href="#/ch/1" data-nav="ch">Chapters</a>
     <button class="snd" id="snd" type="button" aria-pressed="true" aria-label="声音已开启，点击关闭"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="lbl">Sound</span></button>
@@ -565,6 +593,26 @@ a{color:inherit;text-decoration:none}
   <div class="foot x"><span id="authorCopyright"></span><span id="authorStats"></span><span id="authorJournal"></span></div>
 </section>
 
+<section class="view about contact" id="contact" hidden aria-labelledby="contactName">
+  <div class="ch-head x">
+    <a class="back" id="contactBack" href="#/">← Back</a>
+    <h1 class="ch-title"><small>Get in touch</small>Contact us <span>联系我们</span></h1>
+    <span class="ch-count" id="contactYear"></span>
+  </div>
+  <div class="contact-page">
+    <div>
+      <p class="contact-kicker">MAX Fitness Studio</p>
+      <h2 class="contact-name" id="contactName" tabindex="-1"></h2>
+      <p class="contact-intro">想来看场地、约一次体验课，<br>或者直接聊聊训练计划，都欢迎联系。</p>
+    </div>
+    <div>
+      <ul class="contact-list" id="contactList"></ul>
+      <p class="contact-status" id="contactStatus" role="status"></p>
+    </div>
+  </div>
+  <div class="foot x"><span id="contactCopyright"></span><span id="contactStats"></span><span id="contactJournal"></span></div>
+</section>
+
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="单张大图" aria-hidden="true">
   <div class="lb-veil"></div>
   <canvas class="lb-dev" id="lbDev"></canvas>
@@ -602,8 +650,8 @@ a{color:inherit;text-decoration:none}
    其余都是引擎。每个值怎么从照片里推出来，见 skills/photo-album/SKILL.md
    ============================================================ */
 const THEME = {
-  title:"FORGE — 健身房影像展",
-  logo:["Training", "FORGE"],                      // 左上角：一个词 + 方框里的缩写
+  title:"IN MAX — 健身房影像展",
+  logo:["Training", "IN MAX"],                     // 左上角：一个词 + 方框里的品牌名
   year:"2026",
   journal:"A training gallery",
   author:{
@@ -614,7 +662,7 @@ const THEME = {
       // { icon:"github", label:"GitHub", url:"https://github.com/your-name" },
     ],
   },
-  home:{ word:"ZENG Y^2", sub:"Training  2026", line:"Deadlift · Glutes · Shoulders · Yoga" },   // 首页点阵大字、副标题、项目行
+  home:{ word:"MAX 健身工作室", sub:"Training  2026", line:"Deadlift · Glutes · Shoulders · Yoga · Cutting · Dance · Pilates" },   // 首页点阵大字、副标题、项目行
   font:{ family:"Archivo", weight:900, stretch:"expanded", upper:true },   // 点阵字用的字体，和 :root --display 的第一个一致；upper 和 --case 一致
   scale:[0,2,3,5,7,9,10], base:57,            // 多利亚音阶（house / funk 的律动感）和基准音高（MIDI 音符号）
   presence:.9,                                 // 章节环境声的音量：.5 若有若无 / 1 默认 / 1.5 有存在感
@@ -626,43 +674,70 @@ const THEME = {
     gather:950, develop:1250,         // 大图：粒子飞出、由粗到细显影的时长（ms）
   },
 };
-// 照片：src 对应 photos/sq/ 与 photos/full/ 下的同名文件；w、h 是 full 图的实际宽高；非 jpg 用 ext 标注
+// 照片：src 是相对 photos/sq 与 photos/full 的路径（不含扩展名），每章各占一个子文件夹；
+// dir 与 chapters.json 的章节目录一致；w、h 是 full 图的实际宽高；非 jpg 用 ext 标注
 const CHAPTERS = [
-  { en:"Deadlift", zh:"硬拉", line:"杠铃离地那一下，整个场馆都安静了。", photos:[
-    { src:"deadlift-01-plates", w:1536, h:1024, cap:"铁片摞在墙边，还没人说话。" },
-    { src:"deadlift-02-setup", w:1024, h:1536, cap:"握稳，先把气沉下去。" },
-    { src:"deadlift-03-lockout", w:1024, h:1536, cap:"站直的那一刻，光刚好落在肩上。" },
-    { src:"deadlift-04-grip", w:1024, h:1536, cap:"镁粉留在掌心，也留在杆上。" },
+  { en:"Deadlift", zh:"硬拉", dir:"deadlift", line:"杠铃离地那一下，整个场馆都安静了。", photos:[
+    { src:"deadlift/deadlift-01-plates", w:1536, h:1024, cap:"铁片摞在墙边，还没人说话。" },
+    { src:"deadlift/deadlift-02-setup", w:1024, h:1536, cap:"握稳，先把气沉下去。" },
+    { src:"deadlift/deadlift-03-lockout", w:1024, h:1536, cap:"站直的那一刻，光刚好落在肩上。" },
+    { src:"deadlift/deadlift-04-grip", w:1024, h:1536, cap:"镁粉留在掌心，也留在杆上。" },
   ]},
-  { en:"Glutes", zh:"臀腿", line:"酸胀是一组一组攒出来的。", photos:[
-    { src:"glutes-01-rack", w:1536, h:1024, cap:"架子空着，等下一个人走过去。" },
-    { src:"glutes-02-squat", w:1024, h:1536, cap:"蹲到最低处，只剩自己的呼吸。" },
-    { src:"glutes-03-hipthrust", w:1024, h:1536, cap:"顶上去，停半秒，再放下。" },
-    { src:"glutes-04-lunge", w:1024, h:1536, cap:"一步一步，把地板走热。" },
+  { en:"Glutes", zh:"臀腿", dir:"glutes", line:"酸胀是一组一组攒出来的。", photos:[
+    { src:"glutes/glutes-01-rack", w:1536, h:1024, cap:"架子空着，等下一个人走过去。" },
+    { src:"glutes/glutes-02-squat", w:1024, h:1536, cap:"蹲到最低处，只剩自己的呼吸。" },
+    { src:"glutes/glutes-03-hipthrust", w:1024, h:1536, cap:"顶上去，停半秒，再放下。" },
+    { src:"glutes/glutes-04-lunge", w:1024, h:1536, cap:"一步一步，把地板走热。" },
   ]},
-  { en:"Shoulders", zh:"肩部", line:"轻一点，反而更要稳。", photos:[
-    { src:"shoulders-01-dumbbells", w:1536, h:1024, cap:"一排哑铃，按重量排得整整齐齐。" },
-    { src:"shoulders-02-press", w:1024, h:1536, cap:"举过头顶，手臂连成一条线。" },
-    { src:"shoulders-03-lateral", w:1024, h:1536, cap:"向两边打开，像把窗推开。" },
-    { src:"shoulders-04-facepull", w:1024, h:1536, cap:"绳索收回来，肩胛慢慢合上。" },
+  { en:"Shoulders", zh:"肩部", dir:"shoulders", line:"轻一点，反而更要稳。", photos:[
+    { src:"shoulders/shoulders-01-dumbbells", w:1536, h:1024, cap:"一排哑铃，按重量排得整整齐齐。" },
+    { src:"shoulders/shoulders-02-press", w:1024, h:1536, cap:"举过头顶，手臂连成一条线。" },
+    { src:"shoulders/shoulders-03-lateral", w:1024, h:1536, cap:"向两边打开，像把窗推开。" },
+    { src:"shoulders/shoulders-04-facepull", w:1024, h:1536, cap:"绳索收回来，肩胛慢慢合上。" },
   ]},
-  { en:"Yoga", zh:"瑜伽", line:"把呼吸放慢，这一天才算练完。", photos:[
-    { src:"yoga-01-studio", w:1536, h:1024, cap:"垫子卷着，晨光先到了。" },
-    { src:"yoga-02-downwarddog", w:1024, h:1536, cap:"身体折成一个安静的角。" },
-    { src:"yoga-03-warrior", w:1024, h:1536, cap:"站稳，手臂向两边伸出去。" },
-    { src:"yoga-04-savasana", w:1024, h:1536, cap:"躺下来，什么都不用再做。" },
+  { en:"Yoga", zh:"瑜伽", dir:"yoga", line:"把呼吸放慢，这一天才算练完。", photos:[
+    { src:"yoga/yoga-01-studio", w:1536, h:1024, cap:"垫子卷着，晨光先到了。" },
+    { src:"yoga/yoga-02-downwarddog", w:1024, h:1536, cap:"身体折成一个安静的角。" },
+    { src:"yoga/yoga-03-warrior", w:1024, h:1536, cap:"站稳，手臂向两边伸出去。" },
+    { src:"yoga/yoga-04-savasana", w:1024, h:1536, cap:"躺下来，什么都不用再做。" },
+  ]},
+  { en:"Cutting", zh:"减脂", dir:"cutting", line:"心率拉上去，汗把一天冲干净。", photos:[
+    { src:"cutting/cutting-01-cardio", w:1536, h:1024, cap:"有氧区还没人，履带先醒着。" },
+    { src:"cutting/cutting-02-jumprope", w:1024, h:1536, cap:"绳子落地一下，节拍就准了。" },
+    { src:"cutting/cutting-03-ropes", w:1024, h:1536, cap:"两股绳甩起来，谁都不说话。" },
+    { src:"cutting/cutting-04-sprint", w:1024, h:1536, cap:"最后三十秒，再快一点。" },
+  ]},
+  { en:"Dance", zh:"舞蹈", dir:"dance", line:"把训练变成一段可以重复的节奏。", photos:[
+    { src:"dance/dance-01-studio", w:1536, h:1024, cap:"镜子擦得很亮，等人进来。" },
+    { src:"dance/dance-02-leap", w:1024, h:1536, cap:"跳起来那一下，地板就不存在了。" },
+    { src:"dance/dance-03-rehearsal", w:1024, h:1536, cap:"三个人数同一个八拍。" },
+    { src:"dance/dance-04-spin", w:1024, h:1536, cap:"转过去，衣角慢半拍才跟上。" },
+  ]},
+  { en:"Pilates", zh:"普拉提", dir:"pilates", line:"慢，才能听见身体每一处回应。", photos:[
+    { src:"pilates/pilates-01-studio", w:1536, h:1024, cap:"器械排成一列，阳光也是。" },
+    { src:"pilates/pilates-02-reformer", w:1024, h:1536, cap:"推床滑出去，控制比力气重要。" },
+    { src:"pilates/pilates-03-core", w:1024, h:1536, cap:"停住，只靠核心撑着。" },
+    { src:"pilates/pilates-04-stretch", w:1024, h:1536, cap:"拉长最后一下，今天收工。" },
   ]},
 ];
 const STATS = `${CHAPTERS.reduce((n,c)=>n + c.photos.length, 0)} photos · ${CHAPTERS.length} programs`;
 // 照片环里插的两块文字砖：a 是强调色底，b 是墨色底
 const TEXT_TILES = [
   { cls:"a", html:'<small>Training / 26</small><p>Show up<br>and<br>do the<br>work</p>' },
-  { cls:"b", html:`<small>Training Log</small><p class="w2">FORGE</p><small>${STATS}</small>` },
+  { cls:"b", html:`<small>Training Log</small><p class="w2">IN MAX</p><small>${STATS}</small>` },
 ];
+// 联系页：换场馆时只改这里，页面正文与复制按钮都从这里读
+const CONTACT = {
+  studio:"MAX 工作健身室",
+  wechat:"MAX20240108",
+  person:"MAX-陈",
+  phone:"18820216492",
+};
 
 /* ============================================================ */
 const $ = s => document.querySelector(s);
-// 照片路径：png / jpg 混用，统一在这里拼；CHAPTERS 里的 ext 只标非 jpg 的格式
+// 照片路径：src 自带章节子文件夹（如 cutting/cutting-01-cardio），在这里统一拼成
+// photos/sq/<章节>/<名字>.jpg 与 photos/full/<章节>/<名字>.jpg；ext 只标非 jpg 的格式
 const PHOTO_EXT = Object.fromEntries(CHAPTERS.flatMap(c => c.photos.map(p => [p.src, p.ext || ".jpg"])));
 const photoURL = (dir, src) => `photos/${dir}/${src}${PHOTO_EXT[src] || ".jpg"}`;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -722,6 +797,35 @@ $("#authorCopy").addEventListener("click", async()=>{
     await navigator.clipboard.writeText(THEME.author.email);
     $("#authorStatus").textContent = "邮箱已复制";
   } catch(e){ $("#authorStatus").textContent = "请选中邮箱地址复制"; }
+});
+
+/* ---------------- 联系页：场馆信息 + 一键复制 ---------------- */
+let contactReturn = "#/";
+function initContact(){
+  $("#contactName").textContent = CONTACT.studio;
+  $("#contactList").innerHTML = [
+    ["联系微信", CONTACT.wechat, ""],
+    ["联系人", CONTACT.person, ""],
+    ["电话", CONTACT.phone, `tel:${CONTACT.phone.replace(/\s/g,"")}`],
+  ].map(([k,v,href])=>`
+    <li><span class="k">${k}</span>${
+      href ? `<a class="v" href="${href}">${v}</a>` : `<span class="v">${v}</span>`
+    }<button class="contact-copy" type="button" data-copy="${v}" aria-label="复制${k}">复制</button></li>`).join("");
+  $("#contactYear").textContent = THEME.year;
+  $("#contactCopyright").textContent = `© ${THEME.year} ${THEME.logo[1]}`;
+  $("#contactStats").textContent = STATS;
+  $("#contactJournal").textContent = THEME.journal;
+  $("#contactList").addEventListener("click", async e=>{
+    const btn = e.target instanceof Element && e.target.closest(".contact-copy");
+    if (!btn) return;
+    try {
+      await navigator.clipboard.writeText(btn.dataset.copy);
+      $("#contactStatus").textContent = `已复制：${btn.dataset.copy}`;
+    } catch(err){ $("#contactStatus").textContent = "请选中内容后手动复制"; }
+  });
+}
+addEventListener("keydown", e=>{
+  if (route.view==="contact" && e.key==="Escape"){ e.preventDefault(); location.hash = contactReturn; }
 });
 
 // 环上的格子：各章节轮流取一张，让相邻格子尽量来自不同章节
@@ -961,15 +1065,15 @@ addEventListener("keydown", e=>{
 const cv = $("#dots"), ctx = cv.getContext("2d");
 const P = { dots:[], mx:-1e4, my:-1e4, R:THEME.motion.repel, step:6, r:2.4, w:0, h:0, size:0, shapes:[], key:0, src:null, tinted:false, timer:0, tints:new Map() };
 const HOME = THEME.home;
-// 上层展示区：顶部一行细信息、章节细导航、四张带间距的类目方图（点进去是对应章节）
+// 上层展示区：顶部一行细信息、章节细导航、每章一张带间距的类目方图（点进去是对应章节）
 function buildHero(){
   const up = s => THEME.font.upper ? String(s).toUpperCase() : s;
   $("#heroTop").innerHTML =
     `<span>${HOME.sub}</span>` +
     `<span class="ht-mid">A training gallery by ${THEME.author.name}</span>` +
-    `<a href="mailto:${THEME.author.email}">Contact us</a>`;
+    `<span>${THEME.year}</span>`;                    // 联系方式统一放在顶部导航，不再挤在右上角
   $("#heroNav").innerHTML = CHAPTERS.map((c,i)=>`<a href="#/ch/${i+1}">${up(c.en)}</a>`).join('<i>·</i>');
-  $("#heroCards").innerHTML = CHAPTERS.slice(0,4).map((c,i)=>`
+  $("#heroCards").innerHTML = CHAPTERS.map((c,i)=>`
     <a class="hero-card" href="#/ch/${i+1}/1" aria-label="进入${c.zh}章节">
       <span class="ph"><img src="${photoURL("sq", c.photos[0].src)}" alt="" decoding="async"></span>
       <span class="num">${pad2(i+1)}</span>
@@ -1038,7 +1142,7 @@ function sampleDots(intro){
   // 点阵大字现在位于上层展示区顶部：宽度跟着标题区，高度按视口取，做成居中的大标题
   const box = $("#heroTitle").getBoundingClientRect();
   // 尺寸上限调大一档：宽度上限 1320px（原 1000）、高度取视口 20% / 最多 190px（原 16% / 150px），
-  // 「ZENG Y^2」在桌面端从 134px 的字号提到约 172px；窄屏本来就是宽度受限，不受影响。
+  // 「MAX 健身工作室」在桌面端约 150px 字号；中文由系统 CJK 字体兜底，窄屏本来就是宽度受限，不受影响。
   const cw = Math.max(240, Math.min(box.width || innerWidth*.9, 1320));
   const chH = Math.max(90, Math.min(innerHeight*.20, 190));
   // 以首页大字定画布：宽度撑到标题区的 88%，高度不超过 chH
@@ -1060,7 +1164,7 @@ function sampleDots(intro){
   }
 }
 
-// k：0 = 首页大字，1–6 = 第几章；src：拿来取色的照片。点数少的词，多出来的点叠在已有点上
+// k：0 = 首页大字，1–7 = 第几章；src：拿来取色的照片。点数少的词，多出来的点叠在已有点上
 function setShape(k, src, burst=true){
   const pts = P.shapes[k], n = pts.length, N = P.dots.length, tint = src ? photoTint(src) : null;
   if (k===P.key) burst = false;
@@ -1927,9 +2031,10 @@ Object.assign(V, {
 });
 const arp = (t, degs, gap, fn) => degs.forEach((d,k)=>fn(d, t + k*gap));
 
-/* ===== 声音：风格区 ===== 每章一套 house / EDM 节拍与环境，数组顺序对应 CHAPTERS。配方见 skills/photo-album/references/sound.md
+/* ===== 声音：风格区 ===== 每章一套 house / EDM 节拍与环境，数组顺序对应 CHAPTERS（7 项）。配方见 skills/photo-album/references/sound.md
    hz(音级, 八度, 基准) 按 THEME.scale 取音；V.kick / V.hat / V.clap / V.sub / V.bass / V.stab / V.lead 是上面的乐器族。
-   四章按一次训练由重到轻：124 / 126 / 128 / 100 BPM，底鼓、反拍 hi-hat、sub bass 与和弦 stab 的密度依次变化。 */
+   七章按训练质感排：124 / 126 / 128 / 100 / 132 / 130 / 92 BPM —— 力量由重到轻，减脂最急、舞蹈最跳、普拉提最慢。
+   新增章节时 LB_SND / VOICE / SCENES 三个数组必须同步加项，否则该章取到 undefined。 */
 // 首页：照片环每走一格弹 melody 里的下一个音（step）；风格台切换时响一声（chime）
 const RING_SND = {
   melody:[0,2,4,6,4,2,0,3,5,7,5,3],
@@ -1970,13 +2075,40 @@ const LB_SND = [
     swap:t=>V.air(t, SND.fx, .025, .6, 500, 1300),
     close:t=>arp(t, [4,2,0], .22, (d,s)=>V.stab([d].map(x=>hz(x,0)), s, SND.fx, .035, 1.0, {open:true})),
   },
+  { // 减脂：HIIT 的上扫与连续拍手，最急最快
+    open:t=>{ V.riser(t, SND.fx, .055, .55, 300, 5200, hz(0,-1)); V.sweep(t+.05, SND.fx, .04, .6, 600, 7000); },
+    step:(t,j)=>{ V.hat(t, SND.fx, .035+.004*j, false); if (j%2===0) V.kick(t, SND.fx, .06, {f0:140,f1:50,dur:.16}); },
+    done:t=>{ V.clap(t, SND.fx, .085); V.impact(t+.06, SND.fx, .1); V.stab([0,2,4].map(d=>hz(d,0)), t+.12, SND.fx, .055, .45, {open:true}); },
+    look:(t,d,v)=>V.lead(hz(d,1), t, SND.fx, .04*v, .12, {bright:true}),
+    swap:t=>V.sweep(t, SND.fx, .04, .35, 1200, 7000),
+    close:t=>arp(t, [7,5,3,0], .07, (d,s)=>V.lead(hz(d,1), s, SND.fx, .05, .14, {bright:true})),
+  },
+  { // 舞蹈：house 的反拍拍手与和弦短句
+    open:t=>arp(t, [0,3,5,7], .09, (d,s)=>V.stab([d, d+2].map(x=>hz(x,0)), s, SND.fx, .04, .3, {open:true})),
+    step:(t,j)=>{ V.clap(t, SND.fx, .045); V.hat(t+.05, SND.fx, .03, true); },
+    done:t=>{ V.clap(t, SND.fx, .075); V.stab([0,2,4,7].map(d=>hz(d,0)), t+.05, SND.fx, .06, .8, {open:true}); },
+    look:(t,d,v)=>V.stab([hz(d,0)], t, SND.fx, .035*v, .22),
+    swap:t=>V.bass(hz(3,-1), t, SND.fx, .075, .18),
+    close:t=>arp(t, [7,5,3,0], .1, (d,s)=>V.stab([hz(d,0)], s, SND.fx, .04, .3, {open:true})),
+  },
+  { // 普拉提：长气息、慢收，最轻最柔
+    open:t=>{ V.air(t, SND.fx, .045, 1.8, 320, 900); V.stab([0,2,4,6].map(d=>hz(d,0)), t+.25, SND.fx, .04, 1.6, {open:true}); },
+    step:(t,j)=>V.lead(hz(j,0), t, SND.fx, .022, .5),
+    done:t=>V.stab([0,2,4,6].map(d=>hz(d,0)), t, SND.fx, .045, 2.0, {open:true}),
+    look:(t,d,v)=>V.stab([hz(d,0)], t, SND.fx, .03*v, .7, {open:true}),
+    swap:t=>V.stab([hz(2,0), hz(4,0)], t, SND.fx, .03, .8, {open:true}),
+    close:t=>arp(t, [4,2,0], .26, (d,s)=>V.stab([hz(d,0)], s, SND.fx, .03, 1.2, {open:true})),
+  },
 ];
-// 悬停音色：四章分别用 sub / bass / lead / stab，越往后越轻
+// 悬停音色：七章分别用 sub / bass / lead / stab / lead / stab / stab，按训练质感由重到轻再回到律动
 const VOICE = [
   (f,t,d)=>V.sub(f/2, t, d, .07, .22),
   (f,t,d)=>V.bass(f/2, t, d, .065, .16),
   (f,t,d)=>V.lead(f, t, d, .05, .16, {bright:true}),
   (f,t,d)=>V.stab([f, f*Math.pow(2,3/12)], t, d, .04, .45, {open:true}),
+  (f,t,d)=>V.lead(f, t, d, .05, .12, {bright:true}),
+  (f,t,d)=>V.stab([f, f*Math.pow(2,5/12)], t, d, .045, .28),
+  (f,t,d)=>V.stab([f], t, d, .035, .7, {open:true}),
 ];
 // 每章的环境声：tick 一次排满一个小节（4 拍），返回下一小节的起点，节拍不受 60ms 调度抖动影响
 const SCENES = [
@@ -2028,6 +2160,45 @@ const SCENES = [
          V.sub(hz(0,-1), t, b, .06, beat*2.2);
          V.stab([0,2,4,6].map(d=>hz(d,0)), t + .3, b, .04, beat*3.2, {open:true});
          if (bar%2===0) V.air(t + .6, b, .02, 2.4, 420, 1100);
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "bandpass", 1800, .8, .018); const beat = 60/132; let bar = 0;       // 减脂 132 BPM：HIIT 冲刺，16 分 hi-hat + 加拍底鼓 + 每四小节一次上扫
+       return { nodes:[n.s, lfo(n.g.gain,.14,.006)], tick:t=>{
+         for (let k=0;k<4;k++){
+           const s = t + k*beat;
+           V.kick(s, b, .145);
+           V.kick(s + beat*.75, b, .075, {f0:130,f1:48,dur:.18});
+           for (let h=0;h<4;h++) V.hat(s + h*beat/4, b, h===3 ? .028 : .016, false);
+           V.bass(hz((bar*4+k)%7,-1), s + beat*.5, b, .055, beat*.22);
+         }
+         if (bar%2===1) V.clap(t + beat*2, b, .06);
+         V.stab([0,2,4].map(d=>hz(d,0)), t + beat*3, b, .04, beat*.7, {open:true});
+         if (bar%4===3) V.riser(t + beat*2, b, .03, beat*2, 600, 5200, hz(0,-1));
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "bandpass", 1100, .6, .018); const beat = 60/130; let bar = 0;       // 舞蹈 130 BPM：house 四四拍 + 反拍开镲、二四拍拍手
+       const seq = [0,3,5,7,5,3,2,4];
+       return { nodes:[n.s, lfo(n.g.gain,.11,.007)], tick:t=>{
+         for (let k=0;k<4;k++){
+           const s = t + k*beat;
+           V.kick(s, b, .15);
+           V.hat(s + beat*.5, b, .032, true);
+           for (let h=0;h<2;h++) V.hat(s + (h+.25)*beat/2, b, .014, false);
+           if (k===1 || k===3) V.clap(s, b, .06);
+           V.bass(hz(seq[(bar*4+k)%8],-1), s + beat*.25, b, .06, beat*.26);
+         }
+         V.stab([0,2,4,7].map(d=>hz(d,0)), t + beat*2.5, b, .045, beat*1.2, {open:true});
+         V.sub(hz(0,-1), t, b, .065, beat*.9);
+         bar++; return t + 4*beat;
+       } }; },
+  b=>{ const n = loopNoise(b, SND.noise, "lowpass", 520, .4, .016); const beat = 60/92; let bar = 0;         // 普拉提 92 BPM：几乎不放鼓，长和弦与气息，收得最慢
+       return { nodes:[n.s, lfo(n.g.gain,.05,.005)], tick:t=>{
+         V.kick(t, b, .055, {f0:104, f1:42, dur:.5});
+         V.hat(t + beat*2, b, .012, true);
+         V.sub(hz(0,-1), t, b, .055, beat*2.4);
+         V.stab([0,2,4,6].map(d=>hz(d,0)), t + .35, b, .038, beat*3.4, {open:true});
+         V.air(t + .8, b, .022, 2.6, 360, 980);
+         if (bar%2===1) arp(t + beat, [0,2,4], beat*.7, (d,s)=>V.lead(hz(d,0), s, b, .028, beat*.6));
          bar++; return t + 4*beat;
        } }; },
 ];
@@ -2137,6 +2308,7 @@ const curtain = $("#curtain");
 function parse(){
   const path = location.hash || "#/";
   if (/^#\/about\/?$/.test(path)) return { view:"about", key:"about", photo:-1, path };
+  if (/^#\/contact\/?$/.test(path)) return { view:"contact", key:"contact", photo:-1, path };
   const m = location.hash.match(/^#\/ch\/(\d+)(?:\/(\d+))?(\/view)?/);
   if (m){
     const ci = Math.min(CHAPTERS.length, Math.max(1, +m[1])) - 1, focus = +(m[2]||0), n = CHAPTERS[ci].photos.length;
@@ -2149,6 +2321,9 @@ function show(r){
   if (r.view==="about" && !wasAbout && route.key){
     authorReturn = route.path || "#/"; $("#authorBack").href = authorReturn;
   }
+  if (r.view==="contact" && route.view!=="contact" && route.key){
+    contactReturn = route.path || "#/"; $("#contactBack").href = contactReturn;
+  }
   if (LB.open) lbReset();
   if (r.view!=="home"){
     clearTouchPreview(false); clearTimeout(P.timer); ring.hover = false;
@@ -2157,6 +2332,7 @@ function show(r){
   $("#home").hidden = r.view!=="home";
   $("#chapter").hidden = r.view!=="chapter";
   $("#about").hidden = r.view!=="about";
+  $("#contact").hidden = r.view!=="contact";
   if (r.view==="home") $("#home").scrollTop = 0;   // 回首页时从上层展示区重新开始
   document.querySelectorAll("[data-nav]").forEach(a=>a.setAttribute("aria-current", String(a.dataset.nav===(r.view==="chapter"?"ch":r.view))));
   if (r.view==="chapter") buildChapter(r.ci, r.focus);
@@ -2166,6 +2342,9 @@ function show(r){
   if (r.view==="about"){
     $("#about").scrollTop = 0; $("#authorStatus").textContent = "";
     $("#authorName").focus({ preventScroll:true });
+  } else if (r.view==="contact"){
+    $("#contact").scrollTop = 0; $("#contactStatus").textContent = "";
+    $("#contactName").focus({ preventScroll:true });
   } else if (wasAbout){
     (authorTrigger?.getClientRects().length ? authorTrigger : $("#logo")).focus({ preventScroll:true });
   }
@@ -2178,7 +2357,8 @@ async function go(){
   if (reduce || busy){ show(r); if (r.photo >= 0) lbOpen(r.ci, r.photo, false); return; }
   busy = true; sndSwoosh();
   curtain.classList.add("active");
-  curtain.querySelector("b").textContent = r.view==="chapter" ? CHAPTERS[r.ci].en : r.view==="about" ? "About" : HOME.word;
+  curtain.querySelector("b").textContent = r.view==="chapter" ? CHAPTERS[r.ci].en
+    : r.view==="about" ? "About" : r.view==="contact" ? "Contact us" : HOME.word;
   const opt = { duration:520, easing:EASE, fill:"forwards" };
   await curtain.animate([{transform:"translateY(100%)"},{transform:"translateY(0)"}], opt).finished;
   if (tok===goTok) show(r);                                  // 转场途中网址又变了：以最新的为准，不要把它重置掉
@@ -2293,6 +2473,7 @@ function lbResize(){ lbLayout(); lpHide(); if (LB.phase==="shown") lbDrawDev(1);
   document.title = THEME.title;
   $("#logo").innerHTML = `${THEME.logo[0]}<span class="box">${THEME.logo[1]}</span>`;
   initAuthor();
+  initContact();
   buildHero();
   // 上层展示区可滚动：点左上角 logo 回到顶部标题；照片环区域内的滑动仍只转环
   $("#logo").addEventListener("click", ()=>{ if (route.view==="home") $("#home").scrollTo({top:0,behavior:"smooth"}); });

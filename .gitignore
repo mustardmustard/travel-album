@@ -10,3 +10,7 @@
 # 校验 / 调试产生的临时文件
 _check_*.js
 *.log
+
+# Python 语法检查产生的字节码
+__pycache__/
+*.pyc

@@ -9,7 +9,9 @@
 
 prepare_photos.py（把健身房照片按训练项目整理成 sq/full）跑完会自动调用它；
 手动换了 photos/sq 里的图，再单独跑一次。
-支持 jpg / png / webp；键名是不含扩展名的文件名，必须和 index.html 里 CHAPTERS 的 src 一致。
+支持 jpg / png / webp，会递归扫描 photos/sq 下按章节分的子文件夹；
+键名是相对 photos/sq 的路径、去掉扩展名，例如 "cutting/cutting-01-cardio"，
+必须和 index.html 里 CHAPTERS 的 src 完全一致（扁平结构时仍是纯文件名）。
 需要 Pillow（pip install pillow）。
 """
 import base64, json, sys
@@ -21,18 +23,20 @@ except ImportError:
     sys.exit("需要 Pillow：pip install pillow")
 
 SIZE = 32
+EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 def bake(root):
     sq = Path(root) / "photos" / "sq"
-    # png / jpg 混用也支持；键名统一用不含扩展名的文件名，和 CHAPTERS 的 src 对齐
-    files = sorted(p for p in sq.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"})
+    # 递归：按章节分子文件夹后仍能全部收进来；键名用相对路径，和 CHAPTERS 的 src 对齐
+    files = sorted(p for p in sq.rglob("*") if p.is_file() and p.suffix.lower() in EXTS)
     if not files:
         sys.exit(f"{sq} 里没有照片")
     data = {}
     for f in files:
+        key = f.relative_to(sq).with_suffix("").as_posix()
         im = Image.open(f).convert("RGB").resize((SIZE, SIZE), Image.BOX)
-        data[f.stem] = base64.b64encode(im.tobytes()).decode()
+        data[key] = base64.b64encode(im.tobytes()).decode()
     out = Path(root) / "photos" / "tints.js"
     out.write_text(
         "// 由 skills/photo-album/scripts/bake_tints.py 生成：每张方图缩成 32×32 的 RGB，base64。\n"
