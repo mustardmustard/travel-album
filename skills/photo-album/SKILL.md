@@ -50,7 +50,7 @@ description: >-
 ### 第 1 步：整理和测量照片
 
 ```bash
-python3 skills/photo-album/scripts/prepare_photos.py <照片文件夹> --label-from-folder --sq-fit \
+python3 skills/photo-album/scripts/prepare_photos.py <照片文件夹> --label-from-folder \
     --order deadlift,glutes,shoulders,yoga,cutting,dance,pilates --out <新站文件夹>
 python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/full --out <新站文件夹>
 ```
@@ -58,7 +58,7 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 - 第一个脚本把不同章的照片分别写进 `photos/sq/<章节>/` 与 `photos/full/<章节>/`，打印每张的 `src`、`w`、`h`，并写出 `chapters.json`（每章 `dir` + `label`，照片 `src / w / h / from`）。**`src` 带章节目录**（如 `dance/dance-02-leap`），直接抄进 `CHAPTERS` 就能被 `photoURL()` 拼成正确路径。
 - `--order` 决定 `chapters.json` 里的章节顺序（不填按文件夹名字母序）；`CHAPTERS` 里的展示顺序由你另行决定，不必和它一致。
 - 两个脚本用同一个 `--out`：`analyze_photos.py` 只在自己的 `--out` 目录里找 `chapters.json`，放一起才能给 `contact.jpg` 标出项目、让 `dna-seed.json` 带上 `exercise_draft_by_label`（没有 manifest 时它是空数组）。它递归扫描 `photos/full` 下各章节子文件夹，按 `src` 匹配标签。
-- 竖幅全身动作多时给第一个脚本加 `--sq-fit`（方图等比缩进浅色底，不居中裁切），避免头脚被切掉；默认仍是 640×640 居中裁切。`--sq-fit` 和 manifest 无关，可单独开关。
+- 默认 640×640 居中裁切，照片铺满方图，**别随便加 `--sq-fit`**：竖幅全身动作用它等比缩进浅色底虽能保住头脚，但格子四边会留纸白，首页手风琴细条的胶囊圆角和照片环的方向化圆角会落在白底上看不出来，观感变成直角（本站 GYM 基线因此固定用默认裁切）。确需使用时，先看一眼手风琴与照片环的圆角是否还在。
 - `bake_tints.py` 由第一个脚本自动调用，递归收齐所有章节的方图；`tints.js` 的键名与 `CHAPTERS` 的 `src` 完全一致，改过目录结构一定要重跑，否则首页悬停时会全部退回强调色。
 - 脚本需要 Pillow（`pip install pillow`）。纯中文文件名会被 `slug()` 过滤成空字符串，脚本会用「项目文件夹名 + 序号」兜底并在 stderr 提示；文件名里留一段英文动作名最省心。
 
@@ -119,7 +119,8 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 
 **功能**
 - [ ] 首页：照片环会流动，可推动，带惯性；点阵大字躲鼠标；悬停照片时变成章节名并染上照片颜色
-- [ ] 首页手风琴卡数量 = 章节数，窄屏下展开的那张仍有可读宽度
+- [ ] 首页手风琴卡数量 = 章节数，窄屏下展开的那张仍有可读宽度；收起的细条是上下半圆的胶囊状、照片铺满
+- [ ] 照片环的方图铺满格子（四角不是纸白留白），上栏只圆上两角、下栏只圆下两角，倒影格全直角
 - [ ] 顶部导航 `Contact us` 在 `Album` 左侧，`#/contact` 能显示场馆名 / 微信 / 联系人 / 电话，复制按钮可用，Back 能回到来处
 - [ ] 每一章都能进入，横滑带惯性，照片保持原始比例；`photos/sq/<章节>/`、`photos/full/<章节>/` 全部 200，`tints.js` 键名与 `CHAPTERS.src` 完全一致
 - [ ] 风格台 1–4 都能出图；色块效果给出调色板
@@ -164,6 +165,7 @@ python3 skills/photo-album/scripts/analyze_photos.py <新站文件夹>/photos/fu
 - **顶部导航塞了 5 个入口后窄屏会挤**：flex 项默认可收缩，链接文字会折行甚至被裁掉。窄屏要给 `.nav a` / `.about-trigger` 加 `white-space:nowrap;flex:none`，放不下时按断点先隐藏 `Chapters`（首页还有章节细导航和类目卡）。
 - **纯中文文件名会被 `slug()` 变成 `photo`**：`slug()` 只留 ASCII，纯中文文件名（如 `硬拉1.jpg`）会退化成空字符串，多张会全撞成 `photo` 互相覆盖。现在的脚本会用「项目文件夹名 + 序号」兜底并在 stderr 提示，但最省心的还是文件名里留一段英文动作名（如 `deadlift-01.jpg`）。
 - **竖幅全身动作被 640×640 居中裁切切掉**：首页方图默认 `ImageOps.fit` 居中裁切，硬拉、深蹲、站姿体式这类竖幅全身照头脚容易被切。`portrait_share` 高时先看成图，或用 `--sq-fit` 等比缩进浅色底。
+- **`--sq-fit` 会把圆角"弄丢"**：等比缩进浅色底后，方图四边是纸白，手风琴细条的胶囊圆角与照片环的方向化圆角都落在白底上，浏览器计算样式没变、`border-radius` 也还在，但视觉上全是直角。用户报「圆角效果变了」时先查 `photos/sq` 的四角像素是不是纸白，别急着改 CSS。
 - **会员肖像授权**：人像照片要拿到会员/教练的书面 consent，未成年人一律排除，`credit` / `license` 写清授权范围，DNA 里填 `portrait_release`。没有授权的照片宁可换器械空镜、局部特写或背影；镜面里的反射人像也算。
 - **门店大屏声音默认关**：门店、前台大屏常年无人交互，浏览器不会自动播。把 `THEME.soundOn` 设为 false，由第一次点击开启，既避免静音或报错，也不打扰店内。
 - **在浏览器里验证 `file://` 的退路**：把 `getImageData` 改成读到照片就抛 SecurityError，再悬停照片，看 `P.tinted` 是否为 true。

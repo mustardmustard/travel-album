@@ -37,11 +37,11 @@ python3 -m http.server 8765
 
 ```bash
 python3 skills/photo-album/scripts/prepare_photos.py <原始照片文件夹> \
-    --label-from-folder --sq-fit \
+    --label-from-folder \
     --order deadlift,glutes,shoulders,yoga,cutting,dance,pilates --out .
 ```
 
-它会按章节生成 `photos/sq/<章节>/`、`photos/full/<章节>/`、`photos/tints.js` 和根目录的 `chapters.json`（每章 `dir` + `label`，照片 `src / w / h / from`），把打印出的 `src`、`w`、`h` 抄进 `CHAPTERS` 即可。`--order` 只决定 `chapters.json` 的章节顺序；`CHAPTERS` 里的展示顺序另定。`--sq-fit` 让竖幅全身动作等比缩进 640×640 的浅色底，不被居中裁切切掉手脚。手动替换了 `photos/sq/<章节>/` 里的图，要再跑一次 `python3 skills/photo-album/scripts/bake_tints.py`（它递归扫描所有章节子文件夹）。
+它会按章节生成 `photos/sq/<章节>/`、`photos/full/<章节>/`、`photos/tints.js` 和根目录的 `chapters.json`（每章 `dir` + `label`，照片 `src / w / h / from`），把打印出的 `src`、`w`、`h` 抄进 `CHAPTERS` 即可。`--order` 只决定 `chapters.json` 的章节顺序；`CHAPTERS` 里的展示顺序另定。**本站用默认的 640×640 居中裁切，让照片铺满方图**——首页手风琴细条的胶囊圆角、照片环「上栏只圆上两角 / 下栏只圆下两角」的方向化圆角都靠照片铺满才看得见。`--sq-fit` 会把竖幅动作等比缩进浅色底（不切头脚），但会在格子四边留下纸白留白、圆角落在白底上就像直角，视觉上等于把圆角弄丢了；确需使用时先确认圆角观感。手动替换了 `photos/sq/<章节>/` 里的图，要再跑一次 `python3 skills/photo-album/scripts/bake_tints.py`（它递归扫描所有章节子文件夹）。
 
 **`CHAPTERS` 里的 `src` 必须带章节目录**，例如 `cutting/cutting-01-cardio`；`photoURL(dir, src)` 会拼成 `photos/sq/cutting/cutting-01-cardio.jpg`。`tints.js` 的键名也是这个相对路径，两边必须完全一致，否则 `file://` 下悬停照片会全部退回强调色。照片允许 jpg / png 混用：非 jpg 的条目在 `CHAPTERS` 里加 `ext:".png"`；`w`、`h` 要填 full 图的实际宽高。加章时别忘了把 `LB_SND` / `VOICE` / `SCENES` 也补成相同项数。
 
