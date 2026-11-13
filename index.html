@@ -828,11 +828,19 @@ addEventListener("keydown", e=>{
   if (route.view==="contact" && e.key==="Escape"){ e.preventDefault(); location.hash = contactReturn; }
 });
 
-// 环上的格子：各章节轮流取一张，让相邻格子尽量来自不同章节
+// 环上的格子：各章轮流取一张，让相邻格子尽量来自不同章节；
+// 并且把每章的 01 氛围图与 02 起的动作图打散交错（按照片序号分错位轮转），
+// 避免章节数多时整条边全是空场馆氛围图、另一条边全是动作图
 function ringTiles(){
-  const out = [], max = Math.max(...CHAPTERS.map(c=>c.photos.length));
-  for (let k=0;k<max;k++) CHAPTERS.forEach((c,ci)=>{ if (c.photos[k]) out.push({ ci, pi:k, p:c.photos[k] }); });
-  for (let i=0, n=out.length; out.length < 24; i++) out.push(out[i % n]);   // 照片环四条边至少要二十几格，照片少时循环补满
+  const n = CHAPTERS.length, max = Math.max(...CHAPTERS.map(c=>c.photos.length));
+  const rows = Array.from({length:max},(_,k)=>
+    CHAPTERS.map((c,ci)=>c.photos[k] ? { ci, pi:k, p:c.photos[k] } : null).filter(Boolean));
+  const out = [], turns = Math.max(n, max);
+  for (let j=0; j<turns; j++) rows.forEach((r,k)=>{
+    const t = r[(j + k*2) % r.length];
+    if (t && !out.some(o=>o.p===t.p)) out.push(t);
+  });
+  for (let i=0, base=[...out]; out.length < 24; i++) out.push(base[i % base.length]);   // 照片环四条边至少要二十几格，照片少时循环补满
   out.splice(3,0,{ text:TEXT_TILES[0] });
   out.splice(17,0,{ text:TEXT_TILES[1] });
   return out;
